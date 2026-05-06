@@ -3,7 +3,9 @@ import * as THREE from 'three';
 const lambert = (color, flat = false) => new THREE.MeshLambertMaterial({ color, flatShading: flat });
 const basic = (color) => new THREE.MeshBasicMaterial({ color });
 
-export function buildWeaponArm(team, raceKey, helmetMat, weaponTier = 0, klass = 'infantry') {
+const ORB_COLOR = { fire: 0xff5530, frost: 0x6cd6ff, lightning: 0xffe066, arcane: 0xb88dff };
+
+export function buildWeaponArm(team, raceKey, helmetMat, weaponTier = 0, klass = 'infantry', magicType = null) {
   const liveryMat = lambert(team.livery);
   const arm = new THREE.Group();
   arm.position.set(0.50, 1.65, 0);
@@ -20,7 +22,7 @@ export function buildWeaponArm(team, raceKey, helmetMat, weaponTier = 0, klass =
     const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 1.5, 6), lambert(0x3a2a1a));
     pole.position.set(0.05, -0.10, 0.15);
     const orb = new THREE.Mesh(new THREE.SphereGeometry(0.16, 10, 8),
-      new THREE.MeshBasicMaterial({ color: 0x9be2ff }));
+      new THREE.MeshBasicMaterial({ color: ORB_COLOR[magicType] || 0x9be2ff }));
     orb.position.set(0.05, 0.62, 0.15);
     pole.castShadow = true;
     wpn.add(pole, orb);
