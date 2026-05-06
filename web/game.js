@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { scene, camera, renderer, setProjectiles, updateFx, trackCamera, resetCameraTarget, spawnFx, setMap, mapForRound, MAPS } from './scene.js';
+import { scene, camera, renderer, setProjectiles, updateFx, trackCamera, resetCameraTarget, spawnFx, setMap, mapForRound, MAPS, applyTerrain } from './scene.js';
 import { makeUnit, updateUnitVisuals } from './units.js';
 import { RACES, applyCard, showCardPicker, showRacePicker,
          loadMeta, saveMeta, awardRoundXp, awardRunEndXp, recordRunEnd,
@@ -22,7 +22,7 @@ const spellsBar = document.getElementById('spells');
 const buildingsBar = document.getElementById('buildings');
 
 const ENEMY_RACES = ['skeletons', 'dwarves', 'elves', 'humans'];
-const meta = loadMeta();
+const meta = loadMeta(); let currentMapKey = 'meadow';
 let playerRace = 'humans';
 let enemyRace = 'skeletons';
 let playerRoster = [];
@@ -78,7 +78,7 @@ function spawnRoster(teamIdx, roster, baseZ, raceKey) {
     const z = baseZ + row * SPACING * (baseZ > 0 ? 1 : -1);
     const u = makeUnit(teamIdx, x, z, w, raceKey);
     u.maxHp = w.maxHp; u.hp = Math.max(1, w.currentHp);
-    u.damage = w.damage; u.speed = w.speed; u.range = w.range;
+    u.damage = w.damage; u.baseSpeed = u.speed = w.speed; u.baseRange = u.range = w.range;
     u.rosterIdx = i; u.bossId = w.bossId; u.isBoss = !!w.isBoss;
     u.mesh.position.y = w.hoverY || 0;
     units.push(u);
@@ -109,7 +109,7 @@ function refreshHud() {
 function startRound() {
   if (round > 1) applyBuildings(playerRoster, playerBuildings, playerRace);
   clearArmies();
-  const mapKey = mapForRound(round); setMap(mapKey); resetCameraTarget();
+  const mapKey = currentMapKey = mapForRound(round); setMap(mapKey); resetCameraTarget();
   placeBuildings(scene, buildingMeshes, playerBuildings, BASE_Z + 18);
   const boss = isBossRound(round);
   enemyRace = ENEMY_RACES[(round - 1) % ENEMY_RACES.length];
@@ -148,6 +148,7 @@ function nearestEnemy(u) {
 }
 
 function step(dt, t) {
+  applyTerrain(units, currentMapKey, dt, t, spawnFx);
   for (const u of units) {
     if (u.hp <= 0) continue;
     if (!u.attackTarget || u.attackTarget.hp <= 0) u.attackTarget = nearestEnemy(u).u;

@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { buildLandmarks } from './terrain/landmarks.js';
+export { applyTerrain } from './terrain/landmarks.js';
 
 export const canvas = document.getElementById('game');
 export const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });

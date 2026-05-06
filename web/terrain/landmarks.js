@@ -10,6 +10,12 @@ function meadowHills(g) {
   b.position.set(52, 0.05, -28); b.scale.set(1.2, 0.45, 1.2);
   b.castShadow = true; b.receiveShadow = true;
   g.add(a, b);
+  for (const x of [-9, 9]) {
+    const hill = new THREE.Mesh(new THREE.SphereGeometry(3.5, 16, 10, 0, Math.PI * 2, 0, Math.PI / 2), lambert(0x7fc05a));
+    hill.position.set(x, 0.04, 0); hill.scale.set(1.0, 0.4, 1.0);
+    hill.castShadow = true; hill.receiveShadow = true;
+    g.add(hill);
+  }
 }
 
 function desertDunes(g) {
@@ -19,31 +25,32 @@ function desertDunes(g) {
   const small = new THREE.Mesh(new THREE.SphereGeometry(6, 14, 8, 0, Math.PI * 2, 0, Math.PI / 2), lambert(0xc9a76a));
   small.position.set(40, 0.05, 56); small.scale.set(4, 0.4, 1.3);
   small.castShadow = true; small.receiveShadow = true;
-  g.add(ridge, small);
+  const cdune = new THREE.Mesh(new THREE.SphereGeometry(6, 16, 10, 0, Math.PI * 2, 0, Math.PI / 2), lambert(0xc9a76a));
+  cdune.position.set(0, 0.04, 0); cdune.scale.set(4.5, 0.32, 0.7);
+  cdune.castShadow = true; cdune.receiveShadow = true;
+  g.add(ridge, small, cdune);
 }
 
 function forestRiverBridge(g) {
-  const river = new THREE.Mesh(
+  const bgr = new THREE.Mesh(
     new THREE.BoxGeometry(4.5, 0.05, 200),
     new THREE.MeshLambertMaterial({ color: 0x3a6a8a, transparent: true, opacity: 0.9 })
   );
-  river.position.set(58, 0.03, 0); river.rotation.y = 0.32;
+  bgr.position.set(58, 0.03, 0); bgr.rotation.y = 0.32;
+  g.add(bgr);
+  const river = new THREE.Mesh(
+    new THREE.BoxGeometry(60, 0.05, 5.5),
+    new THREE.MeshLambertMaterial({ color: 0x3a6a8a, transparent: true, opacity: 0.9 })
+  );
+  river.position.set(0, 0.03, 0);
   g.add(river);
-  const planks = new THREE.Mesh(new THREE.BoxGeometry(7.5, 0.3, 2.8), lambert(0x6b4423));
-  planks.position.set(58, 0.20, 0); planks.rotation.y = 0.32;
-  planks.castShadow = true;
+  const planks = new THREE.Mesh(new THREE.BoxGeometry(7, 0.3, 5.5), lambert(0x6b4423));
+  planks.position.set(0, 0.20, 0); planks.castShadow = true;
   g.add(planks);
   for (const side of [-1, 1]) {
-    const rail = new THREE.Mesh(new THREE.BoxGeometry(7.5, 0.55, 0.15), lambert(0x4b3018));
-    rail.position.set(58, 0.55, side * 1.35); rail.rotation.y = 0.32;
-    rail.castShadow = true;
+    const rail = new THREE.Mesh(new THREE.BoxGeometry(7, 0.55, 0.15), lambert(0x4b3018));
+    rail.position.set(0, 0.55, side * 2.6); rail.castShadow = true;
     g.add(rail);
-    for (let i = -1; i <= 1; i += 2) {
-      const post = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.9, 0.2), lambert(0x4b3018));
-      post.position.set(58 + i * 3.4 * Math.cos(0.32), 0.4, side * 1.35 + i * 3.4 * Math.sin(0.32));
-      post.castShadow = true;
-      g.add(post);
-    }
   }
 }
 
@@ -64,6 +71,12 @@ function frostPond(g) {
     lump.castShadow = true;
     g.add(lump);
   }
+  const cpond = new THREE.Mesh(
+    new THREE.CylinderGeometry(7.5, 7.5, 0.1, 32),
+    new THREE.MeshLambertMaterial({ color: 0xb6dceb, transparent: true, opacity: 0.85 })
+  );
+  cpond.position.set(0, 0.04, 0); cpond.scale.set(1.0, 1, 0.85);
+  g.add(cpond);
 }
 
 function volcanicLavaPool(g) {
@@ -84,6 +97,14 @@ function volcanicLavaPool(g) {
     rim.castShadow = true;
     g.add(rim);
   }
+  for (const x of [-6, 6]) {
+    const cpool = new THREE.Mesh(
+      new THREE.CylinderGeometry(3.2, 3.2, 0.1, 24),
+      new THREE.MeshLambertMaterial({ color: 0xff5520, emissive: 0xff8030, emissiveIntensity: 0.9 })
+    );
+    cpool.position.set(x, 0.04, 0);
+    g.add(cpool);
+  }
 }
 
 const LANDMARKS = {
@@ -97,4 +118,43 @@ const LANDMARKS = {
 export function buildLandmarks(key, group) {
   const fn = LANDMARKS[key];
   if (fn) fn(group);
+}
+
+export function applyTerrain(units, mapKey, dt, t, spawnFx) {
+  for (const u of units) {
+    if (u.hp <= 0) continue;
+    u.speed = u.baseSpeed; u.range = u.baseRange;
+  }
+  if (mapKey === 'meadow') {
+    for (const u of units) {
+      if (u.hp <= 0) continue;
+      const onHill = ((u.x + 9) ** 2 + u.z * u.z < 13) || ((u.x - 9) ** 2 + u.z * u.z < 13);
+      if (onHill) u.range = u.baseRange + 0.6;
+    }
+  } else if (mapKey === 'desert') {
+    for (const u of units) {
+      if (u.hp <= 0) continue;
+      if (Math.abs(u.z) < 3 && Math.abs(u.x) < 22) u.speed = u.baseSpeed * 0.55;
+    }
+  } else if (mapKey === 'forest') {
+    for (const u of units) {
+      if (u.hp <= 0) continue;
+      const inRiver = Math.abs(u.z) < 2.75 && Math.abs(u.x) > 3.5 && Math.abs(u.x) < 30;
+      if (inRiver) u.speed = u.baseSpeed * 0.2;
+    }
+  } else if (mapKey === 'frost') {
+    for (const u of units) {
+      if (u.hp <= 0) continue;
+      if (u.x * u.x / 56 + u.z * u.z / 40.6 < 1) u.speed = u.baseSpeed * 0.5;
+    }
+  } else if (mapKey === 'volcanic') {
+    for (const u of units) {
+      if (u.hp <= 0) continue;
+      const inLava = ((u.x + 6) ** 2 + u.z * u.z < 11) || ((u.x - 6) ** 2 + u.z * u.z < 11);
+      if (inLava) {
+        u.hp -= 10 * dt;
+        if (Math.random() < 0.04 && spawnFx) spawnFx(u.x, u.z, 0.4, 0xff7733, 0.25);
+      }
+    }
+  }
 }
