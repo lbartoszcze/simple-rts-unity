@@ -83,6 +83,7 @@
       camera.position.set(2.5, 2.6, 6.0);
       camera.lookAt(0, 0.9, 0);
       camera.updateProjectionMatrix();
+      console.log('[demo] camera pos=' + camera.position.x.toFixed(2) + ',' + camera.position.y.toFixed(2) + ',' + camera.position.z.toFixed(2) + ' fov=' + camera.fov + ' aspect=' + camera.aspect.toFixed(2));
       playClip(u, clipName);
       const clock = new THREE.Clock();
       function loop() {
