@@ -4,13 +4,14 @@ export const RACES = {
     flavor: 'Disciplined, balanced, versatile.',
     base: { count: 8, hp: 110, damage: 22, speed: 7, range: 2.4 },
     cards: [
-      { id: 'iron',     icon: '🛡️', name: 'Iron Plate',       tier: 'common', desc: '+30 HP per warrior',           apply: s => { s.hp += 30; } },
-      { id: 'edge',     icon: '⚔️', name: 'Sharpened Blade',  tier: 'common', desc: '+8 attack damage',             apply: s => { s.damage += 8; } },
-      { id: 'recruit',  icon: '🪖', name: 'Conscription',     tier: 'common', desc: '+2 warriors',                  apply: s => { s.count += 2; } },
-      { id: 'discip',   icon: '🎖️', name: 'Discipline',       tier: 'common', desc: '+15 HP, +4 damage',            apply: s => { s.hp += 15; s.damage += 4; } },
-      { id: 'crusade',  icon: '✝️', name: "Crusader's Vow",   tier: 'combo',  desc: '+25 HP, +6 damage',            apply: s => { s.hp += 25; s.damage += 6; } },
-      { id: 'banner',   icon: '🚩', name: 'Royal Banner',     tier: 'rare',   desc: '+3 warriors, +10 HP each',     apply: s => { s.count += 3; s.hp += 10; } },
-      { id: 'tactic',   icon: '📜', name: 'Tactician',        tier: 'rare',   desc: '+1 warrior, +5 dmg, +0.5 spd', apply: s => { s.count += 1; s.damage += 5; s.speed += 0.5; } },
+      { id: 'h_iron',    kind: 'armor',   icon: '🛡️', name: 'Iron Plate',       tier: 'common', desc: '+25 max HP per warrior',                   hp: 25 },
+      { id: 'h_tower',   kind: 'armor',   icon: '🪙', name: 'Tower Shield',     tier: 'combo',  desc: '+45 max HP, -0.5 speed',                    hp: 45, speedDelta: -0.5 },
+      { id: 'h_blade',   kind: 'weapon',  icon: '⚔️', name: 'Sharpened Blades', tier: 'common', desc: '+7 attack damage',                           damage: 7 },
+      { id: 'h_crus',    kind: 'weapon',  icon: '🗡️', name: 'Crusader Sword',   tier: 'combo',  desc: '+10 damage, +0.5 range',                     damage: 10, range: 0.5 },
+      { id: 'h_consc',   kind: 'recruit', icon: '🪖', name: 'Conscription',     tier: 'common', desc: '+2 standard warriors',                       amount: 2 },
+      { id: 'h_knight',  kind: 'recruit', icon: '🏰', name: 'Knight Order',     tier: 'rare',   desc: '+1 elite warrior (1.5x stats)',              amount: 1, mult: 1.5 },
+      { id: 'h_holy',    kind: 'spell',   icon: '✨', name: 'Holy Light',       tier: 'rare',   desc: 'Spell — fully heal your army at battle start', spell: { id: 'heal_full', icon: '✨', name: 'Holy Light' } },
+      { id: 'h_banner',  kind: 'spell',   icon: '🎆', name: 'Battle Banner',    tier: 'combo',  desc: 'Spell — one fireball, 45 AoE damage',          spell: { id: 'fireball', icon: '🎆', name: 'Battle Banner', dmg: 45, radius: 8 } },
     ],
   },
   dwarves: {
@@ -18,13 +19,14 @@ export const RACES = {
     flavor: 'Stout, slow, unbreakable.',
     base: { count: 7, hp: 170, damage: 26, speed: 5.5, range: 2.0 },
     cards: [
-      { id: 'forge',    icon: '🔨', name: 'Forged Plate',     tier: 'common', desc: '+55 HP per warrior',          apply: s => { s.hp += 55; } },
-      { id: 'axe',      icon: '🪓', name: 'Battle Axe',       tier: 'common', desc: '+14 attack damage',            apply: s => { s.damage += 14; } },
-      { id: 'mountain', icon: '⛰️', name: 'Mountain Stance',  tier: 'combo',  desc: '+60 HP, -1.5 speed',           apply: s => { s.hp += 60; s.speed -= 1.5; } },
-      { id: 'brew',     icon: '🍺', name: 'Beer & Brawn',     tier: 'common', desc: '+25 HP, +5 damage',            apply: s => { s.hp += 25; s.damage += 5; } },
-      { id: 'tunneler', icon: '⛏️', name: 'Tunneler',         tier: 'common', desc: '+1 warrior, +10 HP',           apply: s => { s.count += 1; s.hp += 10; } },
-      { id: 'rune',     icon: '🪨', name: 'Runic Ward',       tier: 'rare',   desc: '+30 HP, +0.4 range',           apply: s => { s.hp += 30; s.range += 0.4; } },
-      { id: 'thane',    icon: '👑', name: "Thane's Wrath",    tier: 'rare',   desc: '+12 damage, +20 HP',           apply: s => { s.damage += 12; s.hp += 20; } },
+      { id: 'd_forge',   kind: 'armor',   icon: '🔨', name: 'Forged Plate',     tier: 'common', desc: '+50 max HP per warrior',                     hp: 50 },
+      { id: 'd_mount',   kind: 'armor',   icon: '⛰️', name: 'Mountain Stance',  tier: 'combo',  desc: '+65 max HP, -1 speed',                       hp: 65, speedDelta: -1 },
+      { id: 'd_axe',     kind: 'weapon',  icon: '🪓', name: 'Battle Axe',       tier: 'common', desc: '+12 attack damage',                           damage: 12 },
+      { id: 'd_hammer',  kind: 'weapon',  icon: '🔨', name: 'Throwing Hammer',  tier: 'combo',  desc: '+8 damage, +0.8 range',                       damage: 8, range: 0.8 },
+      { id: 'd_tunnel',  kind: 'recruit', icon: '⛏️', name: 'Tunneler',         tier: 'common', desc: '+1 warrior with +20 HP',                      amount: 1, hpBonus: 20 },
+      { id: 'd_clan',    kind: 'recruit', icon: '🍺', name: 'Clan Muster',      tier: 'common', desc: '+2 standard warriors',                       amount: 2 },
+      { id: 'd_quake',   kind: 'spell',   icon: '🌋', name: 'Earthquake',       tier: 'rare',   desc: 'Spell — 60 AoE damage at battle start',        spell: { id: 'fireball', icon: '🌋', name: 'Earthquake', dmg: 60, radius: 10 } },
+      { id: 'd_brew',    kind: 'spell',   icon: '🍺', name: "Brewmaster's Toast", tier: 'combo', desc: 'Spell — heal your army for 75% of max HP',     spell: { id: 'heal_pct', icon: '🍺', name: "Brewmaster's Toast", pct: 0.75 } },
     ],
   },
   elves: {
@@ -32,13 +34,14 @@ export const RACES = {
     flavor: 'Swift, ranged, fragile.',
     base: { count: 9, hp: 80, damage: 18, speed: 9, range: 4.5 },
     cards: [
-      { id: 'longbow',  icon: '🏹', name: 'Longbow',          tier: 'common', desc: '+2.5 range, +5 damage',        apply: s => { s.range += 2.5; s.damage += 5; } },
-      { id: 'wind',     icon: '💨', name: 'Wind Walker',      tier: 'common', desc: '+3 movement speed',            apply: s => { s.speed += 3; } },
-      { id: 'cloak',    icon: '🌿', name: 'Forest Cloak',     tier: 'common', desc: '+18 HP, +1 speed',             apply: s => { s.hp += 18; s.speed += 1; } },
-      { id: 'moon',     icon: '🌙', name: 'Moonlight Arrow',  tier: 'combo',  desc: '+2 range, +9 damage',          apply: s => { s.range += 2; s.damage += 9; } },
-      { id: 'sylvan',   icon: '🍃', name: 'Sylvan Pact',      tier: 'common', desc: '+2 warriors',                  apply: s => { s.count += 2; } },
-      { id: 'silver',   icon: '🌟', name: 'Silver Edge',      tier: 'rare',   desc: '+13 damage, +1 range',         apply: s => { s.damage += 13; s.range += 1; } },
-      { id: 'wardance', icon: '🍂', name: 'Wardance',         tier: 'rare',   desc: '+0.5 speed, +1.2 range, +6 dmg', apply: s => { s.speed += 0.5; s.range += 1.2; s.damage += 6; } },
+      { id: 'e_cloak',   kind: 'armor',   icon: '🌿', name: 'Forest Cloak',     tier: 'common', desc: '+18 max HP, +0.8 speed',                     hp: 18, speedDelta: 0.8 },
+      { id: 'e_moon',    kind: 'armor',   icon: '🌙', name: 'Moonweave',        tier: 'combo',  desc: '+25 max HP, +0.4 range',                     hp: 25, range: 0.4 },
+      { id: 'e_bow',     kind: 'weapon',  icon: '🏹', name: 'Longbow',          tier: 'common', desc: '+2 range, +4 damage',                         damage: 4, range: 2.0 },
+      { id: 'e_silver',  kind: 'weapon',  icon: '🌟', name: 'Silver Edge',      tier: 'combo',  desc: '+11 damage',                                  damage: 11 },
+      { id: 'e_pact',    kind: 'recruit', icon: '🍃', name: 'Sylvan Pact',      tier: 'common', desc: '+2 standard warriors',                       amount: 2 },
+      { id: 'e_ranger',  kind: 'recruit', icon: '🎯', name: 'Ranger Captain',   tier: 'rare',   desc: '+1 elite ranger (1.5x stats)',                amount: 1, mult: 1.5 },
+      { id: 'e_volley',  kind: 'spell',   icon: '🏹', name: 'Volley',           tier: 'combo',  desc: 'Spell — 35 damage to every enemy at battle start', spell: { id: 'all_enemies', icon: '🏹', name: 'Volley', dmg: 35 } },
+      { id: 'e_spring',  kind: 'spell',   icon: '💧', name: 'Healing Spring',   tier: 'rare',   desc: 'Spell — fully heal your army at battle start', spell: { id: 'heal_full', icon: '💧', name: 'Healing Spring' } },
     ],
   },
   skeletons: {
@@ -46,19 +49,54 @@ export const RACES = {
     flavor: 'Numerous, expendable, relentless.',
     base: { count: 13, hp: 55, damage: 14, speed: 7.5, range: 2.0 },
     cards: [
-      { id: 'raise',    icon: '🦴', name: 'Raise Dead',       tier: 'common', desc: '+4 warriors',                  apply: s => { s.count += 4; } },
-      { id: 'spear',    icon: '🗡️', name: 'Bone Spear',       tier: 'common', desc: '+0.8 range, +6 damage',        apply: s => { s.range += 0.8; s.damage += 6; } },
-      { id: 'plague',   icon: '☠️', name: 'Plague Bearer',    tier: 'common', desc: '+2 warriors, +4 damage',       apply: s => { s.count += 2; s.damage += 4; } },
-      { id: 'necro',    icon: '🌑', name: 'Necrotic Aura',    tier: 'combo',  desc: '+18 damage, -8 HP',            apply: s => { s.damage += 18; s.hp -= 8; } },
-      { id: 'march',    icon: '👣', name: 'Death March',      tier: 'common', desc: '+2 speed, +1 warrior',         apply: s => { s.speed += 2; s.count += 1; } },
-      { id: 'horde',    icon: '🪦', name: 'Shambling Horde',  tier: 'rare',   desc: '+5 warriors, -10 HP each',     apply: s => { s.count += 5; s.hp -= 10; } },
-      { id: 'lich',     icon: '🔮', name: "Lich's Blessing",  tier: 'rare',   desc: '+30 HP, +12 damage',           apply: s => { s.hp += 30; s.damage += 12; } },
+      { id: 's_bone',    kind: 'armor',   icon: '🦴', name: 'Bone Wards',       tier: 'common', desc: '+30 max HP per warrior',                     hp: 30 },
+      { id: 's_tomb',    kind: 'armor',   icon: '🪦', name: 'Tomb Wraps',       tier: 'combo',  desc: '+40 max HP, -1 speed',                       hp: 40, speedDelta: -1 },
+      { id: 's_spear',   kind: 'weapon',  icon: '🗡️', name: 'Bone Spear',       tier: 'common', desc: '+5 damage, +0.7 range',                       damage: 5, range: 0.7 },
+      { id: 's_cursed',  kind: 'weapon',  icon: '⚫', name: 'Cursed Steel',     tier: 'combo',  desc: '+11 damage',                                  damage: 11 },
+      { id: 's_raise',   kind: 'recruit', icon: '🪦', name: 'Raise Dead',       tier: 'common', desc: '+4 standard warriors',                        amount: 4 },
+      { id: 's_plague',  kind: 'recruit', icon: '☠️', name: 'Plague Bearer',    tier: 'combo',  desc: '+2 warriors with +4 damage',                  amount: 2, dmgBonus: 4 },
+      { id: 's_wave',    kind: 'spell',   icon: '🌑', name: 'Death Wave',       tier: 'rare',   desc: 'Spell — 55 AoE damage at battle start',        spell: { id: 'fireball', icon: '🌑', name: 'Death Wave', dmg: 55, radius: 12 } },
+      { id: 's_drain',   kind: 'spell',   icon: '🔮', name: 'Soul Drain',       tier: 'combo',  desc: 'Spell — instantly kill the 3 weakest enemies', spell: { id: 'soul_drain', icon: '🔮', name: 'Soul Drain', count: 3 } },
     ],
   },
 };
 
+export function applyCard(card, roster, spells, race) {
+  const base = RACES[race].base;
+  if (card.kind === 'armor') {
+    for (const w of roster) {
+      const bonus = card.hp || 0;
+      w.maxHp += bonus;
+      w.currentHp = Math.min(w.maxHp, w.currentHp + bonus);
+      if (card.speedDelta) w.speed = Math.max(2, w.speed + card.speedDelta);
+      if (card.range)      w.range += card.range;
+    }
+  } else if (card.kind === 'weapon') {
+    for (const w of roster) {
+      if (card.damage) w.damage += card.damage;
+      if (card.range)  w.range  += card.range;
+    }
+  } else if (card.kind === 'recruit') {
+    const mult = card.mult || 1;
+    const hpBonus = card.hpBonus || 0;
+    const dmgBonus = card.dmgBonus || 0;
+    for (let i = 0; i < (card.amount || 1); i++) {
+      const maxHp = Math.round(base.hp * mult + hpBonus);
+      roster.push({
+        maxHp,
+        currentHp: maxHp,
+        damage: Math.round(base.damage * mult + dmgBonus),
+        speed: base.speed * mult,
+        range: base.range,
+      });
+    }
+  } else if (card.kind === 'spell') {
+    spells.push({ ...card.spell });
+  }
+}
+
 export function pickThree(race, rng = Math.random) {
-  const pool = (RACES[race]?.cards || RACES.humans.cards).slice();
+  const pool = RACES[race].cards.slice();
   const out = [];
   while (out.length < 3 && pool.length) {
     const i = Math.floor(rng() * pool.length);
@@ -103,9 +141,10 @@ export function showCardPicker(race, round, onPick) {
     const el = document.createElement('div');
     el.className = 'card';
     el.dataset.tier = card.tier;
+    el.dataset.kind = card.kind;
     el.innerHTML = `
       <div class="icon">${card.icon}</div>
-      <div class="tag">${card.tier}</div>
+      <div class="tag">${card.kind} · ${card.tier}</div>
       <div class="name">${card.name}</div>
       <div class="desc">${card.desc}</div>
     `;

@@ -31,8 +31,8 @@ const sky = new THREE.HemisphereLight(0xbfe4ff, 0x7a8b5a, 0.65);
 scene.add(sky);
 
 export const cameraTarget = new THREE.Vector3(0, 0, 0);
-const camOffset = new THREE.Vector3(0, 95, 90);
-export const camera = new THREE.PerspectiveCamera(38, 1, 0.5, 400);
+const camOffset = new THREE.Vector3(22, 62, 56);
+export const camera = new THREE.PerspectiveCamera(42, 1, 0.5, 400);
 function syncCamera() {
   camera.position.copy(cameraTarget).add(camOffset);
   camera.lookAt(cameraTarget);
@@ -134,6 +134,30 @@ const projLines = new THREE.LineSegments(projGeom, projMat);
 projLines.frustumCulled = false;
 projGeom.setDrawRange(0, 0);
 scene.add(projLines);
+
+const fxMeshes = [];
+export function spawnFx(x, z, radius, color, duration = 0.7) {
+  const geom = new THREE.SphereGeometry(radius, 16, 12);
+  const mat = new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.65 });
+  const m = new THREE.Mesh(geom, mat);
+  m.position.set(x, 1.5, z);
+  scene.add(m);
+  fxMeshes.push({ mesh: m, age: 0, duration, mat, geom });
+}
+export function updateFx(dt) {
+  for (let i = fxMeshes.length - 1; i >= 0; i--) {
+    const fx = fxMeshes[i];
+    fx.age += dt;
+    const p = fx.age / fx.duration;
+    fx.mesh.scale.setScalar(0.6 + p * 1.2);
+    fx.mat.opacity = Math.max(0, 0.65 * (1 - p));
+    if (fx.age >= fx.duration) {
+      scene.remove(fx.mesh);
+      fx.geom.dispose(); fx.mat.dispose();
+      fxMeshes.splice(i, 1);
+    }
+  }
+}
 
 export function setProjectiles(segs) {
   const pos = projGeom.attributes.position.array;

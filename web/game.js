@@ -1,20 +1,26 @@
 import * as THREE from 'three';
-import { scene, camera, renderer, canvas, setProjectiles } from './scene.js';
+import { scene, camera, renderer, setProjectiles, updateFx } from './scene.js';
 import { makeUnit, updateUnitVisuals } from './units.js';
-import { RACES, showCardPicker, showRacePicker } from './lib/cards.js';
+import { RACES, applyCard, showCardPicker, showRacePicker } from './lib/cards.js';
+import { runAllSpells } from './lib/spells.js';
 
 const TEAM_BLUE = 0;
 const TEAM_RED = 1;
 const SPACING = 2.6;
+const BASE_Z = 22;
+const HEAL_FRACTION = 0.4;
 
 const banner = document.getElementById('banner');
 const roundLabel = document.getElementById('round-label');
 const scoreLabel = document.getElementById('score-label');
+const rosterLabel = document.getElementById('roster-label');
+const spellsBar = document.getElementById('spells');
 
 const ENEMY_RACES = ['skeletons', 'dwarves', 'elves', 'humans'];
 let playerRace = 'humans';
 let enemyRace = 'skeletons';
-let playerStats = { ...RACES.humans.base };
+let playerRoster = [];
+let playerSpells = [];
 let round = 1;
 let wins = 0;
 let phase = 'select';
@@ -23,18 +29,28 @@ const projectiles = [];
 const PROJ_TTL = 0.12;
 const RANGED_THRESHOLD = 3.0;
 
-function enemyStatsForRound(n, raceKey) {
+function makeBaseRoster(race) {
+  const b = RACES[race].base;
+  const out = [];
+  for (let i = 0; i < b.count; i++) {
+    out.push({ maxHp: b.hp, currentHp: b.hp, damage: b.damage, speed: b.speed, range: b.range });
+  }
+  return out;
+}
+
+function enemyRosterForRound(n, raceKey) {
   const base = RACES[raceKey].base;
   const hpScale = 0.70 + (n - 1) * 0.12;
   const dmgScale = 0.70 + (n - 1) * 0.10;
   const countScale = 0.65 + (n - 1) * 0.12;
-  return {
-    count: Math.max(3, Math.round(base.count * countScale)),
-    hp: Math.max(20, Math.round(base.hp * hpScale)),
-    damage: Math.max(6, Math.round(base.damage * dmgScale)),
-    speed: base.speed * 0.92,
-    range: base.range,
-  };
+  const count = Math.max(3, Math.round(base.count * countScale));
+  const hp = Math.max(20, Math.round(base.hp * hpScale));
+  const dmg = Math.max(6, Math.round(base.damage * dmgScale));
+  const out = [];
+  for (let i = 0; i < count; i++) {
+    out.push({ maxHp: hp, currentHp: hp, damage: dmg, speed: base.speed * 0.92, range: base.range });
+  }
+  return out;
 }
 
 function clearArmies() {
@@ -44,19 +60,38 @@ function clearArmies() {
   setProjectiles([]);
 }
 
-function spawnArmy(teamIdx, stats, baseZ, raceKey) {
-  const cols = Math.min(6, Math.ceil(Math.sqrt(stats.count * 1.5)));
-  const rows = Math.ceil(stats.count / cols);
-  let placed = 0;
-  for (let r = 0; r < rows && placed < stats.count; r++) {
-    for (let c = 0; c < cols && placed < stats.count; c++) {
-      const x = (c - (cols - 1) * 0.5) * SPACING;
-      const z = baseZ + r * SPACING * (baseZ > 0 ? 1 : -1);
-      const u = makeUnit(teamIdx, x, z, stats, raceKey);
-      units.push(u);
-      scene.add(u.mesh);
-      placed++;
-    }
+function spawnRoster(teamIdx, roster, baseZ, raceKey) {
+  const cols = Math.min(6, Math.ceil(Math.sqrt(roster.length * 1.5)));
+  for (let i = 0; i < roster.length; i++) {
+    const w = roster[i];
+    const row = Math.floor(i / cols);
+    const col = i % cols;
+    const x = (col - (cols - 1) * 0.5) * SPACING;
+    const z = baseZ + row * SPACING * (baseZ > 0 ? 1 : -1);
+    const u = makeUnit(teamIdx, x, z, w, raceKey);
+    u.maxHp = w.maxHp;
+    u.hp = Math.max(1, w.currentHp);
+    u.damage = w.damage;
+    u.speed = w.speed;
+    u.range = w.range;
+    u.rosterIdx = i;
+    units.push(u);
+    scene.add(u.mesh);
+  }
+}
+
+function refreshHud() {
+  const alive = playerRoster.length;
+  const totalHp = playerRoster.reduce((s, w) => s + w.currentHp, 0);
+  const maxHp = playerRoster.reduce((s, w) => s + w.maxHp, 0);
+  rosterLabel.textContent = `${alive} alive · ${Math.round(totalHp)}/${maxHp} HP`;
+  spellsBar.innerHTML = '';
+  for (const s of playerSpells) {
+    const el = document.createElement('div');
+    el.className = 'spell';
+    el.title = s.name;
+    el.textContent = s.icon;
+    spellsBar.appendChild(el);
   }
 }
 
@@ -64,11 +99,12 @@ function startRound() {
   clearArmies();
   enemyRace = ENEMY_RACES[(round - 1) % ENEMY_RACES.length];
   if (enemyRace === playerRace) enemyRace = ENEMY_RACES[(round) % ENEMY_RACES.length];
-  spawnArmy(TEAM_BLUE, playerStats, 30, playerRace);
-  spawnArmy(TEAM_RED, enemyStatsForRound(round, enemyRace), -30, enemyRace);
+  spawnRoster(TEAM_BLUE, playerRoster, BASE_Z, playerRace);
+  spawnRoster(TEAM_RED, enemyRosterForRound(round, enemyRace), -BASE_Z, enemyRace);
   phase = 'battle';
   roundLabel.textContent = `Round ${round} — vs ${RACES[enemyRace].name}`;
   scoreLabel.textContent = `${RACES[playerRace].icon} ${RACES[playerRace].name} · ${wins} ${wins === 1 ? 'win' : 'wins'}`;
+  refreshHud();
   banner.classList.add('hidden');
   const toast = document.getElementById('round-toast');
   if (toast) {
@@ -76,6 +112,7 @@ function startRound() {
     toast.classList.add('show');
     setTimeout(() => toast.classList.remove('show'), 1700);
   }
+  setTimeout(() => { runAllSpells(playerSpells, units); playerSpells.length = 0; refreshHud(); }, 350);
 }
 
 function nearestEnemy(u) {
@@ -119,7 +156,6 @@ function step(dt) {
     u.x += u.vx * dt;
     u.z += u.vz * dt;
   }
-
   for (let i = projectiles.length - 1; i >= 0; i--) {
     projectiles[i].ttl -= dt;
     if (projectiles[i].ttl <= 0) projectiles.splice(i, 1);
@@ -152,13 +188,31 @@ function step(dt) {
   }
 }
 
+function syncRosterFromUnits() {
+  const survivors = [];
+  for (const u of units) {
+    if (u.team !== TEAM_BLUE || u.hp <= 0) continue;
+    const w = playerRoster[u.rosterIdx];
+    if (!w) continue;
+    w.currentHp = Math.min(w.maxHp, u.hp);
+    survivors.push(w);
+  }
+  playerRoster = survivors;
+  for (const w of playerRoster) {
+    w.currentHp = Math.min(w.maxHp, w.currentHp + (w.maxHp - w.currentHp) * HEAL_FRACTION);
+  }
+}
+
 function onWin() {
   phase = 'cardpick';
   wins++;
+  syncRosterFromUnits();
   scoreLabel.textContent = `${RACES[playerRace].icon} ${RACES[playerRace].name} · ${wins} ${wins === 1 ? 'win' : 'wins'}`;
+  refreshHud();
   setTimeout(() => {
     showCardPicker(playerRace, round, (card) => {
-      card.apply(playerStats);
+      applyCard(card, playerRoster, playerSpells, playerRace);
+      refreshHud();
       round++;
       startRound();
     });
@@ -167,6 +221,7 @@ function onWin() {
 
 function onLoss() {
   phase = 'gameover';
+  syncRosterFromUnits();
   banner.innerHTML = `Defeat — round ${round}<small>${wins} ${wins === 1 ? 'win' : 'wins'} in this run</small><button id="retry">New Run</button>`;
   banner.className = 'lose';
   banner.classList.remove('hidden');
@@ -176,17 +231,11 @@ function onLoss() {
   }, 0);
 }
 
-function resetRun() {
-  playerStats = { ...RACES[playerRace].base };
-  round = 1;
-  wins = 0;
-  startRound();
-}
-
 function startGame() {
   showRacePicker((raceKey) => {
     playerRace = raceKey;
-    playerStats = { ...RACES[raceKey].base };
+    playerRoster = makeBaseRoster(raceKey);
+    playerSpells = [];
     round = 1;
     wins = 0;
     startRound();
@@ -198,6 +247,7 @@ function frame(now) {
   const dt = Math.min(0.05, (now - last) / 1000);
   last = now;
   if (phase === 'battle') step(dt);
+  updateFx(dt);
   for (const u of units) updateUnitVisuals(u, camera, now / 1000);
   renderer.render(scene, camera);
   requestAnimationFrame(frame);
