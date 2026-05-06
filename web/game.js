@@ -105,8 +105,7 @@ function startRound() {
   const mapKey = currentMapKey = mapForRound(round); setMap(mapKey); resetCameraTarget();
   placeBuildings(scene, buildingMeshes, playerBuildings, BASE_Z + 18);
   const boss = isBossRound(round);
-  enemyRace = ENEMY_RACES[(round - 1) % ENEMY_RACES.length];
-  if (enemyRace === playerRace) enemyRace = ENEMY_RACES[(round) % ENEMY_RACES.length];
+  if (!sandboxMode) { enemyRace = ENEMY_RACES[(round - 1) % ENEMY_RACES.length]; if (enemyRace === playerRace) enemyRace = ENEMY_RACES[(round) % ENEMY_RACES.length]; }
   spawnRoster(TEAM_BLUE, playerRoster, BASE_Z, playerRace);
   const enemyList = sandboxMode ? sandboxEnemyRoster : boss ? bossRoster(round, RACES[enemyRace].base) : enemyRosterForRound(round, enemyRace);
   spawnRoster(TEAM_RED, enemyList, -BASE_Z, enemyRace);
