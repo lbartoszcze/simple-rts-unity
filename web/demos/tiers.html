@@ -21,14 +21,15 @@
     .cell h2 { margin: 0 0 6px; font-size: 14px; letter-spacing: 0.08em; color: #f3c259; text-align: center; }
     .cell p  { margin: 6px 0 0; font-size: 12px; color: #a3a99a; line-height: 1.45; }
     canvas { width: 100%; height: 320px; display: block; border-radius: 8px; background: #6cb04a; }
+    canvas[data-soldier] { height: 520px; }
   </style>
 </head>
 <body>
   <h1>🎬 Loaded 3D model — actual rigged character with skeletal animation</h1>
   <p class="sub">Demonstrating that the prior cells (lego figures stitched together from BoxGeometry + SphereGeometry primitives) hit a hard ceiling no amount of "add another sphere" will fix. This cell loads a free CC0 rigged humanoid (.glb) from threejs.org and drives one of its baked Mixamo clips. Same three.js scene, same lighting — drastically different result. Reload if it doesn't appear immediately (it has to fetch ~8MB).</p>
   <div class="row" style="grid-template-columns: 1fr 1fr;">
-    <div class="cell"><h2>RIGGED · TPose</h2><canvas data-soldier="TPose"></canvas><p>T-pose, no animation. If the head is visible here, the camera is fine and the issue is per-clip.</p></div>
-    <div class="cell"><h2>RIGGED · WALK</h2><canvas data-soldier="Walk"></canvas><p>Same model, walk clip.</p></div>
+    <div class="cell"><h2>RIGGED · IDLE</h2><canvas data-soldier="Idle"></canvas><p>Imported skinned mesh, PBR materials, idle animation clip from the .glb.</p></div>
+    <div class="cell"><h2>RIGGED · WALK</h2><canvas data-soldier="Walk"></canvas><p>Same model, walk clip — bones interpolate smoothly across keyframes.</p></div>
   </div>
   <h1 style="margin-top: 32px">🎨 Race-specific tier tint — same T3 geometry, different palette</h1>
   <p class="sub">At tier 2+ each race uses its own palette: humans gold, dwarves bronze + orange glow, elves silver-green, skeletons bone + cyan. The chest gem also changes color per race.</p>
@@ -68,7 +69,7 @@
       const ground = new THREE.Mesh(new THREE.PlaneGeometry(30, 30), new THREE.MeshLambertMaterial({ color: 0x7fc05a }));
       ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; scene.add(ground);
       const camera = new THREE.PerspectiveCamera(28, 1, 0.1, 100);
-      camera.position.set(3, 4, 10); camera.lookAt(0, 0.5, 0);
+      camera.position.set(1.2, 1.2, 4.0); camera.lookAt(0, 0.5, 0);
       function resize() { const w = canvas.clientWidth, h = canvas.clientHeight; renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); }
       resize();
       try { await loadHumanoid(); console.log('[demo] humanoid loaded, building'); } catch (e) { console.error('[demo] load failed', e); return; }
