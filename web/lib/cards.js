@@ -12,6 +12,8 @@ export const RACES = {
       { id: 'h_knight',  kind: 'recruit', icon: '🏰', name: 'Knight Order',     tier: 'rare',   desc: '+1 elite warrior (1.5x stats)',              amount: 1, mult: 1.5 },
       { id: 'h_holy',    kind: 'spell',   icon: '✨', name: 'Holy Light',       tier: 'rare',   desc: 'Spell — fully heal your army at battle start', spell: { id: 'heal_full', icon: '✨', name: 'Holy Light' } },
       { id: 'h_banner',  kind: 'spell',   icon: '🎆', name: 'Battle Banner',    tier: 'combo',  desc: 'Spell — one fireball, 45 AoE damage',          spell: { id: 'fireball', icon: '🎆', name: 'Battle Banner', dmg: 45, radius: 8 } },
+      { id: 'h_fire',    kind: 'building', icon: '🔥', name: 'Fireplace',        tier: 'rare',   desc: 'Building — +15% extra heal between rounds',     building: 'fireplace' },
+      { id: 'h_tower',   kind: 'building', icon: '🗼', name: 'Watchtower',       tier: 'rare',   desc: 'Building — +1 damage every round',              building: 'watchtower' },
     ],
   },
   dwarves: {
@@ -27,6 +29,8 @@ export const RACES = {
       { id: 'd_clan',    kind: 'recruit', icon: '🍺', name: 'Clan Muster',      tier: 'common', desc: '+2 standard warriors',                       amount: 2 },
       { id: 'd_quake',   kind: 'spell',   icon: '🌋', name: 'Earthquake',       tier: 'rare',   desc: 'Spell — 60 AoE damage at battle start',        spell: { id: 'fireball', icon: '🌋', name: 'Earthquake', dmg: 60, radius: 10 } },
       { id: 'd_brew',    kind: 'spell',   icon: '🍺', name: "Brewmaster's Toast", tier: 'combo', desc: 'Spell — heal your army for 75% of max HP',     spell: { id: 'heal_pct', icon: '🍺', name: "Brewmaster's Toast", pct: 0.75 } },
+      { id: 'd_forge',   kind: 'building', icon: '🛠️', name: 'Forge',           tier: 'rare',   desc: 'Building — +2 damage every round',              building: 'forge' },
+      { id: 'd_mine',    kind: 'building', icon: '⛏️', name: 'Mine',            tier: 'rare',   desc: 'Building — +1 fresh dwarf every 2 rounds',      building: 'mine' },
     ],
   },
   elves: {
@@ -42,6 +46,8 @@ export const RACES = {
       { id: 'e_ranger',  kind: 'recruit', icon: '🎯', name: 'Ranger Captain',   tier: 'rare',   desc: '+1 elite ranger (1.5x stats)',                amount: 1, mult: 1.5 },
       { id: 'e_volley',  kind: 'spell',   icon: '🏹', name: 'Volley',           tier: 'combo',  desc: 'Spell — 35 damage to every enemy at battle start', spell: { id: 'all_enemies', icon: '🏹', name: 'Volley', dmg: 35 } },
       { id: 'e_spring',  kind: 'spell',   icon: '💧', name: 'Healing Spring',   tier: 'rare',   desc: 'Spell — fully heal your army at battle start', spell: { id: 'heal_full', icon: '💧', name: 'Healing Spring' } },
+      { id: 'e_grove',   kind: 'building', icon: '🌳', name: 'Grove',           tier: 'rare',   desc: 'Building — +6 max HP every round, also heals',  building: 'grove' },
+      { id: 'e_wood',    kind: 'building', icon: '🌲', name: 'Watchwood',        tier: 'rare',   desc: 'Building — +0.15 attack range every round',     building: 'watchwood' },
     ],
   },
   skeletons: {
@@ -57,11 +63,13 @@ export const RACES = {
       { id: 's_plague',  kind: 'recruit', icon: '☠️', name: 'Plague Bearer',    tier: 'combo',  desc: '+2 warriors with +4 damage',                  amount: 2, dmgBonus: 4 },
       { id: 's_wave',    kind: 'spell',   icon: '🌑', name: 'Death Wave',       tier: 'rare',   desc: 'Spell — 55 AoE damage at battle start',        spell: { id: 'fireball', icon: '🌑', name: 'Death Wave', dmg: 55, radius: 12 } },
       { id: 's_drain',   kind: 'spell',   icon: '🔮', name: 'Soul Drain',       tier: 'combo',  desc: 'Spell — instantly kill the 3 weakest enemies', spell: { id: 'soul_drain', icon: '🔮', name: 'Soul Drain', count: 3 } },
+      { id: 's_yard',    kind: 'building', icon: '🪦', name: 'Boneyard',        tier: 'rare',   desc: 'Building — +1 fresh skeleton every round',      building: 'boneyard' },
+      { id: 's_crypt',   kind: 'building', icon: '⚰️', name: 'Crypt',           tier: 'rare',   desc: 'Building — +5% damage every round',             building: 'crypt' },
     ],
   },
 };
 
-export function applyCard(card, roster, spells, race) {
+export function applyCard(card, roster, spells, race, buildings) {
   const base = RACES[race].base;
   if (card.kind === 'armor') {
     for (const w of roster) {
@@ -92,6 +100,8 @@ export function applyCard(card, roster, spells, race) {
     }
   } else if (card.kind === 'spell') {
     spells.push({ ...card.spell });
+  } else if (card.kind === 'building') {
+    buildings.push({ id: card.building, name: card.name, icon: card.icon });
   }
 }
 

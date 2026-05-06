@@ -3,6 +3,8 @@ import { scene, camera, renderer, setProjectiles, updateFx } from './scene.js';
 import { makeUnit, updateUnitVisuals } from './units.js';
 import { RACES, applyCard, showCardPicker, showRacePicker } from './lib/cards.js';
 import { runAllSpells } from './lib/spells.js';
+import { applyBuildings, buildingHealBonus, placeBuildings } from './lib/buildings.js';
+import { isBossRound, bossRoster, bossForRound, swapToBossMesh } from './lib/bosses.js';
 
 const TEAM_BLUE = 0;
 const TEAM_RED = 1;
@@ -15,12 +17,15 @@ const roundLabel = document.getElementById('round-label');
 const scoreLabel = document.getElementById('score-label');
 const rosterLabel = document.getElementById('roster-label');
 const spellsBar = document.getElementById('spells');
+const buildingsBar = document.getElementById('buildings');
 
 const ENEMY_RACES = ['skeletons', 'dwarves', 'elves', 'humans'];
 let playerRace = 'humans';
 let enemyRace = 'skeletons';
 let playerRoster = [];
 let playerSpells = [];
+let playerBuildings = [];
+const buildingMeshes = [];
 let round = 1;
 let wins = 0;
 let phase = 'select';
@@ -75,8 +80,11 @@ function spawnRoster(teamIdx, roster, baseZ, raceKey) {
     u.speed = w.speed;
     u.range = w.range;
     u.rosterIdx = i;
+    u.bossId = w.bossId;
+    u.isBoss = !!w.isBoss;
     units.push(u);
     scene.add(u.mesh);
+    if (u.isBoss) swapToBossMesh(u, scene);
   }
 }
 
@@ -88,29 +96,43 @@ function refreshHud() {
   spellsBar.innerHTML = '';
   for (const s of playerSpells) {
     const el = document.createElement('div');
-    el.className = 'spell';
-    el.title = s.name;
-    el.textContent = s.icon;
+    el.className = 'spell'; el.title = s.name; el.textContent = s.icon;
     spellsBar.appendChild(el);
+  }
+  buildingsBar.innerHTML = '';
+  for (const b of playerBuildings) {
+    const el = document.createElement('div');
+    el.className = 'building'; el.title = b.name; el.textContent = b.icon;
+    buildingsBar.appendChild(el);
   }
 }
 
 function startRound() {
+  if (round > 1) applyBuildings(playerRoster, playerBuildings, playerRace);
   clearArmies();
+  placeBuildings(scene, buildingMeshes, playerBuildings, BASE_Z + 18);
+  const boss = isBossRound(round);
   enemyRace = ENEMY_RACES[(round - 1) % ENEMY_RACES.length];
   if (enemyRace === playerRace) enemyRace = ENEMY_RACES[(round) % ENEMY_RACES.length];
   spawnRoster(TEAM_BLUE, playerRoster, BASE_Z, playerRace);
-  spawnRoster(TEAM_RED, enemyRosterForRound(round, enemyRace), -BASE_Z, enemyRace);
+  const enemyList = boss
+    ? bossRoster(round, RACES[enemyRace].base)
+    : enemyRosterForRound(round, enemyRace);
+  spawnRoster(TEAM_RED, enemyList, -BASE_Z, enemyRace);
   phase = 'battle';
-  roundLabel.textContent = `Round ${round} — vs ${RACES[enemyRace].name}`;
+  const enemyLabel = boss ? bossForRound(round).name : RACES[enemyRace].name;
+  roundLabel.textContent = `Round ${round} — vs ${enemyLabel}`;
   scoreLabel.textContent = `${RACES[playerRace].icon} ${RACES[playerRace].name} · ${wins} ${wins === 1 ? 'win' : 'wins'}`;
   refreshHud();
   banner.classList.add('hidden');
   const toast = document.getElementById('round-toast');
   if (toast) {
-    toast.innerHTML = `Round ${round}<small>${RACES[playerRace].icon} ${RACES[playerRace].name} vs ${RACES[enemyRace].icon} ${RACES[enemyRace].name}</small>`;
+    const eIcon = boss ? bossForRound(round).icon : RACES[enemyRace].icon;
+    const eName = boss ? bossForRound(round).name.toUpperCase() : RACES[enemyRace].name;
+    toast.innerHTML = `${boss ? 'BOSS — ' : ''}Round ${round}<small>${RACES[playerRace].icon} ${RACES[playerRace].name} vs ${eIcon} ${eName}</small>`;
+    toast.classList.toggle('boss', boss);
     toast.classList.add('show');
-    setTimeout(() => toast.classList.remove('show'), 1700);
+    setTimeout(() => toast.classList.remove('show'), boss ? 2400 : 1700);
   }
   setTimeout(() => { runAllSpells(playerSpells, units); playerSpells.length = 0; refreshHud(); }, 350);
 }
@@ -198,8 +220,9 @@ function syncRosterFromUnits() {
     survivors.push(w);
   }
   playerRoster = survivors;
+  const fraction = HEAL_FRACTION + buildingHealBonus(playerBuildings);
   for (const w of playerRoster) {
-    w.currentHp = Math.min(w.maxHp, w.currentHp + (w.maxHp - w.currentHp) * HEAL_FRACTION);
+    w.currentHp = Math.min(w.maxHp, w.currentHp + (w.maxHp - w.currentHp) * fraction);
   }
 }
 
@@ -211,7 +234,7 @@ function onWin() {
   refreshHud();
   setTimeout(() => {
     showCardPicker(playerRace, round, (card) => {
-      applyCard(card, playerRoster, playerSpells, playerRace);
+      applyCard(card, playerRoster, playerSpells, playerRace, playerBuildings);
       refreshHud();
       round++;
       startRound();
@@ -236,6 +259,7 @@ function startGame() {
     playerRace = raceKey;
     playerRoster = makeBaseRoster(raceKey);
     playerSpells = [];
+    playerBuildings = [];
     round = 1;
     wins = 0;
     startRound();
