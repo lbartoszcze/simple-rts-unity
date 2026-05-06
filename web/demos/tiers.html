@@ -65,14 +65,7 @@
       scene.add(new THREE.AmbientLight(0xffffff, 0.7));
       const ground = new THREE.Mesh(new THREE.PlaneGeometry(20, 20), new THREE.MeshLambertMaterial({ color: 0xcccccc }));
       ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; scene.add(ground);
-      const skin = RACE_SKIN[raceKey] || RACE_SKIN.humans;
-      const character = new THREE.Group();
-      const body = buildBlobBody(skin[0], skin[1]);
-      character.add(body);
-      const armor = buildArmorTier(TEAM, raceKey, 3);
-      character.add(armor);
-      const weapon = buildWeaponArm(TEAM, raceKey, new THREE.MeshLambertMaterial({ color: 0x707378, flatShading: true }), 3, 'infantry', null, null);
-      character.add(weapon);
+      const character = makeBody(TEAM, raceKey, 3, 3, 'infantry', null, null);
       scene.add(character);
       const tris = countTriangles(character);
       const tag = document.querySelector(`p[data-poly="${raceKey}"]`);
