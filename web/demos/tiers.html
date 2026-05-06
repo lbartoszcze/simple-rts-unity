@@ -68,11 +68,20 @@
       camera.lookAt(center);
       camera.near = Math.max(0.01, dist / 100); camera.far = dist * 10;
       camera.updateProjectionMatrix();
-      let meshCount = 0; let visibleCount = 0;
-      u.root.traverse((m) => { if (m.isMesh) { meshCount++; if (m.visible && m.material) visibleCount++; console.log('[glb] ' + raceKey + ' mesh ' + (m.name || '?') + ' visible=' + m.visible + ' transparent=' + (m.material && m.material.transparent) + ' opacity=' + (m.material && m.material.opacity)); } });
-      console.log('[glb] ' + raceKey + ' size=' + size.x.toFixed(2) + ',' + size.y.toFixed(2) + ',' + size.z.toFixed(2) + ' meshes=' + meshCount + '/' + visibleCount + ' clips=' + (Object.keys(u.clips).join(',') || 'none'));
       const firstClip = Object.keys(u.clips)[0];
       if (firstClip) playClip(u, firstClip);
+      u.mixer.update(0.016);
+      const bbox2 = new THREE.Box3().setFromObject(u.root);
+      const c2 = bbox2.getCenter(new THREE.Vector3());
+      const s2 = bbox2.getSize(new THREE.Vector3());
+      const r2 = Math.sqrt(s2.x*s2.x + s2.y*s2.y + s2.z*s2.z) / 2;
+      const d2 = r2 * 2.6;
+      camera.position.set(c2.x + d2 * 0.4, c2.y + r2 * 0.3, c2.z + d2);
+      camera.lookAt(c2);
+      camera.near = Math.max(0.01, r2 / 100);
+      camera.far = d2 * 10;
+      camera.updateProjectionMatrix();
+      console.log('[glb-cam] ' + raceKey + ' c=' + c2.x.toFixed(1) + ',' + c2.y.toFixed(1) + ',' + c2.z.toFixed(1) + ' r=' + r2.toFixed(1) + ' d=' + d2.toFixed(1));
       const clock = new THREE.Clock();
       function loop() {
         const dt = clock.getDelta();
