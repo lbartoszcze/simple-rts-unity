@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { buildWeaponArm } from './lib/weapons.js';
+import { buildWeaponArm, makeHorse, makeWings } from './lib/weapons.js';
 
 export const MAX_HP = 100;
 
@@ -157,6 +157,10 @@ export function makeUnit(teamIdx, x, z, stats, raceKey) {
   const ring = makeRing(team);
   const hp = makeHpBar();
   root.add(body, ring, hp);
+  let bodyBaseY = 0;
+  let wingsRig = null;
+  if (stats?.klass === 'cavalry') { root.add(makeHorse(team)); bodyBaseY = 1.45; body.position.y = bodyBaseY; }
+  if (stats?.klass === 'flyer') { wingsRig = makeWings(team); body.add(wingsRig); }
 
   const u = {
     mesh: root,
@@ -175,6 +179,8 @@ export function makeUnit(teamIdx, x, z, stats, raceKey) {
     klass: stats?.klass || 'infantry',
     swingT: 0,
     hitDealt: false,
+    bodyBaseY,
+    wingsRig,
     x, z,
     vx: 0, vz: 0,
     attackTarget: null,
@@ -200,7 +206,7 @@ export function updateUnitVisuals(u, camera, t) {
     const eased = 1 - Math.pow(1 - p, 2);
     u.body.rotation.x = eased * u.deathFall * 0.7;
     u.body.rotation.z = eased * 0.15;
-    u.body.position.y = -0.6 * eased;
+    u.body.position.y = (u.bodyBaseY || 0) - 0.6 * eased;
     return;
   }
 
@@ -239,7 +245,12 @@ export function updateUnitVisuals(u, camera, t) {
       recZ = (u.recoilDirZ || 0) * 0.22 * fade;
     } else u.recoilStart = null;
   }
-  u.body.position.set(recX, bobY, recZ);
+  u.body.position.set(recX, (u.bodyBaseY || 0) + bobY, recZ);
+  if (u.wingsRig) {
+    const flap = Math.sin(t * 12 + u.x * 0.3) * 0.5;
+    u.wingsRig.userData.wingL.rotation.z = 0.15 + flap;
+    u.wingsRig.userData.wingR.rotation.z = -0.15 - flap;
+  }
 
   if (u.team === 0) {
     u.ring.visible = true;

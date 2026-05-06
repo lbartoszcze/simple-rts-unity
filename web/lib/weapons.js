@@ -66,3 +66,41 @@ export function buildWeaponArm(team, raceKey, helmetMat, weaponTier = 0, klass =
   }
   return arm;
 }
+
+export function makeHorse(team) {
+  const g = new THREE.Group();
+  const dark = lambert(0x4a3018);
+  const light = lambert(0x7a5230);
+  const accent = lambert(team.accent);
+  const body = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.7, 1.8), light);
+  body.position.set(0, 1.0, 0.1); body.castShadow = true;
+  const neck = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.7, 0.4), light);
+  neck.position.set(0, 1.45, 1.05); neck.rotation.x = -0.3; neck.castShadow = true;
+  const head = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.4, 0.7), dark);
+  head.position.set(0, 1.65, 1.45); head.castShadow = true;
+  const tail = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.6, 0.15), dark);
+  tail.position.set(0, 1.05, -0.95); tail.rotation.x = 0.4;
+  const legGeom = new THREE.CylinderGeometry(0.10, 0.12, 0.95, 6);
+  for (const [px, pz] of [[0.30, -0.7], [0.30, 0.7], [-0.30, -0.7], [-0.30, 0.7]]) {
+    const leg = new THREE.Mesh(legGeom, dark);
+    leg.position.set(px, 0.47, pz); leg.castShadow = true;
+    g.add(leg);
+  }
+  const saddle = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.18, 0.9), accent);
+  saddle.position.set(0, 1.42, 0.05);
+  g.add(body, neck, head, tail, saddle);
+  return g;
+}
+
+export function makeWings(team) {
+  const g = new THREE.Group();
+  const wMat = new THREE.MeshLambertMaterial({ color: team.accent, transparent: true, opacity: 0.92, side: THREE.DoubleSide });
+  const wingL = new THREE.Mesh(new THREE.PlaneGeometry(2.2, 1.1), wMat);
+  wingL.position.set(-1.3, 1.4, 0); wingL.rotation.y = Math.PI / 2; wingL.rotation.z = 0.15;
+  const wingR = new THREE.Mesh(new THREE.PlaneGeometry(2.2, 1.1), wMat);
+  wingR.position.set( 1.3, 1.4, 0); wingR.rotation.y = -Math.PI / 2; wingR.rotation.z = -0.15;
+  g.add(wingL, wingR);
+  g.userData.wingL = wingL;
+  g.userData.wingR = wingR;
+  return g;
+}
