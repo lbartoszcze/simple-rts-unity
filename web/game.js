@@ -128,14 +128,18 @@ function startRound() {
   setTimeout(() => { runAllSpells(playerSpells, units); playerSpells.length = 0; refreshHud(); }, 350);
 }
 
-function nearestEnemy(u) {
-  let best = null, bestD = 1e9;
+function pickTarget(u) {
+  let best = null, bestScore = Infinity;
   for (const v of units) {
     if (v.team === u.team || v.hp <= 0) continue;
-    const d = (u.x - v.x) ** 2 + (u.z - v.z) ** 2;
-    if (d < bestD) { best = v; bestD = d; }
+    const d2 = (u.x - v.x) ** 2 + (u.z - v.z) ** 2;
+    let s = d2;
+    if (u.klass === 'cavalry' || u.klass === 'flyer') s = v.range >= 3 ? d2 * 0.35 : d2;
+    else if (u.klass === 'archer' || u.klass === 'mage') s = v.hp * 60 + d2 * 0.05;
+    else if (u.klass === 'beast') s = d2 + (v.range >= 3 ? d2 * 0.5 : 0);
+    if (s < bestScore) { bestScore = s; best = v; }
   }
-  return { u: best, d2: bestD };
+  return best;
 }
 
 function step(dt, t) {
@@ -145,9 +149,10 @@ function step(dt, t) {
     if (!u.attackTarget || u.attackTarget.hp <= 0) u.attackTarget = nearestEnemy(u).u;
     if (!u.attackTarget) { u.vx = 0; u.vz = 0; continue; }
     const dx = u.attackTarget.x - u.x;
-    const dz = u.attackTarget.z - u.z;
-    const dist = Math.hypot(dx, dz);
+    const dz = u.attackTarget.z - u.z, dist = Math.hypot(dx, dz);
+    const kiteAt = (u.klass === 'archer' || u.klass === 'mage' || u.klass === 'flyer') ? u.range * 0.7 : 0;
     if (dist < u.range) {
+      if (kiteAt && dist < kiteAt) { u.vx = -(dx/dist) * u.speed * 0.75; u.vz = -(dz/dist) * u.speed * 0.75; u.swingT = 0; u.hitDealt = false; u.x += u.vx * dt; u.z += u.vz * dt; continue; }
       u.vx = 0; u.vz = 0;
       u.swingT += dt;
       if (u.swingT >= u.swingPeriod) { u.swingT = 0; u.hitDealt = false; }
