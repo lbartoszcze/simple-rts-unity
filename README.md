@@ -1,47 +1,53 @@
 # simple-rts-unity
 
-Minimal real-time-strategy starting point for Unity. Drag-select units, right-click to move them in formation, edge-pan / WASD camera, scroll to zoom.
+Minimal real-time-strategy starting point for Unity 2022 LTS. Drag-select units, right-click to move them in formation, edge-pan / WASD camera, scroll to zoom.
 
-This is a public learning-oriented scaffold — open it in Unity Hub and you've got a working RTS input loop in under a minute. Build resources, combat, and buildings on top.
+The repo ships an Editor bootstrap script — clone, open in Unity Hub, hit **Play**. No manual scene wiring.
 
-## Open in Unity
+## Run it
 
-1. `git clone https://github.com/lbartoszcze/simple-rts-unity.git`
-2. Open Unity Hub → **Add project from disk** → pick the cloned folder.
-3. Editor version pinned to **2022.3 LTS** (`ProjectSettings/ProjectVersion.txt`). Any 2022.3.x install works.
+1. Install Unity Hub: https://unity.com/download
+2. Hub → **Installs → Install Editor → 2022.3 LTS** (any 2022.3.x release).
+3. Clone:
+   ```bash
+   git clone https://github.com/lbartoszcze/simple-rts-unity.git
+   ```
+4. Hub → **Add → Add project from disk** → pick the cloned folder.
+5. Wait for Unity to finish the first import. The bootstrap script (`Assets/Editor/SceneBootstrap.cs`) will:
+   - Add `Ground` (layer 8) and `Unit` (layer 9) to the layer table.
+   - Create `Assets/Scenes/Main.unity` with a green ground plane, a baked NavMesh, a directional light, an angled camera rig, the controller, and a 4×3 block of red capsule units.
+   - Mark the scene built (`Assets/Scenes/.bootstrapped`) so it doesn't re-run.
+6. Open `Assets/Scenes/Main.unity` if Unity hasn't already, hit ▶ **Play**.
 
-## Scene setup (one-time)
+To rebuild the scene from scratch: **Tools → RTS → Rebuild Demo Scene**.
 
-The repo ships scripts only — wire them up in a fresh scene:
+## Controls
 
-1. **Ground** — `GameObject → 3D Object → Plane`, scale `(10, 1, 10)`, Layer = `Ground`.
-2. **NavMesh** — `Window → AI → Navigation`, mark the plane as Navigation Static, **Bake**. (Or add the AI Navigation `NavMeshSurface` component and bake from there.)
-3. **Camera rig** — empty `GameObject "CameraRig"` at `(0, 40, -20)`, rotate `(55, 0, 0)`, parent the Main Camera under it. Add `RtsCamera.cs` to the rig.
-4. **Controller** — empty `GameObject "RtsController"`, add `RtsController.cs`. Set `Ground Mask = Ground`, `Unit Mask = Unit`.
-5. **Unit prefab** —
-   - `GameObject → 3D Object → Capsule`, Layer = `Unit`.
-   - Add `NavMeshAgent`, `Unit.cs`, `Selectable.cs`.
-   - Child empty `SelectionRing` with a flat torus / decal mesh, disabled by default. Drag it into `Selectable.ring`.
-   - Drag the capsule into `Assets/Prefabs` to make it a prefab, then drop a few copies into the scene.
+| Input | Action |
+|---|---|
+| Left-click | Select unit |
+| Left-drag | Box-select units |
+| Right-click on ground | Move selected units there in formation |
+| WASD or push cursor to screen edge | Pan camera |
+| Scroll wheel | Zoom |
 
-Press Play — left-drag to box-select, right-click to move.
-
-## Scripts
+## Code layout
 
 | File | Role |
 |---|---|
-| `Assets/Scripts/RtsCamera.cs` | Edge-pan / WASD pan, scroll zoom, height clamp. |
-| `Assets/Scripts/Selectable.cs` | Toggles a child selection ring. |
-| `Assets/Scripts/Unit.cs` | Thin wrapper over `NavMeshAgent` exposing `MoveTo` / `Stop`. |
+| `Assets/Scripts/RtsCamera.cs` | Edge-pan / WASD pan, scroll zoom, height clamp on the camera rig. |
+| `Assets/Scripts/Selectable.cs` | Toggles a child SelectionRing GameObject. |
+| `Assets/Scripts/Unit.cs` | Wraps `NavMeshAgent`, exposes `MoveTo` / `Stop`. |
 | `Assets/Scripts/RtsController.cs` | Click + drag-box select, right-click formation move order. |
+| `Assets/Editor/SceneBootstrap.cs` | One-shot Editor script that builds the demo scene on first open. |
 
 ## Suggested next steps
 
-- **Combat** — add `Health.cs` + an attack loop on `Unit`: nearest enemy in range → attack, else chase.
-- **Resources** — `ResourceNode` with an amount, `Worker` state machine (idle → gather → deposit).
+- **Combat** — add `Health.cs` plus an attack loop on `Unit`: nearest enemy in range → shoot, else chase.
+- **Resources** — `ResourceNode` with an amount, `Worker` state machine (idle → gather → deposit at a base).
 - **Buildings** — ghost placement on cursor, build timer, production queue spawning units.
-- **Fog of war** — render a darkened overlay to a RenderTexture, punch holes around each player-team unit.
-- **Minimap** — second camera top-down, RawImage in a Canvas, click-to-pan main camera.
+- **Fog of war** — render a darkened overlay to a RenderTexture, punch holes around player-team units.
+- **Minimap** — second top-down camera, RawImage in a Canvas, click-to-pan main camera.
 
 ## License
 
