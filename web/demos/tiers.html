@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>simple-rts — armor + weapon tier evolution</title>
+  <link rel="stylesheet" href="../style.css">
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.160.0/build/three.module.js"
+    }
+  }
+  </script>
+  <style>
+    body { background: #1a2030; padding: 24px; align-items: stretch; overflow: auto; }
+    h1 { color: #f3c259; margin: 0 0 6px; font-size: 24px; letter-spacing: 0.04em; }
+    p.sub { color: #a3a99a; margin: 0 0 18px; max-width: 880px; line-height: 1.55; }
+    .row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+    .cell { background: #0e1218; border: 1px solid #2c374a; border-radius: 10px; padding: 10px; }
+    .cell h2 { margin: 0 0 6px; font-size: 14px; letter-spacing: 0.08em; color: #f3c259; text-align: center; }
+    .cell p  { margin: 6px 0 0; font-size: 12px; color: #a3a99a; line-height: 1.45; }
+    canvas { width: 100%; height: 320px; display: block; border-radius: 8px; background: #6cb04a; }
+  </style>
+</head>
+<body>
+  <h1>🛡 Tier evolution — what stacking armor and weapon cards looks like</h1>
+  <p class="sub">Each card you draft (Sharpened Blades, Tempered Steel, etc.) bumps an
+    invisible counter — but these counters change the geometry of every unit on the
+    field. The chest plate grows thicker, pauldrons scale up, the chest shifts from
+    livery-color to gold trim, then starts emitting a cream glow. Weapons scale up,
+    the blade material brightens from grey to white to gold, and a halo orb appears
+    at the highest tier.</p>
+  <div class="row">
+    <div class="cell"><h2>TIER 0</h2><canvas data-tier="0"></canvas><p>Cloth + iron — base livery chest, dull steel blade. The starting kit.</p></div>
+    <div class="cell"><h2>TIER 1</h2><canvas data-tier="1"></canvas><p>Reinforced — chest +18% wider, +14% taller; weapon scaled up; pauldrons enlarged.</p></div>
+    <div class="cell"><h2>TIER 2</h2><canvas data-tier="2"></canvas><p>Gilded — chest swaps to gold (#c9a44a); blade material brightens to bare white steel; cyan emissive on weapon edge.</p></div>
+    <div class="cell"><h2>TIER 3</h2><canvas data-tier="3"></canvas><p>Mythic — cream emissive glow on the chest; pauldrons emit; weapon turns to pale-gold steel with a translucent halo orb at the haft.</p></div>
+  </div>
+  <script type="module">
+    import * as THREE from 'three';
+    import { makeUnit } from '../units.js';
+
+    function buildScene(canvas, tier) {
+      const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.outputColorSpace = THREE.SRGBColorSpace;
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.05;
+      const scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x7fc05a);
+      const sun = new THREE.DirectionalLight(0xfff2d0, 2.2);
+      sun.position.set(4, 8, 3); sun.castShadow = true;
+      sun.shadow.mapSize.set(1024, 1024);
+      sun.shadow.camera.near = 0.5; sun.shadow.camera.far = 20;
+      sun.shadow.camera.left = -4; sun.shadow.camera.right = 4;
+      sun.shadow.camera.top = 4; sun.shadow.camera.bottom = -4;
+      scene.add(sun);
+      scene.add(new THREE.HemisphereLight(0xbfe4ff, 0x7a8b5a, 0.7));
+      const ground = new THREE.Mesh(
+        new THREE.PlaneGeometry(20, 20),
+        new THREE.MeshLambertMaterial({ color: 0x7fc05a })
+      );
+      ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true;
+      scene.add(ground);
+      const stats = { hp: 100, maxHp: 100, currentHp: 100, damage: 22, speed: 7, range: 2.4, klass: 'infantry', armorTier: tier, weaponTier: tier };
+      const unit = makeUnit(0, 0, 0, stats, 'humans');
+      scene.add(unit.mesh);
+      const camera = new THREE.PerspectiveCamera(28, 1, 0.1, 50);
+      camera.position.set(2.5, 2.4, 4.4);
+      camera.lookAt(0, 1.4, 0);
+      function resize() {
+        const w = canvas.clientWidth, h = canvas.clientHeight;
+        renderer.setSize(w, h, false);
+        camera.aspect = w / h; camera.updateProjectionMatrix();
+      }
+      resize();
+      window.addEventListener('resize', resize);
+      const t0 = performance.now();
+      function loop() {
+        const t = (performance.now() - t0) / 1000;
+        unit.mesh.rotation.y = -Math.PI * 0.35 + Math.sin(t * 0.6) * 0.25;
+        renderer.render(scene, camera);
+        requestAnimationFrame(loop);
+      }
+      loop();
+    }
+
+    document.querySelectorAll('canvas[data-tier]').forEach((c) => {
+      buildScene(c, +c.dataset.tier);
+    });
+  </script>
+</body>
+</html>
