@@ -78,24 +78,27 @@ export function applyCard(card, roster, spells, race, buildings) {
       w.currentHp = Math.min(w.maxHp, w.currentHp + bonus);
       if (card.speedDelta) w.speed = Math.max(2, w.speed + card.speedDelta);
       if (card.range)      w.range += card.range;
+      w.armorTier = (w.armorTier || 0) + 1;
     }
   } else if (card.kind === 'weapon') {
     for (const w of roster) {
       if (card.damage) w.damage += card.damage;
       if (card.range)  w.range  += card.range;
+      w.weaponTier = (w.weaponTier || 0) + 1;
     }
   } else if (card.kind === 'recruit') {
     const mult = card.mult || 1;
     const hpBonus = card.hpBonus || 0;
     const dmgBonus = card.dmgBonus || 0;
+    const aT = roster[0]?.armorTier || 0;
+    const wT = roster[0]?.weaponTier || 0;
     for (let i = 0; i < (card.amount || 1); i++) {
       const maxHp = Math.round(base.hp * mult + hpBonus);
       roster.push({
-        maxHp,
-        currentHp: maxHp,
+        maxHp, currentHp: maxHp,
         damage: Math.round(base.damage * mult + dmgBonus),
-        speed: base.speed * mult,
-        range: base.range,
+        speed: base.speed * mult, range: base.range,
+        armorTier: aT, weaponTier: wT,
       });
     }
   } else if (card.kind === 'spell') {
@@ -103,7 +106,23 @@ export function applyCard(card, roster, spells, race, buildings) {
   } else if (card.kind === 'building') {
     buildings.push({ id: card.building, name: card.name, icon: card.icon });
   }
+  _picks.push(card); _renderPicks();
 }
+
+const _picks = [];
+function _renderPicks() {
+  const bar = document.getElementById('picks');
+  if (!bar) return;
+  bar.innerHTML = '';
+  for (const c of _picks) {
+    const el = document.createElement('div');
+    el.className = `pick ${c.kind || ''}`;
+    el.textContent = c.icon;
+    el.title = `${c.name} — ${c.desc || ''}`;
+    bar.appendChild(el);
+  }
+}
+export function resetPicks() { _picks.length = 0; _renderPicks(); }
 
 const META_KEY = 'simple-rts-meta-v2';
 const RACE_COST = { humans: 0, dwarves: 8, elves: 18, skeletons: 32 };

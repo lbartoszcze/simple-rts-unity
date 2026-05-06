@@ -65,15 +65,12 @@ ground.rotation.x = -Math.PI / 2;
 ground.receiveShadow = true;
 scene.add(ground);
 
-const dirtPaint = new THREE.Mesh(
-  new THREE.CircleGeometry(14, 32),
-  new THREE.MeshLambertMaterial({ color: 0xc6a877, transparent: true, opacity: 0.55 })
-);
-dirtPaint.rotation.x = -Math.PI / 2;
-dirtPaint.position.y = 0.01;
-scene.add(dirtPaint);
+export const sceneryGroup = new THREE.Group();
+scene.add(sceneryGroup);
 
-function makeTree(x, z) {
+const lambert = (color, flat = false) => new THREE.MeshLambertMaterial({ color, flatShading: flat });
+
+function makeOak(x, z) {
   const g = new THREE.Group();
   const trunk = new THREE.Mesh(
     new THREE.CylinderGeometry(0.28, 0.42, 1.6, 6),
@@ -101,11 +98,69 @@ function makeTree(x, z) {
   return g;
 }
 
-function makeRock(x, z) {
+function makeRock(x, z, color = 0x9aa0a4) {
   const r = 0.5 + Math.random() * 0.7;
+  const m = new THREE.Mesh(new THREE.IcosahedronGeometry(r, 0), lambert(color, true));
+  m.position.set(x, r * 0.55, z);
+  m.rotation.set(Math.random(), Math.random(), Math.random());
+  m.castShadow = true;
+  return m;
+}
+
+function makeCactus(x, z) {
+  const g = new THREE.Group();
+  const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.34, 2.2, 7), lambert(0x4a8a3a, true));
+  stem.position.y = 1.1; stem.castShadow = true;
+  g.add(stem);
+  if (Math.random() < 0.7) {
+    const arm = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.9, 0.4), lambert(0x4a8a3a, true));
+    arm.position.set(0.45, 1.4, 0); arm.castShadow = true;
+    g.add(arm);
+  }
+  g.position.set(x, 0, z); g.rotation.y = Math.random() * Math.PI;
+  return g;
+}
+
+function makePine(x, z, snowy = false) {
+  const g = new THREE.Group();
+  const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.32, 1.4, 6), lambert(0x3a2a18));
+  trunk.position.y = 0.7; trunk.castShadow = true;
+  g.add(trunk);
+  const snowMat = snowy ? lambert(0xf2f6fa, true) : null;
+  const tiers = 3 + Math.floor(Math.random() * 2);
+  for (let i = 0; i < tiers; i++) {
+    const r = 1.3 - i * 0.22, h = 1.4 - i * 0.18, y = 1.3 + i * 0.85;
+    const cone = new THREE.Mesh(new THREE.ConeGeometry(r, h, 6), lambert(0x1f5a2c, true));
+    cone.position.y = y; cone.castShadow = true;
+    g.add(cone);
+    if (snowy) {
+      const cap = new THREE.Mesh(new THREE.ConeGeometry(r * 1.06, h * 0.32, 6), snowMat);
+      cap.position.y = y + h * 0.34;
+      g.add(cap);
+    }
+  }
+  g.position.set(x, 0, z);
+  const k = 0.9 + Math.random() * 0.5; g.scale.set(k, k, k);
+  return g;
+}
+
+function makeObelisk(x, z) {
+  const g = new THREE.Group();
+  const h = 3.0 + Math.random() * 1.5;
+  const shaft = new THREE.Mesh(new THREE.BoxGeometry(0.7, h, 0.7), lambert(0x141414, true));
+  shaft.position.y = h / 2; shaft.castShadow = true;
+  const top = new THREE.Mesh(new THREE.ConeGeometry(0.5, 0.8, 4), lambert(0x202020, true));
+  top.position.y = h + 0.4; top.rotation.y = Math.PI / 4; top.castShadow = true;
+  g.add(shaft, top);
+  g.position.set(x, 0, z); g.rotation.y = Math.random() * Math.PI;
+  return g;
+}
+
+function makeLavaRock(x, z) {
+  const r = 0.6 + Math.random() * 0.8;
   const m = new THREE.Mesh(
     new THREE.IcosahedronGeometry(r, 0),
-    new THREE.MeshLambertMaterial({ color: 0x9aa0a4, flatShading: true })
+    new THREE.MeshLambertMaterial({ color: 0x331a14, flatShading: true, emissive: 0xff4422, emissiveIntensity: 0.35 })
   );
   m.position.set(x, r * 0.55, z);
   m.rotation.set(Math.random(), Math.random(), Math.random());
@@ -119,28 +174,53 @@ function inSpawnZone(x, z) {
   return false;
 }
 
-const decor = new THREE.Group();
-scene.add(decor);
-for (let i = 0; i < 90; i++) {
-  let x, z, tries = 0;
-  do {
-    x = (Math.random() - 0.5) * 200;
-    z = (Math.random() - 0.5) * 200;
-    tries++;
-  } while (inSpawnZone(x, z) && tries < 8);
-  if (Math.random() < 0.78) decor.add(makeTree(x, z));
-  else decor.add(makeRock(x, z));
+function scatter(count, factory) {
+  for (let i = 0; i < count; i++) {
+    let x, z, tries = 0;
+    do {
+      x = (Math.random() - 0.5) * 200;
+      z = (Math.random() - 0.5) * 200;
+      tries++;
+    } while (inSpawnZone(x, z) && tries < 8);
+    const obj = factory(x, z);
+    if (obj) sceneryGroup.add(obj);
+  }
 }
 
-for (let i = 0; i < 4; i++) {
-  const fence = new THREE.Mesh(
-    new THREE.BoxGeometry(8, 0.6, 0.2),
-    new THREE.MeshLambertMaterial({ color: 0x8a6235 })
-  );
-  fence.position.set(-30 + i * 20, 0.3, -42);
-  fence.castShadow = true;
-  scene.add(fence);
+const POPULATE = {
+  meadow:   c => scatter(c, (x, z) => Math.random() < 0.78 ? makeOak(x, z) : makeRock(x, z)),
+  desert:   c => scatter(c, (x, z) => { const r = Math.random(); if (r < 0.4) return makeCactus(x, z); if (r < 0.9) return makeRock(x, z, 0xb89a64); return null; }),
+  forest:   c => scatter(c, (x, z) => Math.random() < 0.92 ? makePine(x, z, false) : makeRock(x, z, 0x4a4a3a)),
+  frost:    c => scatter(c, (x, z) => Math.random() < 0.7  ? makePine(x, z, true)  : makeRock(x, z, 0xd0dae0)),
+  volcanic: c => scatter(c, (x, z) => Math.random() < 0.25 ? makeObelisk(x, z) : makeLavaRock(x, z)),
+};
+
+export const MAPS = {
+  meadow:   { name: 'Sunlit Meadow',  icon: '🌿', ground: 0x7fc05a, bg: 0xa8d8e8, fog: 0xc8e0e8, fogNear: 70, fogFar: 180, density: 90 },
+  desert:   { name: 'Bleached Dunes', icon: '🏜️', ground: 0xd6b76a, bg: 0xf2cf8a, fog: 0xe8c97a, fogNear: 60, fogFar: 160, density: 70 },
+  forest:   { name: 'Whisperwood',    icon: '🌲', ground: 0x4a7a3a, bg: 0x4f6e72, fog: 0x4f6e72, fogNear: 35, fogFar: 100, density: 130 },
+  frost:    { name: 'Frostlands',     icon: '❄️', ground: 0xe6ecf2, bg: 0xc9d8e0, fog: 0xc9d8e0, fogNear: 50, fogFar: 140, density: 80 },
+  volcanic: { name: 'Ashen Crater',   icon: '🌋', ground: 0x3a2a2a, bg: 0x6a2a26, fog: 0x6a2a26, fogNear: 30, fogFar: 110, density: 80 },
+};
+
+const SEQ = Object.keys(MAPS);
+export function mapForRound(n) {
+  return SEQ[Math.min(SEQ.length - 1, Math.floor((n - 1) / 3))];
 }
+
+let lastMapKey = null;
+export function setMap(key) {
+  if (key === lastMapKey) return;
+  lastMapKey = key;
+  const m = MAPS[key] || MAPS.meadow;
+  ground.material.color.setHex(m.ground);
+  scene.background = new THREE.Color(m.bg);
+  scene.fog = new THREE.Fog(m.fog, m.fogNear, m.fogFar);
+  while (sceneryGroup.children.length) sceneryGroup.remove(sceneryGroup.children[0]);
+  POPULATE[key](m.density);
+}
+
+setMap('meadow');
 
 export const raycaster = new THREE.Raycaster();
 

@@ -21,7 +21,7 @@ function lambert(color, flat = false) {
 function basic(color) { return new THREE.MeshBasicMaterial({ color }); }
 
 
-function makeBody(team, raceKey) {
+function makeBody(team, raceKey, armorTier = 0, weaponTier = 0) {
   const v = RACE_VISUALS[raceKey] || RACE_VISUALS.humans;
   const liveryMat = lambert(team.livery);
   const accentMat = lambert(team.accent);
@@ -47,6 +47,7 @@ function makeBody(team, raceKey) {
   torso.position.y = 1.30; torso.castShadow = true;
   const chest = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.55, 0.10), accentMat);
   chest.position.set(0, 1.35, 0.36); chest.castShadow = true;
+  chest.scale.set(1 + armorTier * 0.12, 1 + armorTier * 0.10, 1 + armorTier * 0.45);
 
   const paldGeom = new THREE.SphereGeometry(0.18, 8, 6);
   const paldL = new THREE.Mesh(paldGeom, accentMat);
@@ -107,7 +108,7 @@ function makeBody(team, raceKey) {
   sboss.position.set(-0.63, 1.30, 0.05);
   g.add(shieldDisc, sboss);
 
-  const weaponArm = buildWeaponArm(team, raceKey, helmetMat);
+  const weaponArm = buildWeaponArm(team, raceKey, helmetMat, weaponTier);
   g.add(weaponArm);
   g.userData.weaponArm = weaponArm;
   g.rotation.order = 'YXZ';
@@ -151,7 +152,7 @@ export function makeUnit(teamIdx, x, z, stats, raceKey) {
   const root = new THREE.Group();
   root.position.set(x, 0, z);
 
-  const body = makeBody(team, raceKey);
+  const body = makeBody(team, raceKey, stats?.armorTier || 0, stats?.weaponTier || 0);
   const ring = makeRing(team);
   const hp = makeHpBar();
   root.add(body, ring, hp);

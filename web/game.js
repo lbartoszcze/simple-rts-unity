@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { scene, camera, renderer, setProjectiles, updateFx, trackCamera, resetCameraTarget, spawnFx } from './scene.js';
+import { scene, camera, renderer, setProjectiles, updateFx, trackCamera, resetCameraTarget, spawnFx, setMap, mapForRound, MAPS } from './scene.js';
 import { makeUnit, updateUnitVisuals } from './units.js';
 import { RACES, applyCard, showCardPicker, showRacePicker,
          loadMeta, saveMeta, awardRoundXp, awardRunEndXp, recordRunEnd,
@@ -113,7 +113,7 @@ function refreshHud() {
 function startRound() {
   if (round > 1) applyBuildings(playerRoster, playerBuildings, playerRace);
   clearArmies();
-  resetCameraTarget();
+  const mapKey = mapForRound(round); setMap(mapKey); resetCameraTarget();
   placeBuildings(scene, buildingMeshes, playerBuildings, BASE_Z + 18);
   const boss = isBossRound(round);
   enemyRace = ENEMY_RACES[(round - 1) % ENEMY_RACES.length];
@@ -133,7 +133,7 @@ function startRound() {
   if (toast) {
     const eIcon = boss ? bossForRound(round).icon : RACES[enemyRace].icon;
     const eName = boss ? bossForRound(round).name.toUpperCase() : RACES[enemyRace].name;
-    toast.innerHTML = `${boss ? 'BOSS — ' : ''}Round ${round}<small>${RACES[playerRace].icon} ${RACES[playerRace].name} vs ${eIcon} ${eName}</small>`;
+    toast.innerHTML = `${boss ? 'BOSS — ' : ''}Round ${round}<small>${MAPS[mapKey].icon} ${MAPS[mapKey].name}<br>${RACES[playerRace].icon} ${RACES[playerRace].name} vs ${eIcon} ${eName}</small>`;
     toast.classList.toggle('boss', boss);
     toast.classList.add('show');
     setTimeout(() => toast.classList.remove('show'), boss ? 2400 : 1700);
