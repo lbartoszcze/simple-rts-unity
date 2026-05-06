@@ -8,6 +8,7 @@ import { runAllSpells } from './lib/spells.js';
 import { applyBuildings, buildingHealBonus, placeBuildings } from './lib/buildings.js';
 import { isBossRound, bossRoster, bossForRound, swapToBossMesh } from './lib/bosses.js';
 import { showSandboxBuilder, showSandboxResult } from './lib/modes/sandbox.js';
+import { applyMagicHit } from './lib/modes/magic.js';
 
 const TEAM_BLUE = 0;
 const TEAM_RED = 1;
@@ -152,22 +153,14 @@ function step(dt, t) {
         u.hitDealt = true;
         const tgt = u.attackTarget;
         if (tgt && tgt.hp > 0) {
-          tgt.hp -= u.damage * u.swingPeriod;
-          tgt.recoilStart = t;
-          tgt.recoilDirX = -dx / dist;
-          tgt.recoilDirZ = -dz / dist;
-          spawnFx(tgt.x, tgt.z, 0.55, 0xffe066, 0.15);
-          if (u.magicType === 'frost') tgt.frostUntil = t + 1.5;
-          else if (u.magicType === 'arcane') { for (const v of units) { if (v !== tgt && v.team === tgt.team && v.hp > 0 && (v.x-tgt.x)**2 + (v.z-tgt.z)**2 < 4) v.hp -= u.damage * u.swingPeriod * 0.4; } spawnFx(tgt.x, tgt.z, 1.6, 0xb88dff, 0.45); }
-          else if (u.magicType === 'lightning') { let n=null,nd=9; for (const v of units) if (v !== tgt && v.team === tgt.team && v.hp > 0) { const d2=(v.x-tgt.x)**2+(v.z-tgt.z)**2; if (d2<nd) { nd=d2; n=v; } } if (n) { n.hp -= u.damage * u.swingPeriod * 0.6; spawnFx(n.x, n.z, 0.5, 0xffe066, 0.25); } }
-          else if (u.magicType === 'fire') spawnFx(tgt.x, tgt.z, 0.7, 0xff5530, 0.3);
-          if (u.range >= RANGED_THRESHOLD) {
-            projectiles.push({
-              x1: u.x, y1: 1.6, z1: u.z,
-              x2: tgt.x, y2: 1.6, z2: tgt.z,
-              ttl: PROJ_TTL,
-            });
+          if (u.klass === 'mage') {
+            applyMagicHit(u, tgt, { units, t, dx, dz, dist, scene, spawnFx, addUnit: (nu) => { units.push(nu); scene.add(nu.mesh); } });
+          } else {
+            tgt.hp -= u.damage * u.swingPeriod;
+            tgt.recoilStart = t; tgt.recoilDirX = -dx / dist; tgt.recoilDirZ = -dz / dist;
+            spawnFx(tgt.x, tgt.z, 0.55, 0xffe066, 0.15);
           }
+          if (u.range >= RANGED_THRESHOLD) projectiles.push({ x1: u.x, y1: 1.6, z1: u.z, x2: tgt.x, y2: 1.6, z2: tgt.z, ttl: PROJ_TTL });
         }
       }
     } else {

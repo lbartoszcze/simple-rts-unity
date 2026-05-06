@@ -153,8 +153,7 @@ export function makeUnit(teamIdx, x, z, stats, raceKey) {
   const root = new THREE.Group();
   root.position.set(x, 0, z);
 
-  const magicType = stats?.klass === 'mage' ? ['fire','frost','lightning','arcane'][Math.floor(Math.random() * 4)] : null;
-  const body = makeBody(team, raceKey, stats?.armorTier || 0, stats?.weaponTier || 0, stats?.klass, magicType);
+  const body = makeBody(team, raceKey, stats?.armorTier || 0, stats?.weaponTier || 0, stats?.klass, raceKey);
   const ring = makeRing(team);
   const hp = makeHpBar();
   root.add(body, ring, hp);
@@ -180,7 +179,6 @@ export function makeUnit(teamIdx, x, z, stats, raceKey) {
     klass: stats?.klass || 'infantry',
     swingT: 0,
     hitDealt: false,
-    magicType,
     bodyBaseY,
     wingsRig,
     x, z,
