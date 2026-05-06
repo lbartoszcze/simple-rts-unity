@@ -62,7 +62,7 @@
       renderer.outputColorSpace = THREE.SRGBColorSpace;
       renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
       renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.0;
-      const scene = new THREE.Scene(); scene.background = new THREE.Color(0x7fc05a);
+      const scene = new THREE.Scene(); scene.background = new THREE.Color(0xfafafa);
       const sun = new THREE.DirectionalLight(0xfff2d0, 2.4); sun.position.set(4, 8, 3); sun.castShadow = true;
       sun.shadow.mapSize.set(2048, 2048); sun.shadow.camera.left = -4; sun.shadow.camera.right = 4; sun.shadow.camera.top = 4; sun.shadow.camera.bottom = -4;
       scene.add(sun); scene.add(new THREE.HemisphereLight(0xbfe4ff, 0x7a8b5a, 0.6));
