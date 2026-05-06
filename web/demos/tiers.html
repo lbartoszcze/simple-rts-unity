@@ -72,6 +72,7 @@
       camera.position.set(2.5, 3.0, 7.0); camera.lookAt(0, 1.0, 0);
       function resize() { const w = canvas.clientWidth, h = canvas.clientHeight; renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); }
       resize();
+      console.log('[demo] canvas ' + canvas.clientWidth + 'x' + canvas.clientHeight);
       try { await loadHumanoid(); console.log('[demo] humanoid loaded, building'); } catch (e) { console.error('[demo] load failed', e); return; }
       const u = buildHumanoidUnit({ livery: 0x4a7dd1 });
       if (!u) { console.error('[demo] buildHumanoidUnit returned null'); return; }
