@@ -137,9 +137,26 @@ export function makeUnit(teamIdx, x, z, stats, raceKey) {
   return u;
 }
 
+const DEATH_ANIM = 0.55;
+
 export function updateUnitVisuals(u, camera, t) {
   u.mesh.position.x = u.x;
   u.mesh.position.z = u.z;
+
+  if (u.hp <= 0) {
+    if (u.deadAt == null) {
+      u.deadAt = t;
+      u.deathFall = (Math.random() < 0.5 ? -1 : 1) * Math.PI / 2;
+      u.ring.visible = false;
+      u.hpBar.visible = false;
+    }
+    const p = Math.min(1, (t - u.deadAt) / DEATH_ANIM);
+    const eased = 1 - Math.pow(1 - p, 2);
+    u.body.rotation.x = eased * u.deathFall * 0.7;
+    u.body.rotation.z = eased * 0.15;
+    u.body.position.y = -0.6 * eased;
+    return;
+  }
 
   if (u.vx !== 0 || u.vz !== 0) {
     const angle = Math.atan2(u.vx, u.vz);
@@ -165,5 +182,5 @@ export function updateUnitVisuals(u, camera, t) {
 }
 
 export function killVisuals(u) {
-  u.mesh.visible = false;
+  if (u.deadAt == null) u.deadAt = -1;
 }

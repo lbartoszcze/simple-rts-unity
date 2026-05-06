@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import { scene, camera, renderer, canvas } from './scene.js';
-import { makeUnit, updateUnitVisuals, killVisuals } from './units.js';
+import { scene, camera, renderer, canvas, setProjectiles } from './scene.js';
+import { makeUnit, updateUnitVisuals } from './units.js';
 import { RACES, showCardPicker, showRacePicker } from './lib/cards.js';
 
 const TEAM_BLUE = 0;
@@ -19,6 +19,9 @@ let round = 1;
 let wins = 0;
 let phase = 'select';
 const units = [];
+const projectiles = [];
+const PROJ_TTL = 0.12;
+const RANGED_THRESHOLD = 3.0;
 
 function enemyStatsForRound(n, raceKey) {
   const base = RACES[raceKey].base;
@@ -37,6 +40,8 @@ function enemyStatsForRound(n, raceKey) {
 function clearArmies() {
   for (const u of units) scene.remove(u.mesh);
   units.length = 0;
+  projectiles.length = 0;
+  setProjectiles([]);
 }
 
 function spawnArmy(teamIdx, stats, baseZ, raceKey) {
@@ -90,6 +95,17 @@ function step(dt) {
     if (dist < u.range) {
       u.vx = 0; u.vz = 0;
       u.attackTarget.hp -= u.damage * dt;
+      if (u.range >= RANGED_THRESHOLD) {
+        u.fireCooldown = (u.fireCooldown || 0) - dt;
+        if (u.fireCooldown <= 0) {
+          projectiles.push({
+            x1: u.x, y1: 1.6, z1: u.z,
+            x2: u.attackTarget.x, y2: 1.6, z2: u.attackTarget.z,
+            ttl: PROJ_TTL,
+          });
+          u.fireCooldown = 0.18;
+        }
+      }
     } else {
       u.vx = (dx / dist) * u.speed;
       u.vz = (dz / dist) * u.speed;
@@ -97,6 +113,12 @@ function step(dt) {
     u.x += u.vx * dt;
     u.z += u.vz * dt;
   }
+
+  for (let i = projectiles.length - 1; i >= 0; i--) {
+    projectiles[i].ttl -= dt;
+    if (projectiles[i].ttl <= 0) projectiles.splice(i, 1);
+  }
+  setProjectiles(projectiles.map(p => [p.x1, p.y1, p.z1, p.x2, p.y2, p.z2]));
   for (let i = 0; i < units.length; i++) {
     const a = units[i]; if (a.hp <= 0) continue;
     for (let j = i + 1; j < units.length; j++) {
@@ -115,7 +137,7 @@ function step(dt) {
   }
   let blue = 0, red = 0;
   for (const u of units) {
-    if (u.hp <= 0) { killVisuals(u); continue; }
+    if (u.hp <= 0) continue;
     if (u.team === TEAM_BLUE) blue++; else red++;
   }
   if (phase === 'battle') {

@@ -126,6 +126,27 @@ for (let i = 0; i < 4; i++) {
 
 export const raycaster = new THREE.Raycaster();
 
+const PROJ_CAPACITY = 200;
+const projGeom = new THREE.BufferGeometry();
+projGeom.setAttribute('position', new THREE.BufferAttribute(new Float32Array(PROJ_CAPACITY * 3), 3));
+const projMat = new THREE.LineBasicMaterial({ color: 0xfff5d6, transparent: true, opacity: 0.85 });
+const projLines = new THREE.LineSegments(projGeom, projMat);
+projLines.frustumCulled = false;
+projGeom.setDrawRange(0, 0);
+scene.add(projLines);
+
+export function setProjectiles(segs) {
+  const pos = projGeom.attributes.position.array;
+  const n = Math.min(segs.length, Math.floor(PROJ_CAPACITY / 2));
+  for (let i = 0; i < n; i++) {
+    const s = segs[i];
+    pos[i * 6 + 0] = s[0]; pos[i * 6 + 1] = s[1]; pos[i * 6 + 2] = s[2];
+    pos[i * 6 + 3] = s[3]; pos[i * 6 + 4] = s[4]; pos[i * 6 + 5] = s[5];
+  }
+  projGeom.attributes.position.needsUpdate = true;
+  projGeom.setDrawRange(0, n * 2);
+}
+
 function resize() {
   const w = canvas.clientWidth || window.innerWidth;
   const h = canvas.clientHeight || (window.innerHeight - 90);
