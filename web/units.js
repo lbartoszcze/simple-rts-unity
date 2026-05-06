@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { buildWeaponArm, makeHorse, makeWings } from './lib/weapons.js';
+import { buildStatusAuras, updateStatusAuras } from './lib/modes/effects.js';
 
 export const MAX_HP = 100;
 
@@ -161,6 +162,8 @@ export function makeUnit(teamIdx, x, z, stats, raceKey) {
   let wingsRig = null;
   if (stats?.klass === 'cavalry') { root.add(makeHorse(team)); bodyBaseY = 1.45; body.position.y = bodyBaseY; }
   if (stats?.klass === 'flyer') { const swarm = (stats.maxHp || 0) < 50; wingsRig = makeWings(team, raceKey, swarm); body.add(wingsRig); if (swarm) body.scale.multiplyScalar(0.6); }
+  const statusAuras = buildStatusAuras();
+  body.add(statusAuras);
 
   const u = {
     mesh: root,
@@ -181,6 +184,7 @@ export function makeUnit(teamIdx, x, z, stats, raceKey) {
     hitDealt: false,
     bodyBaseY,
     wingsRig,
+    statusAuras,
     x, z,
     vx: 0, vz: 0,
     attackTarget: null,
@@ -194,6 +198,7 @@ const DEATH_ANIM = 0.55;
 export function updateUnitVisuals(u, camera, t) {
   u.mesh.position.x = u.x;
   u.mesh.position.z = u.z;
+  updateStatusAuras(u, t);
 
   if (u.hp <= 0) {
     if (u.deadAt == null) {
