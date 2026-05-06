@@ -1,3 +1,5 @@
+import { cardArtSvg } from '../art/card-art.js';
+
 export const RACES = {
   humans: {
     id: 'humans', name: 'Humans', icon: '👑',
@@ -285,7 +287,7 @@ export function showCardPicker(race, round, meta, onPick) {
     el.dataset.tier = card.tier;
     el.dataset.kind = card.kind;
     el.innerHTML = `
-      <div class="icon">${card.icon}</div>
+      <div class="icon art">${cardArtSvg(card, race)}</div>
       <div class="tag">${card.kind} · ${card.tier}</div>
       <div class="name">${card.name}</div>
       <div class="desc">${card.desc}</div>
