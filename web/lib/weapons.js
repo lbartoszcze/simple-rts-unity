@@ -14,9 +14,16 @@ export function buildWeaponArm(team, raceKey, helmetMat, weaponTier = 0, klass =
   upper.position.set(-0.05, -0.35, 0); upper.castShadow = true;
   arm.add(upper);
   const wpn = new THREE.Group();
-  wpn.scale.setScalar(1 + weaponTier * 0.10);
+  wpn.scale.setScalar(1 + weaponTier * 0.18);
   arm.add(wpn);
-  const metal = (t) => lambert(t > 1 ? 0xffffff : t > 0 ? 0xe8e8f0 : 0xc8c8c8, true);
+  const metalColor = weaponTier > 2 ? 0xfff0a8 : weaponTier > 1 ? 0xffffff : weaponTier > 0 ? 0xe8e8f0 : 0xc8c8c8;
+  const emit = weaponTier >= 2 ? (weaponTier >= 3 ? 0xffe070 : 0x9be2ff) : 0x000000;
+  const metal = (_t) => new THREE.MeshLambertMaterial({ color: metalColor, emissive: emit, emissiveIntensity: weaponTier >= 2 ? 0.5 : 0, flatShading: true });
+  if (weaponTier >= 3) {
+    const glow = new THREE.Mesh(new THREE.SphereGeometry(0.55, 12, 8), new THREE.MeshBasicMaterial({ color: 0xffe070, transparent: true, opacity: 0.25 }));
+    glow.position.set(0.10, -0.05, 0.15);
+    wpn.add(glow);
+  }
   const style = (klass === 'archer' || klass === 'flyer') ? 'bow' : klass === 'mage' ? 'staff' : raceKey;
   if (style === 'staff') {
     const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 1.5, 6), lambert(0x3a2a1a));

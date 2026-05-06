@@ -46,15 +46,20 @@ function makeBody(team, raceKey, armorTier = 0, weaponTier = 0, klass = 'infantr
 
   const torso = new THREE.Mesh(new THREE.CylinderGeometry(0.38, 0.46, 0.85, 8), liveryMat);
   torso.position.y = 1.30; torso.castShadow = true;
-  const chest = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.55, 0.10), accentMat);
+  const armorEmit = armorTier >= 3 ? 0xfff5b8 : 0x000000;
+  const chestColor = armorTier >= 2 ? 0xc9a44a : team.accent;
+  const chestMat = new THREE.MeshLambertMaterial({ color: chestColor, emissive: armorEmit, emissiveIntensity: armorTier >= 3 ? 0.35 : 0 });
+  const chest = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.55, 0.10), chestMat);
   chest.position.set(0, 1.35, 0.36); chest.castShadow = true;
-  chest.scale.set(1 + armorTier * 0.12, 1 + armorTier * 0.10, 1 + armorTier * 0.45);
+  chest.scale.set(1 + armorTier * 0.18, 1 + armorTier * 0.14, 1 + armorTier * 0.7);
 
   const paldGeom = new THREE.SphereGeometry(0.18, 8, 6);
-  const paldL = new THREE.Mesh(paldGeom, accentMat);
-  paldL.position.set(-0.50, 1.65, 0); paldL.scale.set(1, 0.7, 1); paldL.castShadow = true;
-  const paldR = new THREE.Mesh(paldGeom, accentMat);
-  paldR.position.set( 0.50, 1.65, 0); paldR.scale.set(1, 0.7, 1); paldR.castShadow = true;
+  const paldMat = new THREE.MeshLambertMaterial({ color: chestColor, emissive: armorEmit, emissiveIntensity: armorTier >= 3 ? 0.3 : 0 });
+  const paldScale = 1 + armorTier * 0.25;
+  const paldL = new THREE.Mesh(paldGeom, paldMat);
+  paldL.position.set(-0.50, 1.65, 0); paldL.scale.set(paldScale, 0.7 * paldScale, paldScale); paldL.castShadow = true;
+  const paldR = new THREE.Mesh(paldGeom, paldMat);
+  paldR.position.set( 0.50, 1.65, 0); paldR.scale.set(paldScale, 0.7 * paldScale, paldScale); paldR.castShadow = true;
   const armGeom = new THREE.CylinderGeometry(0.10, 0.12, 0.50, 6);
   const armL = new THREE.Mesh(armGeom, liveryMat); armL.position.set(-0.45, 1.30, 0); armL.castShadow = true;
 
