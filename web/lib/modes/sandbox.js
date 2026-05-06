@@ -84,6 +84,16 @@ export function showSandboxBuilder(onStart, onCancel) {
         ${buildSide('p', '👑 Your army')}
         ${buildSide('e', '💀 Enemy army')}
       </div>
+      <details class="sandbox-presets" open><summary>🧪 Demo presets — click to load a status effect</summary>
+        <div class="sandbox-preset-grid">
+          <button data-preset="burn"    type="button">🔥 Burn</button>
+          <button data-preset="poison"  type="button">🟢 Poison</button>
+          <button data-preset="bleed"   type="button">🩸 Bleed</button>
+          <button data-preset="stun"    type="button">⭐ Stun</button>
+          <button data-preset="silence" type="button">🤐 Silence</button>
+          <button data-preset="shield"  type="button">🛡 Shield aura</button>
+        </div>
+      </details>
       <details class="sandbox-json"><summary>JSON setup (paste / copy)</summary>
         <textarea id="sb-json" rows="6" placeholder='{"player":{"race":"humans","infantry":4,"archer":2,"cavalry":1},"enemy":{"race":"skeletons","infantry":8,"flyer":2}}'></textarea>
         <div class="sandbox-json-buttons">
@@ -97,6 +107,20 @@ export function showSandboxBuilder(onStart, onCancel) {
       </div>
     </div>`;
   modal.classList.remove('hidden');
+  const PRESETS = {
+    burn:    { player: { race: 'dwarves',   mage: 6, infantry: 4 },     enemy: { race: 'humans',    infantry: 8 } },
+    poison:  { player: { race: 'skeletons', archer: 6, infantry: 4 },   enemy: { race: 'humans',    infantry: 8 } },
+    bleed:   { player: { race: 'elves',     infantry: 8 },              enemy: { race: 'humans',    infantry: 8 } },
+    stun:    { player: { race: 'dwarves',   cavalry: 4, infantry: 4 },  enemy: { race: 'elves',     infantry: 8 } },
+    silence: { player: { race: 'elves',     flyer: 3, infantry: 4 },    enemy: { race: 'dwarves',   mage: 4, infantry: 2 } },
+    shield:  { player: { race: 'humans',    flyer: 2, infantry: 6 },    enemy: { race: 'skeletons', infantry: 8 } },
+  };
+  for (const btn of document.querySelectorAll('.sandbox-preset-grid button')) {
+    btn.addEventListener('click', () => {
+      const preset = PRESETS[btn.dataset.preset];
+      if (preset) { applySetup(preset); document.getElementById('sb-fight').click(); }
+    });
+  }
   const ta = document.getElementById('sb-json');
   document.getElementById('sb-load').addEventListener('click', () => {
     try { applySetup(JSON.parse(ta.value)); ta.style.borderColor = ''; }
