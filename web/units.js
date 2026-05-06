@@ -240,6 +240,10 @@ export function updateUnitVisuals(u, camera, t) {
     armA = Math.sin(ph * 0.5) * 0.25; tilt = Math.sin(ph * 0.5) * 0.04;
   }
   if (u.weaponArm) { u.weaponArm.rotation.x = armA; u.weaponArm.rotation.z = armRotZ; u.weaponArm.position.z = armZ; }
+  if (!attacking && u.attackTarget && u.attackTarget.attackTarget === u && u.weaponArm) {
+    const tsp = (u.attackTarget.swingT || 0) / (u.attackTarget.swingPeriod || 1.0);
+    if (tsp > 0.30 && tsp < 0.55) u.weaponArm.rotation.x = -1.2;
+  }
   let shieldA = 0;
   if (tgt) {
     const sp = (u.swingT || 0) / (u.swingPeriod || 1.0);
@@ -253,9 +257,8 @@ export function updateUnitVisuals(u, camera, t) {
     u.shieldArm.rotation.x = u.twoHand ? armA * 0.75 : shieldA;
     if (u.twoHand) u.shieldArm.rotation.z = -armRotZ * 0.5;
   }
-  let lean = 0;
-  if (u.recoilStart != null) { const a = (t - u.recoilStart) / 0.18; if (a < 1) lean = (u.dodgeSign || 1) * 0.22 * (1 - a); }
-  else if (!u.dodgeSign) u.dodgeSign = Math.random() < 0.5 ? -1 : 1;
+  const ra = u.recoilStart != null ? (t - u.recoilStart) / 0.18 : 1;
+  const lean = ra < 1 ? ((u.x | 0) % 2 === 0 ? 1 : -1) * 0.22 * (1 - ra) : 0;
   u.body.rotation.x = tilt; u.body.rotation.z = lean;
   let recX = 0, recZ = 0;
   if (u.recoilStart != null) {
