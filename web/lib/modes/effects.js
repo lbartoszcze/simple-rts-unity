@@ -6,18 +6,18 @@ export function buildStatusAuras() {
   const root = new THREE.Group();
 
   const burn = new THREE.Group();
-  for (let i = 0; i < 4; i++) {
-    const flame = new THREE.Mesh(new THREE.ConeGeometry(0.16 - i * 0.02, 0.45 - i * 0.05, 6), basic(i < 2 ? 0xff5530 : 0xffd066, 0.85));
-    flame.position.set((Math.random() - 0.5) * 0.2, 2.4 + i * 0.2, (Math.random() - 0.5) * 0.2);
+  for (let i = 0; i < 5; i++) {
+    const flame = new THREE.Mesh(new THREE.ConeGeometry(0.32 - i * 0.04, 0.85 - i * 0.10, 6), basic(i < 2 ? 0xff3010 : i < 4 ? 0xff8040 : 0xffe070, 0.9));
+    flame.position.set((Math.random() - 0.5) * 0.3, 2.5 + i * 0.30, (Math.random() - 0.5) * 0.3);
     burn.add(flame);
   }
   burn.visible = false;
   root.add(burn);
 
   const poison = new THREE.Group();
-  for (let i = 0; i < 5; i++) {
-    const bub = new THREE.Mesh(new THREE.SphereGeometry(0.12, 8, 6), basic(0x6dbf5d, 0.75));
-    bub.position.set((Math.random() - 0.5) * 0.6, 2.0 + Math.random() * 0.6, (Math.random() - 0.5) * 0.6);
+  for (let i = 0; i < 6; i++) {
+    const bub = new THREE.Mesh(new THREE.SphereGeometry(0.22, 10, 8), basic(0x4ac030, 0.85));
+    bub.position.set((Math.random() - 0.5) * 0.8, 2.2 + Math.random() * 0.8, (Math.random() - 0.5) * 0.8);
     bub.userData.basePhase = Math.random() * Math.PI * 2;
     poison.add(bub);
   }
@@ -25,9 +25,9 @@ export function buildStatusAuras() {
   root.add(poison);
 
   const bleed = new THREE.Group();
-  for (let i = 0; i < 3; i++) {
-    const drop = new THREE.Mesh(new THREE.SphereGeometry(0.10, 6, 6), basic(0xc83030, 0.9));
-    drop.position.set((Math.random() - 0.5) * 0.5, 0.05, (Math.random() - 0.5) * 0.5);
+  for (let i = 0; i < 5; i++) {
+    const drop = new THREE.Mesh(new THREE.SphereGeometry(0.18, 8, 6), basic(0xa00010, 0.95));
+    drop.position.set((Math.random() - 0.5) * 0.9, 0.06, (Math.random() - 0.5) * 0.9);
     drop.scale.set(1, 0.4, 1);
     bleed.add(drop);
   }
@@ -35,26 +35,26 @@ export function buildStatusAuras() {
   root.add(bleed);
 
   const stun = new THREE.Group();
-  for (let i = 0; i < 3; i++) {
-    const star = new THREE.Mesh(new THREE.OctahedronGeometry(0.12), basic(0xffe066, 0.95));
+  for (let i = 0; i < 4; i++) {
+    const star = new THREE.Mesh(new THREE.OctahedronGeometry(0.20), basic(0xffe066, 1.0));
     stun.add(star);
   }
   stun.visible = false;
   root.add(stun);
 
   const silence = new THREE.Group();
-  const xMat = basic(0x7080a0, 0.85);
-  const bar1 = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.07, 0.07), xMat);
-  bar1.rotation.z = Math.PI / 4; bar1.position.y = 2.85;
-  const bar2 = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.07, 0.07), xMat);
-  bar2.rotation.z = -Math.PI / 4; bar2.position.y = 2.85;
+  const xMat = basic(0xa0b0d0, 0.95);
+  const bar1 = new THREE.Mesh(new THREE.BoxGeometry(0.70, 0.12, 0.12), xMat);
+  bar1.rotation.z = Math.PI / 4; bar1.position.y = 3.10;
+  const bar2 = new THREE.Mesh(new THREE.BoxGeometry(0.70, 0.12, 0.12), xMat);
+  bar2.rotation.z = -Math.PI / 4; bar2.position.y = 3.10;
   silence.add(bar1, bar2);
   silence.visible = false;
   root.add(silence);
 
   const shield = new THREE.Mesh(
-    new THREE.SphereGeometry(1.4, 16, 12, 0, Math.PI * 2, 0, Math.PI / 2),
-    new THREE.MeshBasicMaterial({ color: 0xfff5b8, transparent: true, opacity: 0.18, side: THREE.DoubleSide })
+    new THREE.SphereGeometry(1.6, 16, 12, 0, Math.PI * 2, 0, Math.PI / 2),
+    new THREE.MeshBasicMaterial({ color: 0xfff5b8, transparent: true, opacity: 0.32, side: THREE.DoubleSide })
   );
   shield.position.y = 0.5;
   shield.visible = false;
@@ -96,8 +96,8 @@ export function updateStatusAuras(u, t) {
   A.stun.visible = stunned;
   if (stunned) {
     A.stun.children.forEach((s, i) => {
-      const angle = t * 6 + (i * Math.PI * 2 / 3);
-      s.position.set(Math.cos(angle) * 0.4, 2.85, Math.sin(angle) * 0.4);
+      const angle = t * 6 + (i * Math.PI * 2 / 4);
+      s.position.set(Math.cos(angle) * 0.7, 3.10, Math.sin(angle) * 0.7);
       s.rotation.y = t * 5;
     });
   }
