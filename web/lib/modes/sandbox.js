@@ -114,7 +114,15 @@ export function showSandboxBuilder(onStart, onCancel) {
     const erace = document.querySelector('[data-side="e-race"]').value;
     const proster = buildRoster(prace, readComp('p'));
     const eroster = buildRoster(erace, readComp('e'));
-    if (!proster.length || !eroster.length) return;
+    if (!proster.length || !eroster.length) {
+      const btn = document.getElementById('sb-fight');
+      const orig = btn.textContent;
+      btn.style.background = '#e36a6a'; btn.style.color = '#fff';
+      btn.textContent = !proster.length && !eroster.length ? 'Both sides empty'
+        : !proster.length ? 'Your army is empty' : 'Enemy army is empty';
+      setTimeout(() => { btn.style.background = ''; btn.style.color = ''; btn.textContent = orig; }, 1500);
+      return;
+    }
     modal.classList.add('hidden');
     onStart(prace, proster, erace, eroster);
   });
