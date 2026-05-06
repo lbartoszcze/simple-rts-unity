@@ -61,9 +61,11 @@
       const bbox = new THREE.Box3().setFromObject(u.root);
       const size = bbox.getSize(new THREE.Vector3());
       const center = bbox.getCenter(new THREE.Vector3());
-      const dist = Math.max(size.x, size.y, size.z) * 1.6;
-      camera.position.set(center.x + dist * 0.4, center.y + dist * 0.3, center.z + dist);
+      const radius = bbox.getBoundingSphere(new THREE.Sphere()).radius;
+      const dist = radius * 2.4;
+      camera.position.set(center.x + dist * 0.4, center.y + radius * 0.4, center.z + dist);
       camera.lookAt(center);
+      camera.near = Math.max(0.01, dist / 100); camera.far = dist * 10;
       camera.updateProjectionMatrix();
       let meshCount = 0; let visibleCount = 0;
       u.root.traverse((m) => { if (m.isMesh) { meshCount++; if (m.visible && m.material) visibleCount++; console.log('[glb] ' + raceKey + ' mesh ' + (m.name || '?') + ' visible=' + m.visible + ' transparent=' + (m.material && m.material.transparent) + ' opacity=' + (m.material && m.material.opacity)); } });
