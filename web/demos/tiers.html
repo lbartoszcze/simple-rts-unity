@@ -26,21 +26,31 @@
   </style>
 </head>
 <body>
-  <h1>🎬 Real low-poly fantasy character models — one per race</h1>
-  <p class="sub">Replaces the procedural primitives with actual CC-BY low-poly fantasy character meshes from poly.pizza (Quaternius and others). Each race below gets its own rigged stylized warrior with proper armor, weapons, and clean low-poly geometry — exactly the aesthetic of the Unity asset you linked.</p>
+  <h1>🎬 Procedural fantasy characters — generated, not imported</h1>
+  <p class="sub">Every vertex of every model below is built at runtime in <code>web/art/anatomy.js</code> from THREE.js primitives (LatheGeometry, SphereGeometry, CylinderGeometry, etc.) at high segment counts. Polygon target: ~6,000 triangles per character, matching the reference Unity Low-Poly Axe Warrior. Live polygon counter on each cell.</p>
   <div class="row" style="grid-template-columns: 1fr 1fr 1fr 1fr;">
-    <div class="cell"><h2>HUMANS · Knight</h2><canvas data-glb="humans"></canvas></div>
-    <div class="cell"><h2>DWARVES · Warrior</h2><canvas data-glb="dwarves"></canvas></div>
-    <div class="cell"><h2>ELVES · Warrior</h2><canvas data-glb="elves"></canvas></div>
-    <div class="cell"><h2>SKELETONS · Skeleton</h2><canvas data-glb="skeletons"></canvas></div>
+    <div class="cell"><h2>HUMANS</h2><canvas data-proc="humans"></canvas><p class="poly-tag" data-poly="humans">…</p></div>
+    <div class="cell"><h2>DWARVES</h2><canvas data-proc="dwarves"></canvas><p class="poly-tag" data-poly="dwarves">…</p></div>
+    <div class="cell"><h2>ELVES</h2><canvas data-proc="elves"></canvas><p class="poly-tag" data-poly="elves">…</p></div>
+    <div class="cell"><h2>SKELETONS</h2><canvas data-proc="skeletons"></canvas><p class="poly-tag" data-poly="skeletons">…</p></div>
   </div>
   <script type="module">
     import * as THREE from 'three';
-    import { makeUnit, updateUnitVisuals } from '../units.js';
-    import { weaponPose } from '../lib/weapons.js';
-    import { loadHumanoid, buildHumanoidUnit, playClip, loadRaceModel, buildRaceUnit } from '../art/loader.js';
+    import { makeBody } from '../art/anatomy.js';
 
-    async function buildGlbScene(canvas, raceKey) {
+    function countTriangles(obj) {
+      let n = 0;
+      obj.traverse((m) => {
+        if (m.isMesh && m.geometry) {
+          const g = m.geometry;
+          if (g.index) n += g.index.count / 3;
+          else if (g.attributes && g.attributes.position) n += g.attributes.position.count / 3;
+        }
+      });
+      return Math.round(n);
+    }
+
+    function buildProcScene(canvas, raceKey) {
       const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
       renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -48,247 +58,24 @@
       const scene = new THREE.Scene(); scene.background = new THREE.Color(0xeeeeee);
       const sun = new THREE.DirectionalLight(0xffffff, 2.4); sun.position.set(4, 8, 3); sun.castShadow = true;
       sun.shadow.mapSize.set(1024, 1024); scene.add(sun);
-      scene.add(new THREE.AmbientLight(0xffffff, 1.0));
+      scene.add(new THREE.AmbientLight(0xffffff, 0.7));
       const ground = new THREE.Mesh(new THREE.PlaneGeometry(20, 20), new THREE.MeshLambertMaterial({ color: 0xcccccc }));
       ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; scene.add(ground);
-      const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 100);
+      const team = { livery: 0x4a7dd1, accent: 0xf3c259, ring: 0x6dc2ff };
+      const body = makeBody(team, raceKey, 2, 2, 'infantry', null, null);
+      scene.add(body);
+      const tris = countTriangles(body);
+      const tag = document.querySelector(`p[data-poly="${raceKey}"]`);
+      if (tag) tag.textContent = tris.toLocaleString() + ' triangles';
+      const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 50);
+      camera.position.set(2.5, 2.4, 4.4); camera.lookAt(0, 1.2, 0);
       function resize() { const w = canvas.clientWidth, h = canvas.clientHeight; renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); }
       resize();
-      try { await loadRaceModel(raceKey); } catch (e) { console.error('load failed', raceKey, e); return; }
-      const u = buildRaceUnit(raceKey, { livery: 0x4a7dd1 });
-      if (!u) return;
-      scene.add(u.root);
-      const bbox = new THREE.Box3().setFromObject(u.root);
-      const size = bbox.getSize(new THREE.Vector3());
-      const center = bbox.getCenter(new THREE.Vector3());
-      console.log('[glb-cam] ' + raceKey + ' min=' + bbox.min.x.toFixed(1) + ',' + bbox.min.y.toFixed(1) + ',' + bbox.min.z.toFixed(1) + ' max=' + bbox.max.x.toFixed(1) + ',' + bbox.max.y.toFixed(1) + ',' + bbox.max.z.toFixed(1) + ' center=' + center.x.toFixed(1) + ',' + center.y.toFixed(1) + ',' + center.z.toFixed(1));
-      const radius = bbox.getBoundingSphere(new THREE.Sphere()).radius;
-      const dist = radius * 2.4;
-      camera.position.set(center.x + dist * 0.4, center.y + radius * 0.4, center.z + dist);
-      camera.lookAt(center);
-      camera.near = Math.max(0.01, dist / 100); camera.far = dist * 10;
-      camera.updateProjectionMatrix();
-      const firstClip = Object.keys(u.clips)[0];
-      if (firstClip) playClip(u, firstClip);
-      u.mixer.update(0.016);
-      // Compute bbox from skinned-mesh BONES (where the model actually renders) not geometry corners
-      const bbox2 = new THREE.Box3();
-      u.root.traverse((m) => {
-        if (m.isBone) bbox2.expandByPoint(m.getWorldPosition(new THREE.Vector3()));
-        else if (m.isMesh && !m.isSkinnedMesh && m.geometry && m.geometry.boundingBox) {
-          const lb = m.geometry.boundingBox.clone(); m.updateMatrixWorld(true); lb.applyMatrix4(m.matrixWorld); bbox2.union(lb);
-        }
-      });
-      if (bbox2.isEmpty()) bbox2.setFromObject(u.root);
-      const c2 = bbox2.getCenter(new THREE.Vector3());
-      const s2 = bbox2.getSize(new THREE.Vector3());
-      const r2 = Math.max(0.5, Math.sqrt(s2.x*s2.x + s2.y*s2.y + s2.z*s2.z) / 2);
-      const d2 = r2 * 2.6;
-      camera.position.set(c2.x + d2 * 0.4, c2.y + r2 * 0.3, c2.z + d2);
-      camera.lookAt(c2);
-      camera.near = Math.max(0.01, r2 / 100);
-      camera.far = d2 * 20;
-      camera.updateProjectionMatrix();
-      console.log('[glb-cam] ' + raceKey + ' c=' + c2.x.toFixed(1) + ',' + c2.y.toFixed(1) + ',' + c2.z.toFixed(1) + ' r=' + r2.toFixed(1));
-      const clock = new THREE.Clock();
-      function loop() {
-        const dt = clock.getDelta();
-        u.mixer.update(dt);
-        u.root.rotation.y += dt * 0.4;
-        renderer.render(scene, camera);
-        requestAnimationFrame(loop);
-      }
-      loop();
-    }
-    document.querySelectorAll('canvas[data-glb]').forEach((c) => buildGlbScene(c, c.dataset.glb));
-
-    async function buildSoldierScene(canvas, clipName) {
-      const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-      renderer.outputColorSpace = THREE.SRGBColorSpace;
-      renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-      renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.0;
-      const scene = new THREE.Scene(); scene.background = new THREE.Color(0xeeeeee);
-      const sun = new THREE.DirectionalLight(0xffffff, 3.0); sun.position.set(4, 8, 3); sun.castShadow = true;
-      sun.shadow.mapSize.set(2048, 2048); sun.shadow.camera.left = -4; sun.shadow.camera.right = 4; sun.shadow.camera.top = 4; sun.shadow.camera.bottom = -4;
-      scene.add(sun); scene.add(new THREE.AmbientLight(0xffffff, 1.2));
-      const ground = new THREE.Mesh(new THREE.PlaneGeometry(30, 30), new THREE.MeshLambertMaterial({ color: 0xcccccc }));
-      ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; scene.add(ground);
-      const camera = new THREE.PerspectiveCamera(28, 1, 0.1, 200);
-      camera.position.set(2.5, 3.0, 7.0); camera.lookAt(0, 1.0, 0);
-      function resize() { const w = canvas.clientWidth, h = canvas.clientHeight; renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); }
-      resize();
-      console.log('[demo] canvas ' + canvas.clientWidth + 'x' + canvas.clientHeight);
-      try { await loadHumanoid(); console.log('[demo] humanoid loaded, building'); } catch (e) { console.error('[demo] load failed', e); return; }
-      const u = buildHumanoidUnit({ livery: 0x4a7dd1 });
-      if (!u) { console.error('[demo] buildHumanoidUnit returned null'); return; }
-      scene.add(u.root);
-      const bbox = new THREE.Box3().setFromObject(u.root);
-      console.log('[demo] bbox min=' + bbox.min.x.toFixed(2) + ',' + bbox.min.y.toFixed(2) + ',' + bbox.min.z.toFixed(2) + ' max=' + bbox.max.x.toFixed(2) + ',' + bbox.max.y.toFixed(2) + ',' + bbox.max.z.toFixed(2) + ' clips=' + Object.keys(u.clips).join(','));
-      u.root.traverse(m => { if (m.isMesh && m.name) console.log('[demo] mesh ' + m.name + ' y=' + m.position.y.toFixed(2)); });
-      camera.position.set(-1, 2, 3);
-      camera.lookAt(0, 1, 0);
-      camera.fov = 45;
-      camera.updateProjectionMatrix();
-      playClip(u, clipName);
-      const clock = new THREE.Clock();
-      function loop() {
-        const dt = clock.getDelta();
-        u.mixer.update(dt);
-        u.root.rotation.y = -Math.PI * 0.18 + Math.sin(performance.now() * 0.0006) * 0.20;
-        renderer.render(scene, camera);
-        requestAnimationFrame(loop);
-      }
-      loop();
-    }
-    document.querySelectorAll('canvas[data-soldier]').forEach((c) => buildSoldierScene(c, c.dataset.soldier));
-
-    function buildScene(canvas, tier) {
-      const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-      renderer.outputColorSpace = THREE.SRGBColorSpace;
-      renderer.shadowMap.enabled = true;
-      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-      renderer.toneMapping = THREE.ACESFilmicToneMapping;
-      renderer.toneMappingExposure = 1.05;
-      const scene = new THREE.Scene();
-      scene.background = new THREE.Color(0x7fc05a);
-      const sun = new THREE.DirectionalLight(0xfff2d0, 2.2);
-      sun.position.set(4, 8, 3); sun.castShadow = true;
-      sun.shadow.mapSize.set(1024, 1024);
-      sun.shadow.camera.near = 0.5; sun.shadow.camera.far = 20;
-      sun.shadow.camera.left = -4; sun.shadow.camera.right = 4;
-      sun.shadow.camera.top = 4; sun.shadow.camera.bottom = -4;
-      scene.add(sun);
-      scene.add(new THREE.HemisphereLight(0xbfe4ff, 0x7a8b5a, 0.7));
-      const ground = new THREE.Mesh(
-        new THREE.PlaneGeometry(20, 20),
-        new THREE.MeshLambertMaterial({ color: 0x7fc05a })
-      );
-      ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true;
-      scene.add(ground);
-      const stats = { hp: 100, maxHp: 100, currentHp: 100, damage: 22, speed: 7, range: 2.4, klass: 'infantry', armorTier: tier, weaponTier: tier };
-      const unit = makeUnit(0, 0, 0, stats, 'humans');
-      scene.add(unit.mesh);
-      const camera = new THREE.PerspectiveCamera(28, 1, 0.1, 50);
-      camera.position.set(2.5, 2.4, 4.4);
-      camera.lookAt(0, 1.4, 0);
-      function resize() {
-        const w = canvas.clientWidth, h = canvas.clientHeight;
-        renderer.setSize(w, h, false);
-        camera.aspect = w / h; camera.updateProjectionMatrix();
-      }
-      resize();
-      window.addEventListener('resize', resize);
       const t0 = performance.now();
-      function loop() {
-        const t = (performance.now() - t0) / 1000;
-        unit.mesh.rotation.y = -Math.PI * 0.35 + Math.sin(t * 0.6) * 0.25;
-        renderer.render(scene, camera);
-        requestAnimationFrame(loop);
-      }
+      function loop() { const t = (performance.now() - t0) / 1000; body.rotation.y = -Math.PI * 0.30 + Math.sin(t * 0.5) * 0.4; renderer.render(scene, camera); requestAnimationFrame(loop); }
       loop();
     }
-
-    document.querySelectorAll('canvas[data-tier]').forEach((c) => {
-      buildScene(c, +c.dataset.tier);
-    });
-
-    function buildWeaponScene(canvas, weaponStyle) {
-      const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-      renderer.outputColorSpace = THREE.SRGBColorSpace;
-      renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-      renderer.toneMapping = THREE.ACESFilmicToneMapping;
-      const scene = new THREE.Scene(); scene.background = new THREE.Color(0x7fc05a);
-      const sun = new THREE.DirectionalLight(0xfff2d0, 2.2); sun.position.set(4, 8, 3); sun.castShadow = true;
-      sun.shadow.mapSize.set(1024, 1024);
-      scene.add(sun); scene.add(new THREE.HemisphereLight(0xbfe4ff, 0x7a8b5a, 0.7));
-      const ground = new THREE.Mesh(new THREE.PlaneGeometry(20, 20),
-        new THREE.MeshLambertMaterial({ color: 0x7fc05a }));
-      ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; scene.add(ground);
-      const stats = { hp: 100, maxHp: 100, currentHp: 100, damage: 22, speed: 7, range: 2.4, klass: 'infantry', armorTier: 1, weaponTier: 1, weaponStyle };
-      const unit = makeUnit(0, 0, 0, stats, 'humans');
-      scene.add(unit.mesh);
-      const camera = new THREE.PerspectiveCamera(32, 1, 0.1, 50);
-      camera.position.set(2.6, 2.4, 4.2); camera.lookAt(0, 1.4, 0);
-      function resize() { const w = canvas.clientWidth, h = canvas.clientHeight; renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); }
-      resize(); window.addEventListener('resize', resize);
-      const period = 1.6; const t0 = performance.now();
-      function loop() {
-        const t = (performance.now() - t0) / 1000;
-        const sp = (t % period) / period;
-        const r = weaponPose(unit.weaponAnim, sp);
-        unit.weaponArm.rotation.x = r.armA;
-        unit.weaponArm.rotation.z = r.armRotZ || 0;
-        unit.weaponArm.position.z = r.armZ || 0;
-        unit.body.rotation.x = r.tilt;
-        unit.mesh.rotation.y = -Math.PI * 0.35;
-        renderer.render(scene, camera);
-        requestAnimationFrame(loop);
-      }
-      loop();
-    }
-    document.querySelectorAll('canvas[data-weapon]').forEach((c) => {
-      buildWeaponScene(c, c.dataset.weapon);
-    });
-    function buildRaceScene(canvas, race) {
-      const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-      renderer.shadowMap.enabled = true; renderer.toneMapping = THREE.ACESFilmicToneMapping;
-      const scene = new THREE.Scene(); scene.background = new THREE.Color(0x7fc05a);
-      const sun = new THREE.DirectionalLight(0xfff2d0, 2.2); sun.position.set(4, 8, 3); sun.castShadow = true;
-      sun.shadow.mapSize.set(1024, 1024); scene.add(sun);
-      scene.add(new THREE.HemisphereLight(0xbfe4ff, 0x7a8b5a, 0.7));
-      const ground = new THREE.Mesh(new THREE.PlaneGeometry(20, 20), new THREE.MeshLambertMaterial({ color: 0x7fc05a }));
-      ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; scene.add(ground);
-      const stats = { hp: 100, maxHp: 100, currentHp: 100, damage: 22, speed: 7, range: 2.4, klass: 'infantry', armorTier: 3, weaponTier: 3 };
-      const unit = makeUnit(0, 0, 0, stats, race);
-      scene.add(unit.mesh);
-      const camera = new THREE.PerspectiveCamera(28, 1, 0.1, 50);
-      camera.position.set(2.5, 2.4, 4.4); camera.lookAt(0, 1.4, 0);
-      function resize() { const w = canvas.clientWidth, h = canvas.clientHeight; renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); }
-      resize(); const t0 = performance.now();
-      function loop() { const t = (performance.now() - t0) / 1000; unit.mesh.rotation.y = -Math.PI * 0.35 + Math.sin(t * 0.6) * 0.25; renderer.render(scene, camera); requestAnimationFrame(loop); }
-      loop();
-    }
-    document.querySelectorAll('canvas[data-race]').forEach((c) => buildRaceScene(c, c.dataset.race));
-
-    function buildPhaseScene(canvas, phase) {
-      const sp = phase === 'parry' ? null : +phase;
-      const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-      renderer.shadowMap.enabled = true; renderer.toneMapping = THREE.ACESFilmicToneMapping;
-      const scene = new THREE.Scene(); scene.background = new THREE.Color(0x7fc05a);
-      const sun = new THREE.DirectionalLight(0xfff2d0, 2.2); sun.position.set(4, 8, 3); sun.castShadow = true;
-      sun.shadow.mapSize.set(1024, 1024); scene.add(sun);
-      scene.add(new THREE.HemisphereLight(0xbfe4ff, 0x7a8b5a, 0.7));
-      const ground = new THREE.Mesh(new THREE.PlaneGeometry(20, 20), new THREE.MeshLambertMaterial({ color: 0x7fc05a }));
-      ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; scene.add(ground);
-      const stats = { hp: 100, maxHp: 100, currentHp: 100, damage: 22, speed: 7, range: 2.4, klass: 'infantry', armorTier: 1, weaponTier: 1 };
-      const unit = makeUnit(0, 0, 0, stats, 'humans');
-      scene.add(unit.mesh);
-      if (sp === null) {
-        unit.weaponArm.rotation.x = -1.2;
-        unit.body.rotation.x = 0;
-        unit.shieldArm.rotation.x = -1.0;
-      } else {
-        const r = weaponPose('slash', sp);
-        unit.weaponArm.rotation.x = r.armA; unit.body.rotation.x = r.tilt;
-        const sa = sp < 0.35 ? -0.4 - 0.5 * (sp / 0.35)
-                : sp < 0.55 ? -0.9 + 0.6 * ((sp - 0.35) / 0.20)
-                : -0.3 - 0.9 * ((sp - 0.55) / 0.45);
-        unit.shieldArm.rotation.x = sp === 0 ? -0.5 : sa;
-      }
-      unit.mesh.rotation.y = -Math.PI * 0.35;
-      const camera = new THREE.PerspectiveCamera(28, 1, 0.1, 50);
-      camera.position.set(2.5, 2.4, 4.4); camera.lookAt(0, 1.4, 0);
-      function resize() { const w = canvas.clientWidth, h = canvas.clientHeight; renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); }
-      resize();
-      function loop() { renderer.render(scene, camera); requestAnimationFrame(loop); }
-      loop();
-    }
-    document.querySelectorAll('canvas[data-phase]').forEach((c) => buildPhaseScene(c, c.dataset.phase));
+    document.querySelectorAll('canvas[data-proc]').forEach((c) => buildProcScene(c, c.dataset.proc));
   </script>
 </body>
 </html>
