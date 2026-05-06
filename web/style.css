@@ -57,6 +57,28 @@ header b { color: var(--ink); font-weight: 600; }
 
 canvas { display: block; width: 100%; height: 100%; cursor: default; }
 
+#round-toast {
+  position: fixed;
+  top: 28%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.92);
+  padding: 18px 38px;
+  background: rgba(20, 26, 38, 0.85);
+  border: 1px solid var(--accent);
+  border-radius: 10px;
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--accent);
+  text-align: center;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  z-index: 12;
+}
+#round-toast.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+#round-toast small { display: block; margin-top: 4px; font-size: 13px; font-weight: 400; color: var(--muted); letter-spacing: 0.04em; }
+
 #hud {
   position: absolute;
   top: 14px;

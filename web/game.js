@@ -70,6 +70,12 @@ function startRound() {
   roundLabel.textContent = `Round ${round} — vs ${RACES[enemyRace].name}`;
   scoreLabel.textContent = `${RACES[playerRace].icon} ${RACES[playerRace].name} · ${wins} ${wins === 1 ? 'win' : 'wins'}`;
   banner.classList.add('hidden');
+  const toast = document.getElementById('round-toast');
+  if (toast) {
+    toast.innerHTML = `Round ${round}<small>${RACES[playerRace].icon} ${RACES[playerRace].name} vs ${RACES[enemyRace].icon} ${RACES[enemyRace].name}</small>`;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 1700);
+  }
 }
 
 function nearestEnemy(u) {
