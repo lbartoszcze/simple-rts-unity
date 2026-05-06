@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { scene, camera, renderer, setProjectiles, updateFx } from './scene.js';
+import { scene, camera, renderer, setProjectiles, updateFx, trackCamera, resetCameraTarget } from './scene.js';
 import { makeUnit, updateUnitVisuals } from './units.js';
 import { RACES, applyCard, showCardPicker, showRacePicker } from './lib/cards.js';
 import { runAllSpells } from './lib/spells.js';
@@ -110,6 +110,7 @@ function refreshHud() {
 function startRound() {
   if (round > 1) applyBuildings(playerRoster, playerBuildings, playerRace);
   clearArmies();
+  resetCameraTarget();
   placeBuildings(scene, buildingMeshes, playerBuildings, BASE_Z + 18);
   const boss = isBossRound(round);
   enemyRace = ENEMY_RACES[(round - 1) % ENEMY_RACES.length];
@@ -272,6 +273,7 @@ function frame(now) {
   last = now;
   if (phase === 'battle') step(dt);
   updateFx(dt);
+  trackCamera(units);
   for (const u of units) updateUnitVisuals(u, camera, now / 1000);
   renderer.render(scene, camera);
   requestAnimationFrame(frame);

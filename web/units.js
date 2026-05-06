@@ -234,9 +234,35 @@ export function updateUnitVisuals(u, camera, t) {
     return;
   }
 
-  if (u.vx !== 0 || u.vz !== 0) {
-    const angle = Math.atan2(u.vx, u.vz);
-    u.body.rotation.y = angle;
+  let faceX = u.vx, faceZ = u.vz;
+  if (Math.hypot(faceX, faceZ) < 0.1 && u.attackTarget && u.attackTarget.hp > 0) {
+    faceX = u.attackTarget.x - u.x;
+    faceZ = u.attackTarget.z - u.z;
+  }
+  if (faceX !== 0 || faceZ !== 0) {
+    u.body.rotation.y = Math.atan2(faceX, faceZ);
+  }
+
+  const moving = Math.hypot(u.vx, u.vz) > 0.4;
+  const targeting = u.attackTarget && u.attackTarget.hp > 0;
+  const distSq = targeting ? (u.attackTarget.x - u.x) ** 2 + (u.attackTarget.z - u.z) ** 2 : 1e9;
+  const attacking = !moving && targeting && distSq < (u.range + 0.5) ** 2;
+
+  if (moving) {
+    const phase = t * 9 + u.x * 0.7;
+    u.body.position.y = Math.abs(Math.sin(phase)) * 0.11;
+    u.body.rotation.x = Math.sin(phase * 0.5) * 0.05;
+    u.body.rotation.z = 0;
+  } else if (attacking) {
+    const phase = t * 7 + u.x * 0.3;
+    const lunge = (Math.sin(phase) + 1) * 0.5;
+    u.body.position.y = lunge * 0.06;
+    u.body.rotation.x = lunge * 0.32;
+    u.body.rotation.z = 0;
+  } else {
+    u.body.position.y = 0;
+    u.body.rotation.x = 0;
+    u.body.rotation.z = 0;
   }
 
   if (u.team === 0) {

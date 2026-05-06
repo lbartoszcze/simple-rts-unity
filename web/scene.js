@@ -31,13 +31,31 @@ const sky = new THREE.HemisphereLight(0xbfe4ff, 0x7a8b5a, 0.65);
 scene.add(sky);
 
 export const cameraTarget = new THREE.Vector3(0, 0, 0);
-const camOffset = new THREE.Vector3(14, 92, 84);
-export const camera = new THREE.PerspectiveCamera(46, 1, 0.5, 400);
+const camOffset = new THREE.Vector3(10, 36, 28);
+export const camera = new THREE.PerspectiveCamera(50, 1, 0.5, 400);
 function syncCamera() {
   camera.position.copy(cameraTarget).add(camOffset);
   camera.lookAt(cameraTarget);
 }
 syncCamera();
+
+export function trackCamera(units) {
+  let cx = 0, cz = 0, n = 0;
+  for (const u of units) {
+    if (u.hp <= 0) continue;
+    cx += u.x; cz += u.z; n++;
+  }
+  if (n === 0) return;
+  cx /= n; cz /= n;
+  cameraTarget.x += (cx - cameraTarget.x) * 0.05;
+  cameraTarget.z += (cz - cameraTarget.z) * 0.05;
+  syncCamera();
+}
+
+export function resetCameraTarget() {
+  cameraTarget.set(0, 0, 0);
+  syncCamera();
+}
 
 export const ground = new THREE.Mesh(
   new THREE.PlaneGeometry(220, 220, 1, 1),
