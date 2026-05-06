@@ -37,9 +37,22 @@
     <div class="cell"><h2>TIER 2</h2><canvas data-tier="2"></canvas><p>Gilded — chest swaps to gold (#c9a44a); blade material brightens to bare white steel; cyan emissive on weapon edge.</p></div>
     <div class="cell"><h2>TIER 3</h2><canvas data-tier="3"></canvas><p>Mythic — cream emissive glow on the chest; pauldrons emit; weapon turns to pale-gold steel with a translucent halo orb at the haft.</p></div>
   </div>
+  <h1 style="margin-top: 32px">⚔️ Weapon variety — different geometry, different attack animation</h1>
+  <p class="sub">Each weapon style runs its own attack animation — sword/scythe slash, spear/pike/lance thrust forward, axe/halberd chop overhead, mace swings horizontally. Cells below show the weapon mid-attack.</p>
+  <div class="row" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));">
+    <div class="cell"><h2>SWORD · slash</h2><canvas data-weapon="sword"></canvas></div>
+    <div class="cell"><h2>SPEAR · thrust</h2><canvas data-weapon="spear"></canvas></div>
+    <div class="cell"><h2>PIKE · long thrust</h2><canvas data-weapon="pike"></canvas></div>
+    <div class="cell"><h2>LANCE · charge</h2><canvas data-weapon="lance"></canvas></div>
+    <div class="cell"><h2>AXE · chop</h2><canvas data-weapon="axe"></canvas></div>
+    <div class="cell"><h2>HALBERD · chop</h2><canvas data-weapon="halberd"></canvas></div>
+    <div class="cell"><h2>MACE · swing</h2><canvas data-weapon="mace"></canvas></div>
+    <div class="cell"><h2>SCYTHE · slash</h2><canvas data-weapon="scythe"></canvas></div>
+  </div>
   <script type="module">
     import * as THREE from 'three';
-    import { makeUnit } from '../units.js';
+    import { makeUnit, updateUnitVisuals } from '../units.js';
+    import { weaponPose } from '../lib/weapons.js';
 
     function buildScene(canvas, tier) {
       const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
@@ -90,6 +103,45 @@
 
     document.querySelectorAll('canvas[data-tier]').forEach((c) => {
       buildScene(c, +c.dataset.tier);
+    });
+
+    function buildWeaponScene(canvas, weaponStyle) {
+      const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.outputColorSpace = THREE.SRGBColorSpace;
+      renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      const scene = new THREE.Scene(); scene.background = new THREE.Color(0x7fc05a);
+      const sun = new THREE.DirectionalLight(0xfff2d0, 2.2); sun.position.set(4, 8, 3); sun.castShadow = true;
+      sun.shadow.mapSize.set(1024, 1024);
+      scene.add(sun); scene.add(new THREE.HemisphereLight(0xbfe4ff, 0x7a8b5a, 0.7));
+      const ground = new THREE.Mesh(new THREE.PlaneGeometry(20, 20),
+        new THREE.MeshLambertMaterial({ color: 0x7fc05a }));
+      ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; scene.add(ground);
+      const stats = { hp: 100, maxHp: 100, currentHp: 100, damage: 22, speed: 7, range: 2.4, klass: 'infantry', armorTier: 1, weaponTier: 1, weaponStyle };
+      const unit = makeUnit(0, 0, 0, stats, 'humans');
+      scene.add(unit.mesh);
+      const camera = new THREE.PerspectiveCamera(32, 1, 0.1, 50);
+      camera.position.set(2.6, 2.4, 4.2); camera.lookAt(0, 1.4, 0);
+      function resize() { const w = canvas.clientWidth, h = canvas.clientHeight; renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); }
+      resize(); window.addEventListener('resize', resize);
+      const period = 1.6; const t0 = performance.now();
+      function loop() {
+        const t = (performance.now() - t0) / 1000;
+        const sp = (t % period) / period;
+        const r = weaponPose(unit.weaponAnim, sp);
+        unit.weaponArm.rotation.x = r.armA;
+        unit.weaponArm.rotation.z = r.armRotZ || 0;
+        unit.weaponArm.position.z = r.armZ || 0;
+        unit.body.rotation.x = r.tilt;
+        unit.mesh.rotation.y = -Math.PI * 0.35;
+        renderer.render(scene, camera);
+        requestAnimationFrame(loop);
+      }
+      loop();
+    }
+    document.querySelectorAll('canvas[data-weapon]').forEach((c) => {
+      buildWeaponScene(c, c.dataset.weapon);
     });
   </script>
 </body>
