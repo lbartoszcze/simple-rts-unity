@@ -8,7 +8,7 @@ import { runAllSpells } from './lib/spells.js';
 import { applyBuildings, buildingHealBonus, placeBuildings } from './lib/buildings.js';
 import { isBossRound, bossRoster, bossForRound, swapToBossMesh } from './lib/bosses.js';
 import { showSandboxBuilder, showSandboxResult } from './lib/modes/sandbox.js';
-import { applyMagicHit } from './lib/modes/magic.js';
+import { applyVariantHit, tickRaceClass } from './lib/modes/race-class.js';
 
 const TEAM_BLUE = 0;
 const TEAM_RED = 1;
@@ -135,7 +135,7 @@ function pickTarget(u) {
 
 function step(dt, t) {
   applyTerrain(units, currentMapKey, dt, t, spawnFx);
-  for (const u of units) if (u.frostUntil && t < u.frostUntil) u.speed *= 0.5;
+  tickRaceClass(units, dt, t);
   for (const u of units) {
     if (u.hp <= 0) continue;
     if (!u.attackTarget || u.attackTarget.hp <= 0) u.attackTarget = pickTarget(u);
@@ -153,9 +153,8 @@ function step(dt, t) {
         u.hitDealt = true;
         const tgt = u.attackTarget;
         if (tgt && tgt.hp > 0) {
-          if (u.klass === 'mage') {
-            applyMagicHit(u, tgt, { units, t, dx, dz, dist, scene, spawnFx, addUnit: (nu) => { units.push(nu); scene.add(nu.mesh); } });
-          } else {
+          const ctx = { units, t, dx, dz, dist, scene, spawnFx, addUnit: (nu) => { units.push(nu); scene.add(nu.mesh); } };
+          if (!applyVariantHit(u, tgt, ctx)) {
             tgt.hp -= u.damage * u.swingPeriod;
             tgt.recoilStart = t; tgt.recoilDirX = -dx / dist; tgt.recoilDirZ = -dz / dist;
             spawnFx(tgt.x, tgt.z, 0.55, 0xffe066, 0.15);
