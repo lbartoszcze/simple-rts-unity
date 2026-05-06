@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>simple-rts — status effects demo</title>
+  <style>
+    :root { color-scheme: dark; }
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 24px; background: #0e1218; color: #f0e9d6; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; }
+    h1 { font-size: 26px; letter-spacing: 0.04em; margin: 0 0 6px; color: #f3c259; }
+    p.lead { color: #a3a99a; margin: 0 0 24px; max-width: 720px; line-height: 1.55; }
+    p.lead a { color: #6cd6ff; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: 22px; }
+    .card { background: #1a2030; border: 1px solid #2c374a; border-radius: 12px; overflow: hidden; box-shadow: 0 8px 30px rgba(0,0,0,0.45); text-decoration: none; color: inherit; display: block; }
+    .card:hover { border-color: #f3c259; }
+    .card img { display: block; width: 100%; height: auto; background: #2a3a2a; }
+    .meta { padding: 14px 18px 16px; }
+    .meta h2 { margin: 0 0 4px; font-size: 18px; letter-spacing: 0.04em; color: #fff; }
+    .meta p { margin: 0; color: #a3a99a; font-size: 13px; line-height: 1.5; }
+    .tag { display: inline-block; padding: 2px 8px; margin-right: 6px; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; border-radius: 4px; background: #232b3d; }
+    .tag.burn { color: #ff8040; } .tag.poison { color: #4ac030; } .tag.bleed { color: #d04040; }
+    .tag.stun { color: #ffe066; } .tag.silence { color: #a0b0d0; } .tag.shield { color: #fff5b8; }
+  </style>
+</head>
+<body>
+  <h1>🎬 Status effects — auto-playing demos</h1>
+  <p class="lead">
+    Each clip is a 2.4-second loop captured from a live battle on
+    <a href="../">simple-rts-unity</a>. Real game, fresh headless
+    playthroughs. Click a card to open the GIF in full size. To make
+    your own matchups, open the game and click the 🧪 Sandbox tile.
+  </p>
+  <div class="grid">
+    <a class="card" href="anim/burn.gif"><img src="anim/burn.gif" alt="Burn">
+      <div class="meta"><span class="tag burn">DoT</span><h2>🔥 Burn</h2><p>Dwarf <b>Pyromancer</b> ignites enemies — 5 stacked flame cones flicker above the head. 3-second DoT.</p></div></a>
+    <a class="card" href="anim/poison.gif"><img src="anim/poison.gif" alt="Poison">
+      <div class="meta"><span class="tag poison">DoT</span><h2>🟢 Poison</h2><p>Skeleton <b>Bone Slinger</b> venom — chartreuse bubbles drift up. 4-second DoT, stacks per hit.</p></div></a>
+    <a class="card" href="anim/bleed.gif"><img src="anim/bleed.gif" alt="Bleed">
+      <div class="meta"><span class="tag bleed">DoT</span><h2>🩸 Bleed</h2><p>Elf <b>Bladedancer</b> cuts — crimson drops at the feet of every hit (and double-hits). 4-second DoT.</p></div></a>
+    <a class="card" href="anim/stun.gif"><img src="anim/stun.gif" alt="Stun">
+      <div class="meta"><span class="tag stun">CC</span><h2>⭐ Stun</h2><p>Dwarf <b>Boar Rider</b> charge — yellow stars orbit the target's head at 6 rad/s. 0.6s freeze.</p></div></a>
+    <a class="card" href="anim/silence.gif"><img src="anim/silence.gif" alt="Silence">
+      <div class="meta"><span class="tag silence">CC</span><h2>🤐 Silence</h2><p>Elf <b>Hawk Archer</b> peck — slate-blue X mark hovers above the target. 1.5s no-cast.</p></div></a>
+    <a class="card" href="anim/shield.gif"><img src="anim/shield.gif" alt="Shield Aura">
+      <div class="meta"><span class="tag shield">Buff</span><h2>🛡 Shield aura</h2><p>Human <b>Pegasus Knight</b> radiates a cream hemisphere over allies within 5 units — 20% damage reduction.</p></div></a>
+  </div>
+</body>
+</html>
