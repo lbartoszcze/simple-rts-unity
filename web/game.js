@@ -142,8 +142,8 @@ function step(dt, t) {
     const dz = u.attackTarget.z - u.z, dist = Math.hypot(dx, dz);
     const kiteAt = (u.klass === 'archer' || u.klass === 'mage' || u.klass === 'flyer') ? u.range * 0.7 : 0;
     if (dist < u.range) {
-      if (kiteAt && dist < kiteAt) { u.vx = -(dx/dist) * u.speed * 0.75; u.vz = -(dz/dist) * u.speed * 0.75; u.swingT = 0; u.hitDealt = false; u.x += u.vx * dt; u.z += u.vz * dt; continue; }
-      u.vx = 0; u.vz = 0;
+      if (kiteAt && dist < kiteAt) { u.vx = -(dx/dist) * u.speed * 0.75; u.vz = -(dz/dist) * u.speed * 0.75; }
+      else { u.vx = 0; u.vz = 0; }
       u.swingT += dt;
       if (u.swingT >= u.swingPeriod) { u.swingT = 0; u.hitDealt = false; }
       const sp = u.swingT / u.swingPeriod;
