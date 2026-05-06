@@ -145,7 +145,7 @@ function step(dt, t) {
   applyTerrain(units, currentMapKey, dt, t, spawnFx);
   for (const u of units) {
     if (u.hp <= 0) continue;
-    if (!u.attackTarget || u.attackTarget.hp <= 0) u.attackTarget = nearestEnemy(u).u;
+    if (!u.attackTarget || u.attackTarget.hp <= 0) u.attackTarget = pickTarget(u);
     if (!u.attackTarget) { u.vx = 0; u.vz = 0; continue; }
     const dx = u.attackTarget.x - u.x;
     const dz = u.attackTarget.z - u.z, dist = Math.hypot(dx, dz);
