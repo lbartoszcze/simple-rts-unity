@@ -65,7 +65,9 @@
       camera.position.set(center.x + dist * 0.4, center.y + dist * 0.3, center.z + dist);
       camera.lookAt(center);
       camera.updateProjectionMatrix();
-      console.log('[glb] ' + raceKey + ' size=' + size.x.toFixed(2) + ',' + size.y.toFixed(2) + ',' + size.z.toFixed(2) + ' clips=' + Object.keys(u.clips).join(',') || 'none');
+      let meshCount = 0; let visibleCount = 0;
+      u.root.traverse((m) => { if (m.isMesh) { meshCount++; if (m.visible && m.material) visibleCount++; console.log('[glb] ' + raceKey + ' mesh ' + (m.name || '?') + ' visible=' + m.visible + ' transparent=' + (m.material && m.material.transparent) + ' opacity=' + (m.material && m.material.opacity)); } });
+      console.log('[glb] ' + raceKey + ' size=' + size.x.toFixed(2) + ',' + size.y.toFixed(2) + ',' + size.z.toFixed(2) + ' meshes=' + meshCount + '/' + visibleCount + ' clips=' + (Object.keys(u.clips).join(',') || 'none'));
       const firstClip = Object.keys(u.clips)[0];
       if (firstClip) playClip(u, firstClip);
       const clock = new THREE.Clock();
