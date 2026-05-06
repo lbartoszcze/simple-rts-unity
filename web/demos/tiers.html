@@ -37,8 +37,10 @@
   <script type="module">
     import * as THREE from 'three';
     import { makeBody, buildBlobBody } from '../art/anatomy.js';
+    import { buildArmorTier, buildWeaponArm } from '../lib/weapons.js';
 
     const RACE_SKIN = { humans: [0xe6c39a, 0x3a6dd1], dwarves: [0xd9a06d, 0xa67838], elves: [0xd2e6b4, 0x88c870], skeletons: [0xeee5d0, 0xb0d8ff] };
+    const TEAM = { livery: 0x4a7dd1, accent: 0xf3c259, ring: 0x6dc2ff };
 
     function countTriangles(obj) {
       let n = 0;
@@ -64,9 +66,15 @@
       const ground = new THREE.Mesh(new THREE.PlaneGeometry(20, 20), new THREE.MeshLambertMaterial({ color: 0xcccccc }));
       ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; scene.add(ground);
       const skin = RACE_SKIN[raceKey] || RACE_SKIN.humans;
+      const character = new THREE.Group();
       const body = buildBlobBody(skin[0], skin[1]);
-      scene.add(body);
-      const tris = countTriangles(body);
+      character.add(body);
+      const armor = buildArmorTier(TEAM, raceKey, 3);
+      character.add(armor);
+      const weapon = buildWeaponArm(TEAM, raceKey, new THREE.MeshLambertMaterial({ color: 0x707378, flatShading: true }), 3, 'infantry', null, null);
+      character.add(weapon);
+      scene.add(character);
+      const tris = countTriangles(character);
       const tag = document.querySelector(`p[data-poly="${raceKey}"]`);
       if (tag) tag.textContent = tris.toLocaleString() + ' triangles';
       const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 50);
@@ -74,7 +82,7 @@
       function resize() { const w = canvas.clientWidth, h = canvas.clientHeight; renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); }
       resize();
       const t0 = performance.now();
-      function loop() { const t = (performance.now() - t0) / 1000; body.rotation.y = -Math.PI * 0.30 + Math.sin(t * 0.5) * 0.4; renderer.render(scene, camera); requestAnimationFrame(loop); }
+      function loop() { const t = (performance.now() - t0) / 1000; character.rotation.y = -Math.PI * 0.30 + Math.sin(t * 0.5) * 0.4; renderer.render(scene, camera); requestAnimationFrame(loop); }
       loop();
     }
     document.querySelectorAll('canvas[data-proc]').forEach((c) => buildProcScene(c, c.dataset.proc));
