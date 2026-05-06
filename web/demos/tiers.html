@@ -36,7 +36,9 @@
   </div>
   <script type="module">
     import * as THREE from 'three';
-    import { makeBody } from '../art/anatomy.js';
+    import { makeBody, buildBlobBody } from '../art/anatomy.js';
+
+    const RACE_SKIN = { humans: [0xe6c39a, 0x3a6dd1], dwarves: [0xd9a06d, 0xa67838], elves: [0xd2e6b4, 0x88c870], skeletons: [0xeee5d0, 0xb0d8ff] };
 
     function countTriangles(obj) {
       let n = 0;
@@ -61,8 +63,8 @@
       scene.add(new THREE.AmbientLight(0xffffff, 0.7));
       const ground = new THREE.Mesh(new THREE.PlaneGeometry(20, 20), new THREE.MeshLambertMaterial({ color: 0xcccccc }));
       ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; scene.add(ground);
-      const team = { livery: 0x4a7dd1, accent: 0xf3c259, ring: 0x6dc2ff };
-      const body = makeBody(team, raceKey, 2, 2, 'infantry', null, null);
+      const skin = RACE_SKIN[raceKey] || RACE_SKIN.humans;
+      const body = buildBlobBody(skin[0], skin[1]);
       scene.add(body);
       const tris = countTriangles(body);
       const tag = document.querySelector(`p[data-poly="${raceKey}"]`);
