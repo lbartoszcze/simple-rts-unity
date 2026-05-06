@@ -213,12 +213,20 @@ export function makeHorse(team) {
   return g;
 }
 
+const RACE_TIER = {
+  humans:    { metal: 0xc9a44a, glow: 0xfff5b8, mid: 0x806020, gem: 0xff5530 },
+  dwarves:   { metal: 0xa67838, glow: 0xff9050, mid: 0x803010, gem: 0xff5530 },
+  elves:     { metal: 0x88c870, glow: 0xb5ffb5, mid: 0x305030, gem: 0xb88dff },
+  skeletons: { metal: 0xd8d0b8, glow: 0xb0d8ff, mid: 0x305060, gem: 0x9be2ff },
+};
+
 export function buildArmorTier(team, raceKey, armorTier = 0) {
   const g = new THREE.Group();
-  const tierEmit = armorTier >= 3 ? 0xfff5b8 : 0x000000;
-  const tierColor = armorTier >= 2 ? 0xc9a44a : team.accent;
+  const rt = RACE_TIER[raceKey] || RACE_TIER.humans;
+  const tierEmit = armorTier >= 3 ? rt.glow : 0x000000;
+  const tierColor = armorTier >= 2 ? rt.metal : team.accent;
   const matMain = new THREE.MeshLambertMaterial({ color: tierColor, emissive: tierEmit, emissiveIntensity: armorTier >= 3 ? 0.35 : 0 });
-  const matMetal = lambert(armorTier >= 2 ? 0xc9a44a : 0x707378, true);
+  const matMetal = lambert(armorTier >= 2 ? rt.metal : 0x707378, true);
   const matDark = lambert(0x4a4f55);
   const chest = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.55, 0.10), matMain);
   chest.position.set(0, 1.35, 0.36); chest.castShadow = true;
@@ -241,30 +249,30 @@ export function buildArmorTier(team, raceKey, armorTier = 0) {
     g.add(grL, grR, cuffL, cuffR, mail);
   }
   if (armorTier >= 2) {
-    const spikeMat = lambert(0xc9a44a, true);
+    const spikeMat = lambert(rt.metal, true);
     const spL = new THREE.Mesh(new THREE.ConeGeometry(0.12, 0.34, 6), spikeMat); spL.position.set(-0.50, 1.88, 0);
     const spR = new THREE.Mesh(new THREE.ConeGeometry(0.12, 0.34, 6), spikeMat); spR.position.set( 0.50, 1.88, 0);
     const cape2 = new THREE.Mesh(new THREE.BoxGeometry(0.78, 1.40, 0.04),
       new THREE.MeshLambertMaterial({ color: team.livery, side: THREE.DoubleSide }));
     cape2.position.set(0, 1.05, -0.43); cape2.rotation.x = -0.05;
-    const trimMat = new THREE.MeshLambertMaterial({ color: 0xfff5b8, emissive: 0x806020, emissiveIntensity: 0.4 });
+    const trimMat = new THREE.MeshLambertMaterial({ color: rt.glow, emissive: rt.mid, emissiveIntensity: 0.4 });
     const trim = new THREE.Mesh(new THREE.BoxGeometry(0.65, 0.05, 0.12), trimMat);
     trim.position.set(0, 1.56, 0.40);
     const buckle = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.10, 0.10), trimMat); buckle.position.set(0, 0.85, 0.42);
     g.add(spL, spR, cape2, trim, buckle);
   }
   if (armorTier >= 3) {
-    const wingMat = new THREE.MeshLambertMaterial({ color: 0xfff5b8, emissive: 0xffe070, emissiveIntensity: 0.5 });
+    const wingMat = new THREE.MeshLambertMaterial({ color: rt.glow, emissive: rt.glow, emissiveIntensity: 0.5 });
     const wL = new THREE.Mesh(new THREE.ConeGeometry(0.08, 0.55, 6), wingMat); wL.position.set(-0.34, 2.36, -0.06); wL.rotation.z = 0.55; wL.rotation.x = -0.35;
     const wR = new THREE.Mesh(new THREE.ConeGeometry(0.08, 0.55, 6), wingMat); wR.position.set( 0.34, 2.36, -0.06); wR.rotation.z = -0.55; wR.rotation.x = -0.35;
     const gem = new THREE.Mesh(new THREE.OctahedronGeometry(0.13, 0),
-      new THREE.MeshLambertMaterial({ color: 0xff5530, emissive: 0xff5530, emissiveIntensity: 1.0 }));
+      new THREE.MeshLambertMaterial({ color: rt.gem, emissive: rt.gem, emissiveIntensity: 1.0 }));
     gem.position.set(0, 1.42, 0.46);
     const halo = new THREE.Mesh(new THREE.TorusGeometry(0.34, 0.045, 8, 26),
-      new THREE.MeshBasicMaterial({ color: 0xfff5b8, transparent: true, opacity: 0.9 }));
+      new THREE.MeshBasicMaterial({ color: rt.glow, transparent: true, opacity: 0.9 }));
     halo.position.set(0, 2.22, -0.20); halo.rotation.x = -0.25;
     const glow = new THREE.Mesh(new THREE.CircleGeometry(0.95, 24),
-      new THREE.MeshBasicMaterial({ color: 0xffe070, transparent: true, opacity: 0.35, side: THREE.DoubleSide }));
+      new THREE.MeshBasicMaterial({ color: rt.glow, transparent: true, opacity: 0.35, side: THREE.DoubleSide }));
     glow.rotation.x = -Math.PI / 2; glow.position.y = 0.02;
     const runeMat = new THREE.MeshBasicMaterial({ color: 0x6cd6ff });
     const runeL = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.08, 0.13), runeMat); runeL.position.set(-0.50, 1.78, 0.10);
