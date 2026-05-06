@@ -30,15 +30,6 @@
     <div class="cell"><h2>RIGGED · IDLE</h2><canvas data-soldier="Idle"></canvas><p>Imported skinned mesh, PBR materials, idle animation clip from the .glb.</p></div>
     <div class="cell"><h2>RIGGED · WALK</h2><canvas data-soldier="Walk"></canvas><p>Same model, walk clip — bones interpolate smoothly across keyframes.</p></div>
   </div>
-  <h1 style="margin-top: 32px">🥋 Combat phases — guard, wind-up, strike, recover (procedural primitives)</h1>
-  <p class="sub">Every melee attack cycles through four phases. The shield arm rises in guard, drops during the strike (committed), then rises high again on recover. The weapon arc differs per weapon — sword slashes, spear thrusts, axe chops.</p>
-  <div class="row" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
-    <div class="cell"><h2>GUARD</h2><canvas data-phase="0.00"></canvas><p>Idle ready stance — shield at low guard, weapon poised.</p></div>
-    <div class="cell"><h2>WIND-UP</h2><canvas data-phase="0.20"></canvas><p>Weapon raises, shield rises high to cover the strike line.</p></div>
-    <div class="cell"><h2>STRIKE</h2><canvas data-phase="0.45"></canvas><p>Maximum reach forward — shield drops slightly (committed).</p></div>
-    <div class="cell"><h2>PARRY</h2><canvas data-phase="parry"></canvas><p>Defender's weapon flicks up to deflect mid-strike. Auto-triggers when an opponent in your face enters their strike phase.</p></div>
-    <div class="cell"><h2>RECOVER</h2><canvas data-phase="0.75"></canvas><p>Arm pulls back, shield raises high to defend on the way out.</p></div>
-  </div>
   <h1 style="margin-top: 32px">🎨 Race-specific tier tint — same T3 geometry, different palette</h1>
   <p class="sub">At tier 2+ each race uses its own palette: humans gold, dwarves bronze + orange glow, elves silver-green, skeletons bone + cyan. The chest gem also changes color per race.</p>
   <div class="row">
