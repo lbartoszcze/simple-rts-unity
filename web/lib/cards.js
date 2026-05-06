@@ -219,7 +219,7 @@ function lockedCount(race, factionLv) {
   return n;
 }
 
-export function showRacePicker(meta, onPick, onMetaChange) {
+export function showRacePicker(meta, onPick, onMetaChange, onSandbox) {
   const picker = document.getElementById('cardpicker');
   const title = document.getElementById('cardpicker-title');
   const list = document.getElementById('cards');
@@ -260,6 +260,13 @@ export function showRacePicker(meta, onPick, onMetaChange) {
       onPick(key);
     });
     list.appendChild(el);
+  }
+  if (onSandbox) {
+    const sb = document.createElement('div');
+    sb.className = 'card sandbox-tile'; sb.dataset.tier = 'combo';
+    sb.innerHTML = `<div class="icon">🧪</div><div class="tag">test</div><div class="name">Sandbox</div><div class="desc">Custom clash — pick any races + class counts directly. No XP, no progression.</div>`;
+    sb.addEventListener('click', () => { picker.classList.add('hidden'); onSandbox(); });
+    list.appendChild(sb);
   }
   picker.classList.remove('hidden');
 }

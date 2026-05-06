@@ -7,6 +7,7 @@ import { RACES, applyCard, showCardPicker, showRacePicker,
 import { runAllSpells } from './lib/spells.js';
 import { applyBuildings, buildingHealBonus, placeBuildings } from './lib/buildings.js';
 import { isBossRound, bossRoster, bossForRound, swapToBossMesh } from './lib/bosses.js';
+import { showSandboxBuilder, showSandboxResult } from './lib/modes/sandbox.js';
 
 const TEAM_BLUE = 0;
 const TEAM_RED = 1;
@@ -22,20 +23,12 @@ const spellsBar = document.getElementById('spells');
 const buildingsBar = document.getElementById('buildings');
 
 const ENEMY_RACES = ['skeletons', 'dwarves', 'elves', 'humans'];
-const meta = loadMeta(); let currentMapKey = 'meadow';
-let playerRace = 'humans';
-let enemyRace = 'skeletons';
-let playerRoster = [];
-let playerSpells = [];
-let playerBuildings = [];
-const buildingMeshes = [];
-let round = 1;
-let wins = 0;
-let phase = 'select';
-const units = [];
-const projectiles = [];
-const PROJ_TTL = 0.12;
-const RANGED_THRESHOLD = 3.0;
+const meta = loadMeta();
+let currentMapKey = 'meadow', playerRace = 'humans', enemyRace = 'skeletons';
+let playerRoster = [], playerSpells = [], playerBuildings = [];
+let round = 1, wins = 0, phase = 'select', sandboxMode = false, sandboxEnemyRoster = null;
+const buildingMeshes = [], units = [], projectiles = [];
+const PROJ_TTL = 0.12, RANGED_THRESHOLD = 3.0;
 
 function makeBaseRoster(race) {
   const b = RACES[race].base;
@@ -115,9 +108,7 @@ function startRound() {
   enemyRace = ENEMY_RACES[(round - 1) % ENEMY_RACES.length];
   if (enemyRace === playerRace) enemyRace = ENEMY_RACES[(round) % ENEMY_RACES.length];
   spawnRoster(TEAM_BLUE, playerRoster, BASE_Z, playerRace);
-  const enemyList = boss
-    ? bossRoster(round, RACES[enemyRace].base)
-    : enemyRosterForRound(round, enemyRace);
+  const enemyList = sandboxMode ? sandboxEnemyRoster : boss ? bossRoster(round, RACES[enemyRace].base) : enemyRosterForRound(round, enemyRace);
   spawnRoster(TEAM_RED, enemyList, -BASE_Z, enemyRace);
   phase = 'battle';
   const enemyLabel = boss ? bossForRound(round).name : RACES[enemyRace].name;
@@ -236,6 +227,7 @@ function syncRosterFromUnits() {
 }
 
 function onWin() {
+  if (sandboxMode) { phase = 'gameover'; showSandboxResult(true, () => startSandboxFromBuilder(), () => startGame()); return; }
   phase = 'cardpick';
   wins++;
   syncRosterFromUnits();
@@ -254,6 +246,7 @@ function onWin() {
 }
 
 function onLoss() {
+  if (sandboxMode) { phase = 'gameover'; showSandboxResult(false, () => startSandboxFromBuilder(), () => startGame()); return; }
   phase = 'gameover';
   syncRosterFromUnits();
   recordRunEnd(meta, playerRace, round);
@@ -268,16 +261,21 @@ function onLoss() {
   }, 0);
 }
 
-function startGame() {
-  showRacePicker(meta, (raceKey) => {
-    playerRace = raceKey;
-    playerRoster = makeBaseRoster(raceKey);
-    playerSpells = [];
-    playerBuildings = [];
-    round = 1;
-    wins = 0;
+function startSandboxFromBuilder() {
+  showSandboxBuilder((prace, proster, erace, eroster) => {
+    sandboxMode = true; playerRace = prace; enemyRace = erace;
+    playerRoster = proster; sandboxEnemyRoster = eroster;
+    playerSpells = []; playerBuildings = []; round = 1; wins = 0;
     startRound();
-  }, () => saveMeta(meta));
+  }, () => startGame());
+}
+function startGame() {
+  sandboxMode = false;
+  showRacePicker(meta, (raceKey) => {
+    playerRace = raceKey; playerRoster = makeBaseRoster(raceKey);
+    playerSpells = []; playerBuildings = []; round = 1; wins = 0;
+    startRound();
+  }, () => saveMeta(meta), () => startSandboxFromBuilder());
 }
 
 let last = performance.now();
