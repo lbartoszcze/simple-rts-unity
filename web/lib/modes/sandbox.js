@@ -53,6 +53,27 @@ function readComp(side) {
   return out;
 }
 
+function readSetup() {
+  return {
+    player: { race: document.querySelector('[data-side="p-race"]').value, ...readComp('p') },
+    enemy:  { race: document.querySelector('[data-side="e-race"]').value, ...readComp('e') },
+  };
+}
+
+function applySetup(s) {
+  for (const side of ['player', 'enemy']) {
+    const data = s[side]; if (!data) continue;
+    const code = side === 'player' ? 'p' : 'e';
+    if (data.race) document.querySelector(`[data-side="${code}-race"]`).value = data.race;
+    for (const c of CLASSES) {
+      if (data[c.id] != null) {
+        const inp = document.querySelector(`input[data-side="${code}"][data-klass="${c.id}"]`);
+        if (inp) inp.value = data[c.id];
+      }
+    }
+  }
+}
+
 export function showSandboxBuilder(onStart, onCancel) {
   const modal = document.getElementById('sandbox');
   modal.innerHTML = `
@@ -63,12 +84,31 @@ export function showSandboxBuilder(onStart, onCancel) {
         ${buildSide('p', '👑 Your army')}
         ${buildSide('e', '💀 Enemy army')}
       </div>
+      <details class="sandbox-json"><summary>JSON setup (paste / copy)</summary>
+        <textarea id="sb-json" rows="6" placeholder='{"player":{"race":"humans","infantry":4,"archer":2,"cavalry":1},"enemy":{"race":"skeletons","infantry":8,"flyer":2}}'></textarea>
+        <div class="sandbox-json-buttons">
+          <button id="sb-load" type="button">Apply JSON</button>
+          <button id="sb-export" type="button">Copy current → JSON</button>
+        </div>
+      </details>
       <div class="sandbox-buttons">
         <button id="sb-fight">⚔️ Fight</button>
         <button id="sb-cancel">Cancel</button>
       </div>
     </div>`;
   modal.classList.remove('hidden');
+  const ta = document.getElementById('sb-json');
+  document.getElementById('sb-load').addEventListener('click', () => {
+    try { applySetup(JSON.parse(ta.value)); ta.style.borderColor = ''; }
+    catch (e) { ta.style.borderColor = '#e36a6a'; }
+  });
+  document.getElementById('sb-export').addEventListener('click', () => {
+    ta.value = JSON.stringify(readSetup(), null, 2);
+  });
+  try {
+    const m = location.hash.match(/[#&]sb=([^&]+)/);
+    if (m) applySetup(JSON.parse(decodeURIComponent(m[1])));
+  } catch (e) {}
   document.getElementById('sb-fight').addEventListener('click', () => {
     const prace = document.querySelector('[data-side="p-race"]').value;
     const erace = document.querySelector('[data-side="e-race"]').value;
