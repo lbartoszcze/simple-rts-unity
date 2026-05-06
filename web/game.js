@@ -80,23 +80,14 @@ function spawnRoster(teamIdx, roster, baseZ, raceKey) {
   }
 }
 
+const _renderBar = (bar, items, cls) => { bar.innerHTML = ''; for (const it of items) { const el = document.createElement('div'); el.className = cls; el.title = it.name; el.textContent = it.icon; bar.appendChild(el); } };
 function refreshHud() {
-  const alive = playerRoster.length;
-  const totalHp = playerRoster.reduce((s, w) => s + w.currentHp, 0);
-  const maxHp = playerRoster.reduce((s, w) => s + w.maxHp, 0);
-  rosterLabel.textContent = `${alive} alive · ${Math.round(totalHp)}/${maxHp} HP`;
-  spellsBar.innerHTML = '';
-  for (const s of playerSpells) {
-    const el = document.createElement('div');
-    el.className = 'spell'; el.title = s.name; el.textContent = s.icon;
-    spellsBar.appendChild(el);
-  }
-  buildingsBar.innerHTML = '';
-  for (const b of playerBuildings) {
-    const el = document.createElement('div');
-    el.className = 'building'; el.title = b.name; el.textContent = b.icon;
-    buildingsBar.appendChild(el);
-  }
+  let alive = 0, totalHp = 0, maxHp = 0, reds = 0;
+  if (phase === 'battle') for (const u of units) { if (u.team === TEAM_BLUE) { maxHp += u.maxHp; if (u.hp > 0) { alive++; totalHp += u.hp; } } else if (u.hp > 0) reds++; }
+  else { alive = playerRoster.length; for (const w of playerRoster) { totalHp += w.currentHp; maxHp += w.maxHp; } }
+  rosterLabel.textContent = `${alive} alive · ${Math.round(totalHp)}/${maxHp} HP${phase === 'battle' ? ` · ${reds} enemies` : ''}`;
+  _renderBar(spellsBar, playerSpells, 'spell');
+  _renderBar(buildingsBar, playerBuildings, 'building');
 }
 
 function startRound() {
@@ -209,6 +200,7 @@ function step(dt, t) {
     if (u.team === TEAM_BLUE) blue++; else red++;
   }
   if (phase === 'battle') {
+    refreshHud();
     if (red === 0 && blue > 0) onWin();
     else if (blue === 0) onLoss();
   }
