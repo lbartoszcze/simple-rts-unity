@@ -137,7 +137,7 @@ function pickTarget(u) {
 
 function step(dt, t) {
   applyTerrain(units, currentMapKey, dt, t, spawnFx);
-  tickRaceClass(units, dt, t);
+  tickRaceClass(units, dt, t, spawnFx);
   for (const u of units) {
     if (u.hp <= 0) continue;
     if (!u.attackTarget || u.attackTarget.hp <= 0) u.attackTarget = pickTarget(u);

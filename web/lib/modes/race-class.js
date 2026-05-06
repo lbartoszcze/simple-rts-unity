@@ -51,7 +51,7 @@ const RACE_CLASS = {
   },
   skeletons: {
     infantry: { name: 'Risen', onHit: (c, t, ctx) => { t.hp -= baseDmg(c); recoil(t, ctx); ctx.spawnFx(t.x, t.z, 0.5, 0xb88dff, 0.18); return true; } },
-    archer:   { name: 'Bone Slinger', stats: { range: 5.5, swingPeriod: 0.45, kiteRatio: 0.4 }, onHit: (c, t, ctx) => { t.hp -= baseDmg(c) * 0.7; recoil(t, ctx); let n = null, nd = 9; for (const v of ctx.units) if (v !== t && v.team === t.team && v.hp > 0) { const d2 = (v.x - t.x) ** 2 + (v.z - t.z) ** 2; if (d2 < nd) { nd = d2; n = v; } } if (n) { n.hp -= baseDmg(c) * 0.4; ctx.spawnFx(n.x, n.z, 0.4, 0xb88dff, 0.22); } return true; } },
+    archer:   { name: 'Bone Slinger', stats: { range: 5.5, swingPeriod: 0.45, kiteRatio: 0.4 }, onHit: (c, t, ctx) => { t.hp -= baseDmg(c) * 0.5; recoil(t, ctx); t.poisonUntil = Math.max(t.poisonUntil || 0, ctx.t + 4.0); t.poisonDps = Math.max(t.poisonDps || 0, baseDmg(c) * 0.4); ctx.spawnFx(t.x, t.z, 0.4, 0x6dbf5d, 0.22); return true; } },
     mage:     { name: 'Necromancer', onHit: applyMagicHit },
     cavalry:  { name: 'Death Knight', onHit: (c, t, ctx) => { const k = t.hp <= baseDmg(c); t.hp -= baseDmg(c); if (k) c.hp = Math.min(c.maxHp, c.hp + c.maxHp * 0.25); recoil(t, ctx); ctx.spawnFx(t.x, t.z, 0.55, 0xb88dff, k ? 0.4 : 0.18); return true; } },
     flyer:    { name: 'Crow', onHit: (c, t, ctx) => { t.hp -= baseDmg(c); recoil(t, ctx); ctx.spawnFx(t.x, t.z, 0.4, 0x4a4a4a, 0.15); return true; } },
@@ -67,11 +67,19 @@ export function applyVariantHit(caster, target, ctx) {
   return false;
 }
 
-export function tickRaceClass(units, dt, t) {
+export function tickRaceClass(units, dt, t, spawnFx) {
   for (const u of units) {
     if (u.hp <= 0) {
       if (!u.revived && u.raceKey === 'skeletons' && u.klass === 'infantry') { u.hp = 1; u.revived = true; }
       continue;
+    }
+    if (u.burnUntil && t < u.burnUntil) {
+      u.hp -= (u.burnDps || 0) * dt;
+      if (spawnFx && Math.random() < 0.15) spawnFx(u.x, u.z, 0.35, 0xff7733, 0.2);
+    }
+    if (u.poisonUntil && t < u.poisonUntil) {
+      u.hp -= (u.poisonDps || 0) * dt;
+      if (spawnFx && Math.random() < 0.15) spawnFx(u.x, u.z, 0.3, 0x6dbf5d, 0.25);
     }
     if (u.staggerUntil && t < u.staggerUntil) u.speed *= 0.2;
     if (u.rootedUntil && t < u.rootedUntil) u.speed = 0;

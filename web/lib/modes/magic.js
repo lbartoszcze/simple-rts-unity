@@ -43,6 +43,8 @@ export function applyMagicHit(caster, target, ctx) {
     target.recoilStart = t;
     target.recoilDirX = -dx / dist;
     target.recoilDirZ = -dz / dist;
+    target.burnUntil = Math.max(target.burnUntil || 0, t + 3.0);
+    target.burnDps = Math.max(target.burnDps || 0, baseDmg * 0.4);
     spawnFx(target.x, target.z, 1.0, 0xff5530, 0.4);
     return true;
   }
