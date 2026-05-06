@@ -26,19 +26,13 @@
   </style>
 </head>
 <body>
-  <h1>🎬 Loaded 3D model — actual rigged character with skeletal animation</h1>
-  <p class="sub">Demonstrating that the prior cells (lego figures stitched together from BoxGeometry + SphereGeometry primitives) hit a hard ceiling no amount of "add another sphere" will fix. This cell loads a free CC0 rigged humanoid (.glb) from threejs.org and drives one of its baked Mixamo clips. Same three.js scene, same lighting — drastically different result. Reload if it doesn't appear immediately (it has to fetch ~8MB).</p>
-  <div class="row" style="grid-template-columns: 1fr 1fr;">
-    <div class="cell"><h2>RIGGED · TPose (no anim)</h2><canvas data-soldier="TPose"></canvas><p>T-pose, no animation — should show full body if scene is wired correctly.</p></div>
-    <div class="cell"><h2>RIGGED · WALK</h2><canvas data-soldier="Walk"></canvas><p>Walk clip running.</p></div>
-  </div>
-  <h1 style="margin-top: 32px">🎨 Race-specific tier tint — same T3 geometry, different palette</h1>
-  <p class="sub">At tier 2+ each race uses its own palette: humans gold, dwarves bronze + orange glow, elves silver-green, skeletons bone + cyan. The chest gem also changes color per race.</p>
-  <div class="row">
-    <div class="cell"><h2>HUMANS · T3</h2><canvas data-race="humans"></canvas></div>
-    <div class="cell"><h2>DWARVES · T3</h2><canvas data-race="dwarves"></canvas></div>
-    <div class="cell"><h2>ELVES · T3</h2><canvas data-race="elves"></canvas></div>
-    <div class="cell"><h2>SKELETONS · T3</h2><canvas data-race="skeletons"></canvas></div>
+  <h1>🎬 Real low-poly fantasy character models — one per race</h1>
+  <p class="sub">Replaces the procedural primitives with actual CC-BY low-poly fantasy character meshes from poly.pizza (Quaternius and others). Each race below gets its own rigged stylized warrior with proper armor, weapons, and clean low-poly geometry — exactly the aesthetic of the Unity asset you linked.</p>
+  <div class="row" style="grid-template-columns: 1fr 1fr 1fr 1fr;">
+    <div class="cell"><h2>HUMANS · Knight</h2><canvas data-glb="humans"></canvas></div>
+    <div class="cell"><h2>DWARVES · Warrior</h2><canvas data-glb="dwarves"></canvas></div>
+    <div class="cell"><h2>ELVES · Warrior</h2><canvas data-glb="elves"></canvas></div>
+    <div class="cell"><h2>SKELETONS · Skeleton</h2><canvas data-glb="skeletons"></canvas></div>
   </div>
   <h1 style="margin-top: 32px">⚔️ Weapon variety — different geometry, different attack animation</h1>
   <p class="sub">Each weapon style runs its own attack animation — sword/scythe slash, spear/pike/lance thrust forward, axe/halberd chop overhead, mace swings horizontally. Cells below show the weapon mid-attack. (Sword is shown in the combat-phases row above.)</p>
@@ -55,7 +49,47 @@
     import * as THREE from 'three';
     import { makeUnit, updateUnitVisuals } from '../units.js';
     import { weaponPose } from '../lib/weapons.js';
-    import { loadHumanoid, buildHumanoidUnit, playClip } from '../art/loader.js';
+    import { loadHumanoid, buildHumanoidUnit, playClip, loadRaceModel, buildRaceUnit } from '../art/loader.js';
+
+    async function buildGlbScene(canvas, raceKey) {
+      const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.outputColorSpace = THREE.SRGBColorSpace;
+      renderer.shadowMap.enabled = true; renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      const scene = new THREE.Scene(); scene.background = new THREE.Color(0xeeeeee);
+      const sun = new THREE.DirectionalLight(0xffffff, 2.4); sun.position.set(4, 8, 3); sun.castShadow = true;
+      sun.shadow.mapSize.set(1024, 1024); scene.add(sun);
+      scene.add(new THREE.AmbientLight(0xffffff, 1.0));
+      const ground = new THREE.Mesh(new THREE.PlaneGeometry(20, 20), new THREE.MeshLambertMaterial({ color: 0xcccccc }));
+      ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; scene.add(ground);
+      const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 100);
+      function resize() { const w = canvas.clientWidth, h = canvas.clientHeight; renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); }
+      resize();
+      try { await loadRaceModel(raceKey); } catch (e) { console.error('load failed', raceKey, e); return; }
+      const u = buildRaceUnit(raceKey, { livery: 0x4a7dd1 });
+      if (!u) return;
+      scene.add(u.root);
+      const bbox = new THREE.Box3().setFromObject(u.root);
+      const size = bbox.getSize(new THREE.Vector3());
+      const center = bbox.getCenter(new THREE.Vector3());
+      const dist = Math.max(size.x, size.y, size.z) * 1.6;
+      camera.position.set(center.x + dist * 0.4, center.y + dist * 0.3, center.z + dist);
+      camera.lookAt(center);
+      camera.updateProjectionMatrix();
+      console.log('[glb] ' + raceKey + ' size=' + size.x.toFixed(2) + ',' + size.y.toFixed(2) + ',' + size.z.toFixed(2) + ' clips=' + Object.keys(u.clips).join(',') || 'none');
+      const firstClip = Object.keys(u.clips)[0];
+      if (firstClip) playClip(u, firstClip);
+      const clock = new THREE.Clock();
+      function loop() {
+        const dt = clock.getDelta();
+        u.mixer.update(dt);
+        u.root.rotation.y += dt * 0.4;
+        renderer.render(scene, camera);
+        requestAnimationFrame(loop);
+      }
+      loop();
+    }
+    document.querySelectorAll('canvas[data-glb]').forEach((c) => buildGlbScene(c, c.dataset.glb));
 
     async function buildSoldierScene(canvas, clipName) {
       const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
