@@ -37,6 +37,14 @@
     <div class="cell"><h2>TIER 2</h2><canvas data-tier="2"></canvas><p>Gilded — chest swaps to gold (#c9a44a); blade material brightens to bare white steel; cyan emissive on weapon edge.</p></div>
     <div class="cell"><h2>TIER 3</h2><canvas data-tier="3"></canvas><p>Mythic — cream emissive glow on the chest; pauldrons emit; weapon turns to pale-gold steel with a translucent halo orb at the haft.</p></div>
   </div>
+  <h1 style="margin-top: 32px">🥋 Combat phases — guard, wind-up, strike, recover</h1>
+  <p class="sub">Every melee attack cycles through four phases. The shield arm rises in guard, drops during the strike (committed), then rises high again on recover. The weapon arc differs per weapon — sword slashes, spear thrusts, axe chops.</p>
+  <div class="row">
+    <div class="cell"><h2>GUARD</h2><canvas data-phase="0.00"></canvas><p>Idle ready stance — shield at low guard, weapon poised.</p></div>
+    <div class="cell"><h2>WIND-UP</h2><canvas data-phase="0.20"></canvas><p>Weapon raises, shield rises high to cover the strike line.</p></div>
+    <div class="cell"><h2>STRIKE</h2><canvas data-phase="0.45"></canvas><p>Maximum reach forward — shield drops slightly (committed).</p></div>
+    <div class="cell"><h2>RECOVER</h2><canvas data-phase="0.75"></canvas><p>Arm pulls back, shield raises high to defend on the way out.</p></div>
+  </div>
   <h1 style="margin-top: 32px">🎨 Race-specific tier tint — same T3 geometry, different palette</h1>
   <p class="sub">At tier 2+ each race uses its own palette: humans gold, dwarves bronze + orange glow, elves silver-green, skeletons bone + cyan. The chest gem also changes color per race.</p>
   <div class="row">
@@ -172,6 +180,36 @@
       loop();
     }
     document.querySelectorAll('canvas[data-race]').forEach((c) => buildRaceScene(c, c.dataset.race));
+
+    function buildPhaseScene(canvas, sp) {
+      const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.shadowMap.enabled = true; renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      const scene = new THREE.Scene(); scene.background = new THREE.Color(0x7fc05a);
+      const sun = new THREE.DirectionalLight(0xfff2d0, 2.2); sun.position.set(4, 8, 3); sun.castShadow = true;
+      sun.shadow.mapSize.set(1024, 1024); scene.add(sun);
+      scene.add(new THREE.HemisphereLight(0xbfe4ff, 0x7a8b5a, 0.7));
+      const ground = new THREE.Mesh(new THREE.PlaneGeometry(20, 20), new THREE.MeshLambertMaterial({ color: 0x7fc05a }));
+      ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; scene.add(ground);
+      const stats = { hp: 100, maxHp: 100, currentHp: 100, damage: 22, speed: 7, range: 2.4, klass: 'infantry', armorTier: 1, weaponTier: 1 };
+      const unit = makeUnit(0, 0, 0, stats, 'humans');
+      scene.add(unit.mesh);
+      const r = weaponPose('slash', sp);
+      unit.weaponArm.rotation.x = r.armA;
+      unit.body.rotation.x = r.tilt;
+      unit.mesh.rotation.y = -Math.PI * 0.35;
+      const sa = sp < 0.35 ? -0.4 - 0.5 * (sp / 0.35)
+              : sp < 0.55 ? -0.9 + 0.6 * ((sp - 0.35) / 0.20)
+              : -0.3 - 0.9 * ((sp - 0.55) / 0.45);
+      unit.shieldArm.rotation.x = sp === 0 ? -0.5 : sa;
+      const camera = new THREE.PerspectiveCamera(28, 1, 0.1, 50);
+      camera.position.set(2.5, 2.4, 4.4); camera.lookAt(0, 1.4, 0);
+      function resize() { const w = canvas.clientWidth, h = canvas.clientHeight; renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); }
+      resize();
+      function loop() { renderer.render(scene, camera); requestAnimationFrame(loop); }
+      loop();
+    }
+    document.querySelectorAll('canvas[data-phase]').forEach((c) => buildPhaseScene(c, +c.dataset.phase));
   </script>
 </body>
 </html>

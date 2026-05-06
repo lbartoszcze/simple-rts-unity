@@ -47,8 +47,6 @@ function makeBody(team, raceKey, armorTier = 0, weaponTier = 0, klass = 'infantr
   const torso = new THREE.Mesh(new THREE.CylinderGeometry(0.38, 0.46, 0.85, 8), liveryMat);
   torso.position.y = 1.30; torso.castShadow = true;
   const tierArmor = buildArmorTier(team, raceKey, armorTier);
-  const armGeom = new THREE.CylinderGeometry(0.10, 0.12, 0.50, 6);
-  const armL = new THREE.Mesh(armGeom, liveryMat); armL.position.set(-0.45, 1.30, 0); armL.castShadow = true;
 
   const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.10, 0.12, 0.16, 6),
     raceKey === 'skeletons' ? boneMat : skinMat);
@@ -72,7 +70,7 @@ function makeBody(team, raceKey, armorTier = 0, weaponTier = 0, klass = 'infantr
   const kneeR = new THREE.Mesh(kneeGeom, accentMat); kneeR.position.set( 0.18, 0.55, 0.06); kneeR.scale.set(1, 0.6, 1);
   const cape = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.85, 0.04), accentMat);
   cape.position.set(0, 1.30, -0.40); cape.rotation.x = -0.10;
-  g.add(bootL, bootR, legL, legR, kneeL, kneeR, belt, torso, armL, neck, head, eyeL, eyeR, nose, mouth, cape, tierArmor);
+  g.add(bootL, bootR, legL, legR, kneeL, kneeR, belt, torso, neck, head, eyeL, eyeR, nose, mouth, cape, tierArmor);
 
   if (v.capH > 0) {
     const cap = new THREE.Mesh(new THREE.ConeGeometry(0.32, v.capH, 8), helmetMat);
@@ -100,12 +98,15 @@ function makeBody(team, raceKey, armorTier = 0, weaponTier = 0, klass = 'infantr
     g.add(jaw);
   }
 
+  const shieldArm = new THREE.Group(); shieldArm.position.set(-0.50, 1.65, 0);
+  const sUp = new THREE.Mesh(new THREE.CylinderGeometry(0.10, 0.12, 0.50, 6), liveryMat); sUp.position.set(0.05, -0.35, 0); sUp.castShadow = true;
+  const sLow = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.10, 0.32, 6), skinMat); sLow.position.set(0.05, -0.74, 0); sLow.castShadow = true;
+  const sHand = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.10, 0.18), skinMat); sHand.position.set(0.05, -0.92, 0.05); sHand.castShadow = true;
   const shieldDisc = new THREE.Mesh(new THREE.CylinderGeometry(0.30, 0.30, 0.05, 16), liveryMat);
-  shieldDisc.position.set(-0.58, 1.30, 0.05); shieldDisc.rotation.z = Math.PI / 2;
-  shieldDisc.castShadow = true;
-  const sboss = new THREE.Mesh(new THREE.SphereGeometry(0.07, 8, 6), accentMat);
-  sboss.position.set(-0.63, 1.30, 0.05);
-  g.add(shieldDisc, sboss);
+  shieldDisc.position.set(-0.08, -0.92, 0.10); shieldDisc.rotation.z = Math.PI / 2; shieldDisc.castShadow = true;
+  const sboss = new THREE.Mesh(new THREE.SphereGeometry(0.07, 8, 6), accentMat); sboss.position.set(-0.13, -0.92, 0.10);
+  shieldArm.add(sUp, sLow, sHand, shieldDisc, sboss);
+  g.add(shieldArm); g.userData.shieldArm = shieldArm;
 
   const weaponArm = buildWeaponArm(team, raceKey, helmetMat, weaponTier, klass, magicType, weaponStyle);
   g.add(weaponArm);
@@ -170,6 +171,7 @@ export function makeUnit(teamIdx, x, z, stats, raceKey) {
     ring,
     hpBar: hp,
     weaponArm: body.userData.weaponArm,
+    shieldArm: body.userData.shieldArm,
     team: teamIdx,
     raceKey: raceKey || 'humans',
     maxHp: stats ? stats.hp : MAX_HP,
@@ -243,6 +245,17 @@ export function updateUnitVisuals(u, camera, t) {
     u.weaponArm.rotation.z = armRotZ;
     u.weaponArm.position.z = armZ;
   }
+  let shieldA = 0;
+  if (tgt) {
+    if (attacking) {
+      const sp = (u.swingT || 0) / (u.swingPeriod || 1.0);
+      shieldA = sp < 0.35 ? -0.4 - 0.5 * (sp / 0.35)
+              : sp < 0.55 ? -0.9 + 0.6 * ((sp - 0.35) / 0.20)
+              : -0.3 - 0.9 * ((sp - 0.55) / 0.45);
+    } else shieldA = -0.5;
+  }
+  if (u.recoilStart != null && t - u.recoilStart < 0.18) shieldA = -1.3;
+  if (u.shieldArm) u.shieldArm.rotation.x = shieldA;
   u.body.rotation.x = tilt; u.body.rotation.z = 0;
   let recX = 0, recZ = 0;
   if (u.recoilStart != null) {
