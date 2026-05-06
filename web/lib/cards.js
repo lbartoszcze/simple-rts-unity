@@ -1,4 +1,5 @@
 import { cardArtSvg } from '../art/card-art.js';
+import { registerVariants } from './modes/variants.js';
 
 export const RACES = {
   humans: {
@@ -78,6 +79,7 @@ export const RACES = {
     ],
   },
 };
+registerVariants(RACES);
 
 export const KLASS = { infantry:{hpMul:1.0,dmgMul:1.0}, archer:{hpMul:0.75,dmgMul:0.9,range:6.0,swing:0.7}, mage:{hpMul:0.7,dmgMul:1.6,range:5.5,swing:1.4}, cavalry:{hpMul:1.6,dmgMul:1.4,speed:11,swing:0.9}, flyer:{hpMul:0.6,dmgMul:1.1,range:4.0,swing:0.6,y:4}, beast:{hpMul:2.0,dmgMul:1.5,swing:1.2} };
 
@@ -179,10 +181,7 @@ export function awardRoundXp(meta, race, isBoss) {
   return { gold, xp };
 }
 
-export function awardRunEndXp(meta, race) {
-  meta.userXp += 10;
-  meta.factionXp[race] = (meta.factionXp[race] || 0) + 10;
-}
+export function awardRunEndXp(meta, race) { meta.userXp += 10; meta.factionXp[race] = (meta.factionXp[race] || 0) + 10; }
 
 export function factionLevel(meta, race) {
   return levelFor(meta.factionXp?.[race] || 0);
