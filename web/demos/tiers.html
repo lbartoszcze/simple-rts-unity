@@ -61,6 +61,7 @@
       const bbox = new THREE.Box3().setFromObject(u.root);
       const size = bbox.getSize(new THREE.Vector3());
       const center = bbox.getCenter(new THREE.Vector3());
+      console.log('[glb-cam] ' + raceKey + ' min=' + bbox.min.x.toFixed(1) + ',' + bbox.min.y.toFixed(1) + ',' + bbox.min.z.toFixed(1) + ' max=' + bbox.max.x.toFixed(1) + ',' + bbox.max.y.toFixed(1) + ',' + bbox.max.z.toFixed(1) + ' center=' + center.x.toFixed(1) + ',' + center.y.toFixed(1) + ',' + center.z.toFixed(1));
       const radius = bbox.getBoundingSphere(new THREE.Sphere()).radius;
       const dist = radius * 2.4;
       camera.position.set(center.x + dist * 0.4, center.y + radius * 0.4, center.z + dist);
