@@ -31,8 +31,8 @@ const sky = new THREE.HemisphereLight(0xbfe4ff, 0x7a8b5a, 0.65);
 scene.add(sky);
 
 export const cameraTarget = new THREE.Vector3(0, 0, 0);
-const camOffset = new THREE.Vector3(0, 60, 55);
-export const camera = new THREE.PerspectiveCamera(28, 1, 0.5, 400);
+const camOffset = new THREE.Vector3(0, 95, 90);
+export const camera = new THREE.PerspectiveCamera(38, 1, 0.5, 400);
 function syncCamera() {
   camera.position.copy(cameraTarget).add(camOffset);
   camera.lookAt(cameraTarget);

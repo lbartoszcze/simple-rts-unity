@@ -1,16 +1,11 @@
 import * as THREE from 'three';
-import {
-  scene, camera, renderer, canvas,
-  panCamera, zoomCamera,
-} from './scene.js';
+import { scene, camera, renderer, canvas } from './scene.js';
 import { makeUnit, updateUnitVisuals, killVisuals } from './units.js';
 import { RACES, showCardPicker, showRacePicker } from './lib/cards.js';
 
 const TEAM_BLUE = 0;
 const TEAM_RED = 1;
 const SPACING = 2.6;
-const PAN_SPEED = 38;
-const EDGE_PAD = 14;
 
 const banner = document.getElementById('banner');
 const roundLabel = document.getElementById('round-label');
@@ -27,12 +22,14 @@ const units = [];
 
 function enemyStatsForRound(n, raceKey) {
   const base = RACES[raceKey].base;
-  const scale = 1 + (n - 1) * 0.18;
+  const hpScale = 0.70 + (n - 1) * 0.12;
+  const dmgScale = 0.70 + (n - 1) * 0.10;
+  const countScale = 0.65 + (n - 1) * 0.12;
   return {
-    count: Math.round(base.count * (0.85 + (n - 1) * 0.18)),
-    hp: Math.round(base.hp * scale),
-    damage: Math.round(base.damage * (1 + (n - 1) * 0.10)),
-    speed: base.speed,
+    count: Math.max(3, Math.round(base.count * countScale)),
+    hp: Math.max(20, Math.round(base.hp * hpScale)),
+    damage: Math.max(6, Math.round(base.damage * dmgScale)),
+    speed: base.speed * 0.92,
     range: base.range,
   };
 }
@@ -168,34 +165,10 @@ function startGame() {
   });
 }
 
-const keys = new Set();
-const mouseClient = { x: 0, y: 0 };
-window.addEventListener('keydown', (e) => keys.add(e.key.toLowerCase()));
-window.addEventListener('keyup', (e) => keys.delete(e.key.toLowerCase()));
-canvas.addEventListener('mousemove', (e) => {
-  const r = canvas.getBoundingClientRect();
-  mouseClient.x = e.clientX - r.left;
-  mouseClient.y = e.clientY - r.top;
-});
-canvas.addEventListener('wheel', (e) => {
-  e.preventDefault();
-  zoomCamera(e.deltaY * 0.04);
-}, { passive: false });
-
-function tickPan(dt) {
-  let dx = 0, dz = 0;
-  if (keys.has('w') || keys.has('arrowup')    || mouseClient.y < EDGE_PAD) dz -= 1;
-  if (keys.has('s') || keys.has('arrowdown')  || mouseClient.y > canvas.clientHeight - EDGE_PAD) dz += 1;
-  if (keys.has('a') || keys.has('arrowleft')  || mouseClient.x < EDGE_PAD) dx -= 1;
-  if (keys.has('d') || keys.has('arrowright') || mouseClient.x > canvas.clientWidth - EDGE_PAD) dx += 1;
-  if (dx || dz) panCamera(dx * PAN_SPEED * dt, dz * PAN_SPEED * dt);
-}
-
 let last = performance.now();
 function frame(now) {
   const dt = Math.min(0.05, (now - last) / 1000);
   last = now;
-  tickPan(dt);
   if (phase === 'battle') step(dt);
   for (const u of units) updateUnitVisuals(u, camera, now / 1000);
   renderer.render(scene, camera);
