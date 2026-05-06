@@ -34,17 +34,6 @@
     <div class="cell"><h2>ELVES · Warrior</h2><canvas data-glb="elves"></canvas></div>
     <div class="cell"><h2>SKELETONS · Skeleton</h2><canvas data-glb="skeletons"></canvas></div>
   </div>
-  <h1 style="margin-top: 32px">⚔️ Weapon variety — different geometry, different attack animation</h1>
-  <p class="sub">Each weapon style runs its own attack animation — sword/scythe slash, spear/pike/lance thrust forward, axe/halberd chop overhead, mace swings horizontally. Cells below show the weapon mid-attack. (Sword is shown in the combat-phases row above.)</p>
-  <div class="row" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));">
-    <div class="cell"><h2>SPEAR · thrust</h2><canvas data-weapon="spear"></canvas></div>
-    <div class="cell"><h2>PIKE · long thrust</h2><canvas data-weapon="pike"></canvas></div>
-    <div class="cell"><h2>LANCE · charge</h2><canvas data-weapon="lance"></canvas></div>
-    <div class="cell"><h2>AXE · chop</h2><canvas data-weapon="axe"></canvas></div>
-    <div class="cell"><h2>HALBERD · chop</h2><canvas data-weapon="halberd"></canvas></div>
-    <div class="cell"><h2>MACE · swing</h2><canvas data-weapon="mace"></canvas></div>
-    <div class="cell"><h2>SCYTHE · slash</h2><canvas data-weapon="scythe"></canvas></div>
-  </div>
   <script type="module">
     import * as THREE from 'three';
     import { makeUnit, updateUnitVisuals } from '../units.js';
