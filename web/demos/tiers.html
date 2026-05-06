@@ -71,9 +71,12 @@
       camera.position.set(2.6, 2.4, 5.2); camera.lookAt(0, 1.4, 0);
       function resize() { const w = canvas.clientWidth, h = canvas.clientHeight; renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); }
       resize();
-      try { await loadHumanoid(); } catch (e) { console.error(e); return; }
+      try { await loadHumanoid(); console.log('[demo] humanoid loaded, building'); } catch (e) { console.error('[demo] load failed', e); return; }
       const u = buildHumanoidUnit({ livery: 0x4a7dd1 });
+      if (!u) { console.error('[demo] buildHumanoidUnit returned null'); return; }
       scene.add(u.root);
+      const bbox = new THREE.Box3().setFromObject(u.root);
+      console.log('[demo] bbox', bbox.min, bbox.max, 'clips:', Object.keys(u.clips));
       playClip(u, clipName);
       const clock = new THREE.Clock();
       function loop() {
