@@ -3,21 +3,31 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>simple-rts-unity — browser build</title>
+  <title>simple-rts — 3D</title>
   <link rel="stylesheet" href="style.css">
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.160.0/build/three.module.js"
+    }
+  }
+  </script>
 </head>
 <body>
   <header>
     <h1>simple-rts</h1>
     <p>
-      <b>Left-drag</b> to box-select your blue units.
-      <b>Right-click on the ground</b> to move them in formation.
-      <b>Right-click on a red enemy</b> to attack.
-      Wipe out the red team to win.
+      <b>Left-drag</b> to box-select your blue troops.
+      <b>Right-click ground</b> to move them in formation.
+      <b>Right-click a red soldier</b> to attack.
+      <b>WASD</b> or screen edge to pan, <b>scroll</b> to zoom.
     </p>
   </header>
-  <canvas id="game" width="1024" height="640"></canvas>
+  <div id="stage">
+    <canvas id="game"></canvas>
+    <div id="drag-box" class="hidden"></div>
+  </div>
   <div id="banner" class="hidden"></div>
-  <script src="game.js"></script>
+  <script type="module" src="game.js"></script>
 </body>
 </html>
