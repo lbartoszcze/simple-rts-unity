@@ -85,17 +85,12 @@ function makeBody(team, raceKey, armorTier = 0, weaponTier = 0, klass = 'infantr
     beard.position.set(0, 1.85, 0.18); beard.scale.set(1.0, 0.85, 0.7); beard.castShadow = true;
     g.add(beard);
   } else if (v.accessory === 'ears') {
-    const earGeom = new THREE.ConeGeometry(0.06, 0.22, 6);
-    const earMat = lambert(v.skin);
-    const earL = new THREE.Mesh(earGeom, earMat);
-    earL.position.set(-0.27, 2.10, 0); earL.rotation.z = Math.PI / 2;
-    const earR = new THREE.Mesh(earGeom, earMat);
-    earR.position.set( 0.27, 2.10, 0); earR.rotation.z = -Math.PI / 2;
+    const earGeom = new THREE.ConeGeometry(0.06, 0.22, 6); const earMat = lambert(v.skin);
+    const earL = new THREE.Mesh(earGeom, earMat); earL.position.set(-0.27, 2.10, 0); earL.rotation.z = Math.PI / 2;
+    const earR = new THREE.Mesh(earGeom, earMat); earR.position.set( 0.27, 2.10, 0); earR.rotation.z = -Math.PI / 2;
     g.add(earL, earR);
   } else if (v.accessory === 'skull') {
-    const jaw = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.05, 0.18), boneMat);
-    jaw.position.set(0, 1.86, 0.05);
-    g.add(jaw);
+    const jaw = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.05, 0.18), boneMat); jaw.position.set(0, 1.86, 0.05); g.add(jaw);
   }
 
   const shieldArm = new THREE.Group(); shieldArm.position.set(-0.50, 1.65, 0);
@@ -106,7 +101,10 @@ function makeBody(team, raceKey, armorTier = 0, weaponTier = 0, klass = 'infantr
   shieldDisc.position.set(-0.08, -0.92, 0.10); shieldDisc.rotation.z = Math.PI / 2; shieldDisc.castShadow = true;
   const sboss = new THREE.Mesh(new THREE.SphereGeometry(0.07, 8, 6), accentMat); sboss.position.set(-0.13, -0.92, 0.10);
   shieldArm.add(sUp, sLow, sHand, shieldDisc, sboss);
-  g.add(shieldArm); g.userData.shieldArm = shieldArm;
+  const TWO_HAND = new Set(['spear', 'pike', 'halberd', 'lance']);
+  const twoHand = TWO_HAND.has(weaponStyle);
+  if (twoHand) { shieldDisc.visible = false; sboss.visible = false; shieldArm.rotation.y = -0.55; }
+  g.add(shieldArm); g.userData.shieldArm = shieldArm; g.userData.twoHand = twoHand;
 
   const weaponArm = buildWeaponArm(team, raceKey, helmetMat, weaponTier, klass, magicType, weaponStyle);
   g.add(weaponArm);
@@ -172,6 +170,7 @@ export function makeUnit(teamIdx, x, z, stats, raceKey) {
     hpBar: hp,
     weaponArm: body.userData.weaponArm,
     shieldArm: body.userData.shieldArm,
+    twoHand: body.userData.twoHand,
     team: teamIdx,
     raceKey: raceKey || 'humans',
     maxHp: stats ? stats.hp : MAX_HP,
@@ -240,23 +239,24 @@ export function updateUnitVisuals(u, camera, t) {
     bobY = Math.abs(Math.sin(ph)) * 0.11;
     armA = Math.sin(ph * 0.5) * 0.25; tilt = Math.sin(ph * 0.5) * 0.04;
   }
-  if (u.weaponArm) {
-    u.weaponArm.rotation.x = armA;
-    u.weaponArm.rotation.z = armRotZ;
-    u.weaponArm.position.z = armZ;
-  }
+  if (u.weaponArm) { u.weaponArm.rotation.x = armA; u.weaponArm.rotation.z = armRotZ; u.weaponArm.position.z = armZ; }
   let shieldA = 0;
   if (tgt) {
-    if (attacking) {
-      const sp = (u.swingT || 0) / (u.swingPeriod || 1.0);
-      shieldA = sp < 0.35 ? -0.4 - 0.5 * (sp / 0.35)
-              : sp < 0.55 ? -0.9 + 0.6 * ((sp - 0.35) / 0.20)
-              : -0.3 - 0.9 * ((sp - 0.55) / 0.45);
-    } else shieldA = -0.5;
+    const sp = (u.swingT || 0) / (u.swingPeriod || 1.0);
+    shieldA = !attacking ? -0.5
+            : sp < 0.35 ? -0.4 - 0.5 * (sp / 0.35)
+            : sp < 0.55 ? -0.9 + 0.6 * ((sp - 0.35) / 0.20)
+            : -0.3 - 0.9 * ((sp - 0.55) / 0.45);
   }
   if (u.recoilStart != null && t - u.recoilStart < 0.18) shieldA = -1.3;
-  if (u.shieldArm) u.shieldArm.rotation.x = shieldA;
-  u.body.rotation.x = tilt; u.body.rotation.z = 0;
+  if (u.shieldArm) {
+    u.shieldArm.rotation.x = u.twoHand ? armA * 0.75 : shieldA;
+    if (u.twoHand) u.shieldArm.rotation.z = -armRotZ * 0.5;
+  }
+  let lean = 0;
+  if (u.recoilStart != null) { const a = (t - u.recoilStart) / 0.18; if (a < 1) lean = (u.dodgeSign || 1) * 0.22 * (1 - a); }
+  else if (!u.dodgeSign) u.dodgeSign = Math.random() < 0.5 ? -1 : 1;
+  u.body.rotation.x = tilt; u.body.rotation.z = lean;
   let recX = 0, recZ = 0;
   if (u.recoilStart != null) {
     const age = t - u.recoilStart;
