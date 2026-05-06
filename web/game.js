@@ -142,6 +142,7 @@ function step(dt, t) {
     if (u.hp <= 0) continue;
     if (!u.attackTarget || u.attackTarget.hp <= 0) u.attackTarget = pickTarget(u);
     if (!u.attackTarget) { u.vx = 0; u.vz = 0; continue; }
+    if ((u.silenceUntil && t < u.silenceUntil) || (u.stunUntil && t < u.stunUntil)) { u.vx = 0; u.vz = 0; u.swingT = 0; u.hitDealt = false; continue; }
     const dx = u.attackTarget.x - u.x;
     const dz = u.attackTarget.z - u.z, dist = Math.hypot(dx, dz);
     const kr = u.kiteRatio != null ? u.kiteRatio : ((u.klass === 'archer' || u.klass === 'mage' || u.klass === 'flyer') ? 0.7 : 0);

@@ -1,6 +1,6 @@
 import { applyMagicHit } from './magic.js';
 
-const baseDmg = (c) => c.damage * c.swingPeriod * (c.formationMul || 1);
+const baseDmg = (c, t) => c.damage * c.swingPeriod * (c.formationMul || 1) * (t?.damageMul || 1);
 
 export const RACE_BUFF = {
   humans:    { name: 'Banner of Valor', desc: '+15% damage per nearby human ally (max +60%)' },
@@ -27,35 +27,35 @@ const recoil = (t, ctx) => { t.recoilStart = ctx.t; t.recoilDirX = -ctx.dx / ctx
 const RACE_CLASS = {
   humans: {
     infantry: { name: 'Footman', onHit: (c, t, ctx) => { t.staggerUntil = ctx.t + 0.4; ctx.spawnFx(t.x, t.z, 0.45, 0xfff5b8, 0.18); return false; } },
-    archer:   { name: 'Marksman', stats: { range: 7.5, swingPeriod: 1.0, kiteRatio: 0 }, onHit: (c, t, ctx) => { const m = t.klass === 'flyer' ? 1.4 : 1.0; t.hp -= baseDmg(c) * m * 1.4; recoil(t, ctx); ctx.spawnFx(t.x, t.z, 0.55, 0xfff5b8, 0.22); return true; } },
+    archer:   { name: 'Marksman', stats: { range: 7.5, swingPeriod: 1.0, kiteRatio: 0 }, onHit: (c, t, ctx) => { const m = t.klass === 'flyer' ? 1.4 : 1.0; t.hp -= baseDmg(c, t) * m * 1.4; t.bleedUntil = Math.max(t.bleedUntil || 0, ctx.t + 3.5); t.bleedDps = (t.bleedDps || 0) + baseDmg(c, t) * 0.18; recoil(t, ctx); ctx.spawnFx(t.x, t.z, 0.55, 0xc83030, 0.22); return true; } },
     mage:     { name: 'Cleric', onHit: applyMagicHit },
-    cavalry:  { name: 'Lancer', onHit: (c, t, ctx) => { const charge = c.lastChargeTarget !== t; t.hp -= baseDmg(c) * (charge ? 2 : 1); recoil(t, ctx); ctx.spawnFx(t.x, t.z, charge ? 0.9 : 0.5, 0xfff5b8, charge ? 0.35 : 0.15); c.lastChargeTarget = t; return true; } },
-    flyer:    { name: 'Pegasus', onHit: (c, t, ctx) => { t.hp -= baseDmg(c) * 1.2; recoil(t, ctx); ctx.spawnFx(t.x, t.z, 0.55, 0xfff5b8, 0.18); return true; } },
-    beast:    { name: 'War Hound', onHit: (c, t, ctx) => { let pack = 0; for (const v of ctx.units) if (v.team === c.team && v.klass === 'beast' && v.hp > 0) pack++; t.hp -= baseDmg(c) * (1 + Math.max(0, pack - 1) * 0.18); recoil(t, ctx); ctx.spawnFx(t.x, t.z, 0.55, 0xfff5b8, 0.18); return true; } },
+    cavalry:  { name: 'Lancer', onHit: (c, t, ctx) => { const charge = c.lastChargeTarget !== t; t.hp -= baseDmg(c, t) * (charge ? 2 : 1); recoil(t, ctx); ctx.spawnFx(t.x, t.z, charge ? 0.9 : 0.5, 0xfff5b8, charge ? 0.35 : 0.15); c.lastChargeTarget = t; return true; } },
+    flyer:    { name: 'Pegasus', onHit: (c, t, ctx) => { t.hp -= baseDmg(c, t) * 1.2; recoil(t, ctx); ctx.spawnFx(t.x, t.z, 0.55, 0xfff5b8, 0.18); return true; } },
+    beast:    { name: 'War Hound', onHit: (c, t, ctx) => { let pack = 0; for (const v of ctx.units) if (v.team === c.team && v.klass === 'beast' && v.hp > 0) pack++; t.hp -= baseDmg(c, t) * (1 + Math.max(0, pack - 1) * 0.18); recoil(t, ctx); ctx.spawnFx(t.x, t.z, 0.55, 0xfff5b8, 0.18); return true; } },
   },
   dwarves: {
-    infantry: { name: 'Shieldbearer', onHit: (c, t, ctx) => { const w = c.hp / c.maxHp < 0.5 ? 1.5 : 1.0; t.hp -= baseDmg(c) * w; recoil(t, ctx); ctx.spawnFx(t.x, t.z, 0.55, 0xff8a3a, 0.18); return true; } },
-    archer:   { name: 'Crossbowman', stats: { range: 5.0, swingPeriod: 1.2, kiteRatio: 0 }, onHit: (c, t, ctx) => { t.hp -= baseDmg(c) * 1.8; recoil(t, ctx); ctx.spawnFx(t.x, t.z, 0.85, 0xff8a3a, 0.28); return true; } },
+    infantry: { name: 'Shieldbearer', onHit: (c, t, ctx) => { const w = c.hp / c.maxHp < 0.5 ? 1.5 : 1.0; t.hp -= baseDmg(c, t) * w; recoil(t, ctx); ctx.spawnFx(t.x, t.z, 0.55, 0xff8a3a, 0.18); return true; } },
+    archer:   { name: 'Crossbowman', stats: { range: 5.0, swingPeriod: 1.2, kiteRatio: 0 }, onHit: (c, t, ctx) => { t.hp -= baseDmg(c, t) * 1.8; recoil(t, ctx); ctx.spawnFx(t.x, t.z, 0.85, 0xff8a3a, 0.28); return true; } },
     mage:     { name: 'Pyromancer', onHit: applyMagicHit },
-    cavalry:  { name: 'Boar Rider', onHit: (c, t, ctx) => { t.hp -= baseDmg(c); const nx = -ctx.dx / ctx.dist, nz = -ctx.dz / ctx.dist; t.x += nx * 1.0; t.z += nz * 1.0; recoil(t, ctx); ctx.spawnFx(t.x, t.z, 0.7, 0xff8a3a, 0.22); return true; } },
-    flyer:    { name: 'Gyrocopter', onHit: (c, t, ctx) => { for (const v of ctx.units) { if (v.team !== t.team || v.hp <= 0) continue; const d2 = (v.x - t.x) ** 2 + (v.z - t.z) ** 2; if (d2 < 4) v.hp -= baseDmg(c) * (v === t ? 1 : 0.5); } ctx.spawnFx(t.x, t.z, 1.4, 0xff5530, 0.45); return true; } },
-    beast:    { name: 'Cave Bear', onHit: (c, t, ctx) => { t.hp -= baseDmg(c) * 1.3; t.staggerUntil = ctx.t + 0.6; recoil(t, ctx); ctx.spawnFx(t.x, t.z, 0.7, 0xff8a3a, 0.22); return true; } },
+    cavalry:  { name: 'Boar Rider', onHit: (c, t, ctx) => { t.hp -= baseDmg(c, t); const nx = -ctx.dx / ctx.dist, nz = -ctx.dz / ctx.dist; t.x += nx * 1.0; t.z += nz * 1.0; t.stunUntil = Math.max(t.stunUntil || 0, ctx.t + 0.6); recoil(t, ctx); ctx.spawnFx(t.x, t.z, 0.7, 0xff8a3a, 0.25); return true; } },
+    flyer:    { name: 'Gyrocopter', onHit: (c, t, ctx) => { for (const v of ctx.units) { if (v.team !== t.team || v.hp <= 0) continue; const d2 = (v.x - t.x) ** 2 + (v.z - t.z) ** 2; if (d2 < 4) v.hp -= baseDmg(c, t) * (v === t ? 1 : 0.5); } ctx.spawnFx(t.x, t.z, 1.4, 0xff5530, 0.45); return true; } },
+    beast:    { name: 'Cave Bear', onHit: (c, t, ctx) => { t.hp -= baseDmg(c, t) * 1.3; t.staggerUntil = ctx.t + 0.6; recoil(t, ctx); ctx.spawnFx(t.x, t.z, 0.7, 0xff8a3a, 0.22); return true; } },
   },
   elves: {
-    infantry: { name: 'Bladedancer', onHit: (c, t, ctx) => { const dbl = Math.random() < 0.3; t.hp -= baseDmg(c) * (dbl ? 2 : 1); recoil(t, ctx); ctx.spawnFx(t.x, t.z, dbl ? 0.55 : 0.4, dbl ? 0xa8e8b8 : 0xfff5b8, 0.18); return true; } },
-    archer:   { name: 'Longbowman', stats: { range: 9.0, swingPeriod: 0.5, kiteRatio: 0.85 }, onHit: (c, t, ctx) => { t.hp -= baseDmg(c) * 0.85; recoil(t, ctx); ctx.spawnFx(t.x, t.z, 0.5, 0xa8e8b8, 0.18); return true; } },
+    infantry: { name: 'Bladedancer', onHit: (c, t, ctx) => { const dbl = Math.random() < 0.3; const hits = dbl ? 2 : 1; t.hp -= baseDmg(c, t) * hits; t.bleedUntil = Math.max(t.bleedUntil || 0, ctx.t + 4.0); t.bleedDps = (t.bleedDps || 0) + baseDmg(c, t) * 0.12 * hits; recoil(t, ctx); ctx.spawnFx(t.x, t.z, dbl ? 0.55 : 0.4, dbl ? 0xa8e8b8 : 0xc83030, 0.18); return true; } },
+    archer:   { name: 'Longbowman', stats: { range: 9.0, swingPeriod: 0.5, kiteRatio: 0.85 }, onHit: (c, t, ctx) => { t.hp -= baseDmg(c, t) * 0.85; recoil(t, ctx); ctx.spawnFx(t.x, t.z, 0.5, 0xa8e8b8, 0.18); return true; } },
     mage:     { name: 'Arcanist', onHit: applyMagicHit },
-    cavalry:  { name: 'Stag Rider', onHit: (c, t, ctx) => { t.hp -= baseDmg(c); if (Math.random() < 0.25) c.dodgeUntil = ctx.t + 0.8; recoil(t, ctx); ctx.spawnFx(t.x, t.z, 0.5, 0xa8e8b8, 0.18); return true; } },
-    flyer:    { name: 'Hawk Archer', onHit: (c, t, ctx) => { t.hp -= baseDmg(c) * 1.3; recoil(t, ctx); ctx.spawnFx(t.x, t.z, 0.5, 0xa8e8b8, 0.18); return true; } },
-    beast:    { name: 'Treant', onHit: (c, t, ctx) => { t.hp -= baseDmg(c); t.rootedUntil = ctx.t + 1.4; recoil(t, ctx); ctx.spawnFx(t.x, t.z, 0.7, 0x3a8a3f, 0.35); return true; } },
+    cavalry:  { name: 'Stag Rider', onHit: (c, t, ctx) => { t.hp -= baseDmg(c, t); if (Math.random() < 0.25) c.dodgeUntil = ctx.t + 0.8; recoil(t, ctx); ctx.spawnFx(t.x, t.z, 0.5, 0xa8e8b8, 0.18); return true; } },
+    flyer:    { name: 'Hawk Archer', onHit: (c, t, ctx) => { t.hp -= baseDmg(c, t) * 1.3; t.silenceUntil = Math.max(t.silenceUntil || 0, ctx.t + 1.5); recoil(t, ctx); ctx.spawnFx(t.x, t.z, 0.5, 0xa8e8b8, 0.18); return true; } },
+    beast:    { name: 'Treant', onHit: (c, t, ctx) => { t.hp -= baseDmg(c, t); t.rootedUntil = ctx.t + 1.4; recoil(t, ctx); ctx.spawnFx(t.x, t.z, 0.7, 0x3a8a3f, 0.35); return true; } },
   },
   skeletons: {
-    infantry: { name: 'Risen', onHit: (c, t, ctx) => { t.hp -= baseDmg(c); recoil(t, ctx); ctx.spawnFx(t.x, t.z, 0.5, 0xb88dff, 0.18); return true; } },
-    archer:   { name: 'Bone Slinger', stats: { range: 5.5, swingPeriod: 0.45, kiteRatio: 0.4 }, onHit: (c, t, ctx) => { t.hp -= baseDmg(c) * 0.5; recoil(t, ctx); t.poisonUntil = Math.max(t.poisonUntil || 0, ctx.t + 4.0); t.poisonDps = Math.max(t.poisonDps || 0, baseDmg(c) * 0.4); ctx.spawnFx(t.x, t.z, 0.4, 0x6dbf5d, 0.22); return true; } },
+    infantry: { name: 'Risen', onHit: (c, t, ctx) => { t.hp -= baseDmg(c, t); recoil(t, ctx); ctx.spawnFx(t.x, t.z, 0.5, 0xb88dff, 0.18); return true; } },
+    archer:   { name: 'Bone Slinger', stats: { range: 5.5, swingPeriod: 0.45, kiteRatio: 0.4 }, onHit: (c, t, ctx) => { t.hp -= baseDmg(c, t) * 0.5; recoil(t, ctx); t.poisonUntil = Math.max(t.poisonUntil || 0, ctx.t + 4.0); t.poisonDps = Math.max(t.poisonDps || 0, baseDmg(c, t) * 0.4); ctx.spawnFx(t.x, t.z, 0.4, 0x6dbf5d, 0.22); return true; } },
     mage:     { name: 'Necromancer', onHit: applyMagicHit },
-    cavalry:  { name: 'Death Knight', onHit: (c, t, ctx) => { const k = t.hp <= baseDmg(c); t.hp -= baseDmg(c); if (k) c.hp = Math.min(c.maxHp, c.hp + c.maxHp * 0.25); recoil(t, ctx); ctx.spawnFx(t.x, t.z, 0.55, 0xb88dff, k ? 0.4 : 0.18); return true; } },
-    flyer:    { name: 'Crow', onHit: (c, t, ctx) => { t.hp -= baseDmg(c); recoil(t, ctx); ctx.spawnFx(t.x, t.z, 0.4, 0x4a4a4a, 0.15); return true; } },
-    beast:    { name: 'Bone Hydra', onHit: (c, t, ctx) => { t.hp -= baseDmg(c) * 1.2; recoil(t, ctx); ctx.spawnFx(t.x, t.z, 0.55, 0xb88dff, 0.2); return true; } },
+    cavalry:  { name: 'Death Knight', onHit: (c, t, ctx) => { const k = t.hp <= baseDmg(c, t); t.hp -= baseDmg(c, t); if (k) c.hp = Math.min(c.maxHp, c.hp + c.maxHp * 0.25); recoil(t, ctx); ctx.spawnFx(t.x, t.z, 0.55, 0xb88dff, k ? 0.4 : 0.18); return true; } },
+    flyer:    { name: 'Crow', onHit: (c, t, ctx) => { t.hp -= baseDmg(c, t); recoil(t, ctx); ctx.spawnFx(t.x, t.z, 0.4, 0x4a4a4a, 0.15); return true; } },
+    beast:    { name: 'Bone Hydra', onHit: (c, t, ctx) => { t.hp -= baseDmg(c, t) * 1.2; recoil(t, ctx); ctx.spawnFx(t.x, t.z, 0.55, 0xb88dff, 0.2); return true; } },
   },
 };
 
@@ -68,21 +68,27 @@ export function applyVariantHit(caster, target, ctx) {
 }
 
 export function tickRaceClass(units, dt, t, spawnFx) {
+  for (const u of units) if (u.hp > 0) u.damageMul = 1;
+  for (const u of units) {
+    if (u.hp > 0 && u.raceKey === 'humans' && u.klass === 'flyer') {
+      for (const v of units) {
+        if (v.team !== u.team || v.hp <= 0) continue;
+        if ((u.x - v.x) ** 2 + (u.z - v.z) ** 2 < 25) v.damageMul = Math.min(v.damageMul, 0.8);
+      }
+    }
+    if (u.hp > 0 && u.dodgeUntil && t < u.dodgeUntil) u.damageMul = Math.min(u.damageMul, 0.5);
+  }
   for (const u of units) {
     if (u.hp <= 0) {
       if (!u.revived && u.raceKey === 'skeletons' && u.klass === 'infantry') { u.hp = 1; u.revived = true; }
       continue;
     }
-    if (u.burnUntil && t < u.burnUntil) {
-      u.hp -= (u.burnDps || 0) * dt;
-      if (spawnFx && Math.random() < 0.15) spawnFx(u.x, u.z, 0.35, 0xff7733, 0.2);
-    }
-    if (u.poisonUntil && t < u.poisonUntil) {
-      u.hp -= (u.poisonDps || 0) * dt;
-      if (spawnFx && Math.random() < 0.15) spawnFx(u.x, u.z, 0.3, 0x6dbf5d, 0.25);
-    }
+    if (u.burnUntil && t < u.burnUntil) { u.hp -= (u.burnDps || 0) * dt; if (spawnFx && Math.random() < 0.15) spawnFx(u.x, u.z, 0.35, 0xff7733, 0.2); }
+    if (u.poisonUntil && t < u.poisonUntil) { u.hp -= (u.poisonDps || 0) * dt; if (spawnFx && Math.random() < 0.15) spawnFx(u.x, u.z, 0.3, 0x6dbf5d, 0.25); }
+    if (u.bleedUntil && t < u.bleedUntil) { u.hp -= (u.bleedDps || 0) * dt; if (spawnFx && Math.random() < 0.10) spawnFx(u.x, u.z, 0.25, 0xc83030, 0.18); } else u.bleedDps = 0;
     if (u.staggerUntil && t < u.staggerUntil) u.speed *= 0.2;
     if (u.rootedUntil && t < u.rootedUntil) u.speed = 0;
+    if (u.stunUntil && t < u.stunUntil) u.speed = 0;
     if (u.raceKey === 'elves') u.speed *= 1.25;
     if (u.raceKey === 'skeletons') u.hp = Math.min(u.maxHp, u.hp + (u.klass === 'beast' ? 6 : 1) * dt);
     if (u.raceKey === 'skeletons' && u.klass === 'beast') {} // (legacy noop placeholder)
