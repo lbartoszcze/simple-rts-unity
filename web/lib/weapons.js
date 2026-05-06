@@ -41,16 +41,42 @@ export function buildWeaponArm(team, raceKey, helmetMat, weaponTier = 0, klass =
     bow.castShadow = true;
     wpn.add(bow, string);
   } else if (raceKey === 'humans') {
-    const blade = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.78, 0.05), metal(weaponTier));
-    blade.position.set(0.12, -0.10, 0.15); blade.rotation.z = -0.22;
-    const cross = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.05, 0.05), helmetMat);
+    const bladeLen = 0.78 + weaponTier * 0.10;
+    const blade = new THREE.Mesh(new THREE.BoxGeometry(0.06, bladeLen, 0.05), metal(weaponTier));
+    blade.position.set(0.12, -0.10 - (bladeLen - 0.78) * 0.5, 0.15); blade.rotation.z = -0.22;
+    const crossLen = 0.22 + weaponTier * 0.06;
+    const cross = new THREE.Mesh(new THREE.BoxGeometry(crossLen, 0.05, 0.05), helmetMat);
     cross.position.set(0.05, -0.49, 0.15); cross.rotation.z = -0.22;
     const hilt = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.18, 6), lambert(0x3a2a1a));
     hilt.position.set(0.02, -0.60, 0.15); hilt.rotation.z = -0.22;
-    const pommel = new THREE.Mesh(new THREE.SphereGeometry(0.06, 6, 6), helmetMat);
+    const pommelMat = weaponTier >= 2
+      ? new THREE.MeshLambertMaterial({ color: 0xfff5b8, emissive: 0x806020, emissiveIntensity: 0.5 })
+      : helmetMat;
+    const pommel = new THREE.Mesh(new THREE.SphereGeometry(0.07, 8, 6), pommelMat);
     pommel.position.set(-0.01, -0.69, 0.15);
     blade.castShadow = true; cross.castShadow = true; hilt.castShadow = true;
     wpn.add(blade, cross, hilt, pommel);
+    if (weaponTier >= 1) {
+      const fuller = new THREE.Mesh(new THREE.BoxGeometry(0.015, bladeLen * 0.85, 0.06), lambert(0x404040));
+      fuller.position.copy(blade.position); fuller.rotation.z = -0.22;
+      wpn.add(fuller);
+    }
+    if (weaponTier >= 2) {
+      const wingMat = lambert(0xc9a44a, true);
+      const wL = new THREE.Mesh(new THREE.TorusGeometry(0.07, 0.022, 6, 12, Math.PI), wingMat);
+      wL.position.set(-0.10, -0.49, 0.15); wL.rotation.set(0, 0, Math.PI - 0.22);
+      const wR = new THREE.Mesh(new THREE.TorusGeometry(0.07, 0.022, 6, 12, Math.PI), wingMat);
+      wR.position.set( 0.20, -0.49, 0.15); wR.rotation.set(0, 0, -0.22);
+      wpn.add(wL, wR);
+    }
+    if (weaponTier >= 3) {
+      const flameMat = new THREE.MeshLambertMaterial({ color: 0xfff0a8, emissive: 0xffe070, emissiveIntensity: 0.9 });
+      const flL = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.34, 0.04), flameMat);
+      flL.position.set(0.02, -0.06, 0.15); flL.rotation.z = -0.04;
+      const flR = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.34, 0.04), flameMat);
+      flR.position.set(0.22, -0.06, 0.15); flR.rotation.z = -0.42;
+      wpn.add(flL, flR);
+    }
   } else if (raceKey === 'dwarves') {
     const handle = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.85, 6), lambert(0x3a2a1a));
     handle.position.set(0.08, -0.45, 0.15); handle.rotation.z = -0.18;
@@ -98,6 +124,67 @@ export function makeHorse(team) {
   const saddle = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.18, 0.9), accent);
   saddle.position.set(0, 1.42, 0.05);
   g.add(body, neck, head, tail, saddle);
+  return g;
+}
+
+export function buildArmorTier(team, raceKey, armorTier = 0) {
+  const g = new THREE.Group();
+  const tierEmit = armorTier >= 3 ? 0xfff5b8 : 0x000000;
+  const tierColor = armorTier >= 2 ? 0xc9a44a : team.accent;
+  const matMain = new THREE.MeshLambertMaterial({ color: tierColor, emissive: tierEmit, emissiveIntensity: armorTier >= 3 ? 0.35 : 0 });
+  const matMetal = lambert(armorTier >= 2 ? 0xc9a44a : 0x707378, true);
+  const matDark = lambert(0x4a4f55);
+  const chest = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.55, 0.10), matMain);
+  chest.position.set(0, 1.35, 0.36); chest.castShadow = true;
+  chest.scale.set(1 + armorTier * 0.18, 1 + armorTier * 0.14, 1 + armorTier * 0.7);
+  g.add(chest);
+  const paldGeom = new THREE.SphereGeometry(0.18, 8, 6);
+  const paldMat = new THREE.MeshLambertMaterial({ color: tierColor, emissive: tierEmit, emissiveIntensity: armorTier >= 3 ? 0.3 : 0 });
+  const ps = 1 + armorTier * 0.25;
+  const paldL = new THREE.Mesh(paldGeom, paldMat); paldL.position.set(-0.50, 1.65, 0); paldL.scale.set(ps, 0.7 * ps, ps); paldL.castShadow = true;
+  const paldR = new THREE.Mesh(paldGeom, paldMat); paldR.position.set( 0.50, 1.65, 0); paldR.scale.set(ps, 0.7 * ps, ps); paldR.castShadow = true;
+  g.add(paldL, paldR);
+
+  if (armorTier >= 1) {
+    const grL = new THREE.Mesh(new THREE.CylinderGeometry(0.20, 0.22, 0.34, 8), matMetal); grL.position.set(-0.18, 0.45, 0); grL.castShadow = true;
+    const grR = new THREE.Mesh(new THREE.CylinderGeometry(0.20, 0.22, 0.34, 8), matMetal); grR.position.set( 0.18, 0.45, 0); grR.castShadow = true;
+    const cuffL = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.12, 0.18, 6), matMetal); cuffL.position.set(-0.45, 1.04, 0); cuffL.castShadow = true;
+    const cuffR = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.12, 0.18, 6), matMetal); cuffR.position.set( 0.45, 1.04, 0); cuffR.castShadow = true;
+    const mail = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.50, 0.86, 10), matDark);
+    mail.position.set(0, 1.30, 0);
+    g.add(grL, grR, cuffL, cuffR, mail);
+  }
+  if (armorTier >= 2) {
+    const spikeMat = lambert(0xc9a44a, true);
+    const spL = new THREE.Mesh(new THREE.ConeGeometry(0.12, 0.34, 6), spikeMat); spL.position.set(-0.50, 1.88, 0);
+    const spR = new THREE.Mesh(new THREE.ConeGeometry(0.12, 0.34, 6), spikeMat); spR.position.set( 0.50, 1.88, 0);
+    const cape2 = new THREE.Mesh(new THREE.BoxGeometry(0.78, 1.40, 0.04),
+      new THREE.MeshLambertMaterial({ color: team.livery, side: THREE.DoubleSide }));
+    cape2.position.set(0, 1.05, -0.43); cape2.rotation.x = -0.05;
+    const trimMat = new THREE.MeshLambertMaterial({ color: 0xfff5b8, emissive: 0x806020, emissiveIntensity: 0.4 });
+    const trim = new THREE.Mesh(new THREE.BoxGeometry(0.65, 0.05, 0.12), trimMat);
+    trim.position.set(0, 1.56, 0.40);
+    const buckle = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.10, 0.10), trimMat); buckle.position.set(0, 0.85, 0.42);
+    g.add(spL, spR, cape2, trim, buckle);
+  }
+  if (armorTier >= 3) {
+    const wingMat = new THREE.MeshLambertMaterial({ color: 0xfff5b8, emissive: 0xffe070, emissiveIntensity: 0.5 });
+    const wL = new THREE.Mesh(new THREE.ConeGeometry(0.08, 0.55, 6), wingMat); wL.position.set(-0.34, 2.36, -0.06); wL.rotation.z = 0.55; wL.rotation.x = -0.35;
+    const wR = new THREE.Mesh(new THREE.ConeGeometry(0.08, 0.55, 6), wingMat); wR.position.set( 0.34, 2.36, -0.06); wR.rotation.z = -0.55; wR.rotation.x = -0.35;
+    const gem = new THREE.Mesh(new THREE.OctahedronGeometry(0.13, 0),
+      new THREE.MeshLambertMaterial({ color: 0xff5530, emissive: 0xff5530, emissiveIntensity: 1.0 }));
+    gem.position.set(0, 1.42, 0.46);
+    const halo = new THREE.Mesh(new THREE.TorusGeometry(0.34, 0.045, 8, 26),
+      new THREE.MeshBasicMaterial({ color: 0xfff5b8, transparent: true, opacity: 0.9 }));
+    halo.position.set(0, 2.22, -0.20); halo.rotation.x = -0.25;
+    const glow = new THREE.Mesh(new THREE.CircleGeometry(0.95, 24),
+      new THREE.MeshBasicMaterial({ color: 0xffe070, transparent: true, opacity: 0.35, side: THREE.DoubleSide }));
+    glow.rotation.x = -Math.PI / 2; glow.position.y = 0.02;
+    const runeMat = new THREE.MeshBasicMaterial({ color: 0x6cd6ff });
+    const runeL = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.08, 0.13), runeMat); runeL.position.set(-0.50, 1.78, 0.10);
+    const runeR = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.08, 0.13), runeMat); runeR.position.set( 0.50, 1.78, 0.10);
+    g.add(wL, wR, gem, halo, glow, runeL, runeR);
+  }
   return g;
 }
 

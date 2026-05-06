@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { buildWeaponArm, makeHorse, makeWings } from './lib/weapons.js';
+import { buildWeaponArm, makeHorse, makeWings, buildArmorTier } from './lib/weapons.js';
 import { buildStatusAuras, updateStatusAuras } from './lib/modes/effects.js';
 
 export const MAX_HP = 100;
@@ -46,20 +46,7 @@ function makeBody(team, raceKey, armorTier = 0, weaponTier = 0, klass = 'infantr
 
   const torso = new THREE.Mesh(new THREE.CylinderGeometry(0.38, 0.46, 0.85, 8), liveryMat);
   torso.position.y = 1.30; torso.castShadow = true;
-  const armorEmit = armorTier >= 3 ? 0xfff5b8 : 0x000000;
-  const chestColor = armorTier >= 2 ? 0xc9a44a : team.accent;
-  const chestMat = new THREE.MeshLambertMaterial({ color: chestColor, emissive: armorEmit, emissiveIntensity: armorTier >= 3 ? 0.35 : 0 });
-  const chest = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.55, 0.10), chestMat);
-  chest.position.set(0, 1.35, 0.36); chest.castShadow = true;
-  chest.scale.set(1 + armorTier * 0.18, 1 + armorTier * 0.14, 1 + armorTier * 0.7);
-
-  const paldGeom = new THREE.SphereGeometry(0.18, 8, 6);
-  const paldMat = new THREE.MeshLambertMaterial({ color: chestColor, emissive: armorEmit, emissiveIntensity: armorTier >= 3 ? 0.3 : 0 });
-  const paldScale = 1 + armorTier * 0.25;
-  const paldL = new THREE.Mesh(paldGeom, paldMat);
-  paldL.position.set(-0.50, 1.65, 0); paldL.scale.set(paldScale, 0.7 * paldScale, paldScale); paldL.castShadow = true;
-  const paldR = new THREE.Mesh(paldGeom, paldMat);
-  paldR.position.set( 0.50, 1.65, 0); paldR.scale.set(paldScale, 0.7 * paldScale, paldScale); paldR.castShadow = true;
+  const tierArmor = buildArmorTier(team, raceKey, armorTier);
   const armGeom = new THREE.CylinderGeometry(0.10, 0.12, 0.50, 6);
   const armL = new THREE.Mesh(armGeom, liveryMat); armL.position.set(-0.45, 1.30, 0); armL.castShadow = true;
 
@@ -79,7 +66,7 @@ function makeBody(team, raceKey, armorTier = 0, weaponTier = 0, klass = 'infantr
   const cape = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.85, 0.04), accentMat);
   cape.position.set(0, 1.30, -0.40); cape.rotation.x = -0.10;
 
-  g.add(bootL, bootR, legL, legR, belt, torso, chest, paldL, paldR, armL, neck, head, eyeL, eyeR, cape);
+  g.add(bootL, bootR, legL, legR, belt, torso, armL, neck, head, eyeL, eyeR, cape, tierArmor);
 
   if (v.capH > 0) {
     const cap = new THREE.Mesh(new THREE.ConeGeometry(0.32, v.capH, 8), helmetMat);
