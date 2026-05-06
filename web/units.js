@@ -160,7 +160,7 @@ export function makeUnit(teamIdx, x, z, stats, raceKey) {
   let bodyBaseY = 0;
   let wingsRig = null;
   if (stats?.klass === 'cavalry') { root.add(makeHorse(team)); bodyBaseY = 1.45; body.position.y = bodyBaseY; }
-  if (stats?.klass === 'flyer') { wingsRig = makeWings(team); body.add(wingsRig); }
+  if (stats?.klass === 'flyer') { const swarm = (stats.maxHp || 0) < 50; wingsRig = makeWings(team, raceKey, swarm); body.add(wingsRig); if (swarm) body.scale.multiplyScalar(0.6); }
 
   const u = {
     mesh: root,

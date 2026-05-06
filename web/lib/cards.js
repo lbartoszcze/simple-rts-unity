@@ -51,7 +51,7 @@ export const RACES = {
       { id: 'e_pact',    kind: 'recruit', icon: '🍃', name: 'Sylvan Pact',      tier: 'common', desc: '+2 standard warriors',                       amount: 2 },
       { id: 'e_ranger',  kind: 'recruit', icon: '🎯', name: 'Ranger Captain',   tier: 'rare',   desc: '+1 elite ranger (1.5x stats)',                amount: 1, mult: 1.5 },
       { id: 'e_skirm',   kind: 'recruit', klass: 'archer', icon: '🏹', name: 'Skirmishers',    tier: 'common', desc: '+2 archers — ranged 6.0', amount: 2 },
-      { id: 'e_wyvern',  kind: 'recruit', klass: 'flyer',  icon: '🐉', name: 'Wyvern Riders',  tier: 'rare',   desc: '+1 flyer — hovers, ranged', amount: 1 },
+      { id: 'e_hawk',    kind: 'recruit', klass: 'flyer',  icon: '🦅', name: 'Hawk Archers',   tier: 'rare',   desc: '+1 hawk-mounted archer — long range', amount: 1, klassOverride: { range: 5.5, hpMul: 0.7 } },
       { id: 'e_volley',  kind: 'spell',   icon: '🏹', name: 'Volley',           tier: 'combo',  desc: 'Spell — 35 damage to every enemy at battle start', spell: { id: 'all_enemies', icon: '🏹', name: 'Volley', dmg: 35 } },
       { id: 'e_spring',  kind: 'spell',   icon: '💧', name: 'Healing Spring',   tier: 'rare',   desc: 'Spell — fully heal your army at battle start', spell: { id: 'heal_full', icon: '💧', name: 'Healing Spring' } },
       { id: 'e_grove',   kind: 'building', icon: '🌳', name: 'Grove',           tier: 'rare',   desc: 'Building — +6 max HP every round, also heals',  building: 'grove' },
@@ -69,7 +69,7 @@ export const RACES = {
       { id: 's_cursed',  kind: 'weapon',  icon: '⚫', name: 'Cursed Steel',     tier: 'combo',  desc: '+11 damage',                                  damage: 11 },
       { id: 's_raise',   kind: 'recruit', icon: '🪦', name: 'Raise Dead',       tier: 'common', desc: '+4 standard warriors',                        amount: 4 },
       { id: 's_plague',  kind: 'recruit', icon: '☠️', name: 'Plague Bearer',    tier: 'combo',  desc: '+2 warriors with +4 damage',                  amount: 2, dmgBonus: 4 },
-      { id: 's_drake',   kind: 'recruit', klass: 'flyer', icon: '🦇', name: 'Bone Drake',     tier: 'rare',  desc: '+1 flyer — hovers, ranged', amount: 1 },
+      { id: 's_crow',    kind: 'recruit', klass: 'flyer', icon: '🐦‍⬛', name: 'Crow Swarm', tier: 'common', desc: '+3 fast crows — low HP swarm', amount: 3, klassOverride: { hpMul: 0.35, dmgMul: 0.6, speed: 12, range: 3.0, swing: 0.5 } },
       { id: 's_necro',   kind: 'recruit', klass: 'mage',  icon: '🔮', name: 'Necromancer',    tier: 'combo', desc: '+1 mage — ranged, big hits', amount: 1 },
       { id: 's_wave',    kind: 'spell',   icon: '🌑', name: 'Death Wave',       tier: 'rare',   desc: 'Spell — 55 AoE damage at battle start',        spell: { id: 'fireball', icon: '🌑', name: 'Death Wave', dmg: 55, radius: 12 } },
       { id: 's_drain',   kind: 'spell',   icon: '🔮', name: 'Soul Drain',       tier: 'combo',  desc: 'Spell — instantly kill the 3 weakest enemies', spell: { id: 'soul_drain', icon: '🔮', name: 'Soul Drain', count: 3 } },
@@ -103,7 +103,7 @@ export function applyCard(card, roster, spells, race, buildings) {
     const hpBonus = card.hpBonus || 0;
     const dmgBonus = card.dmgBonus || 0;
     const klass = card.klass || 'infantry';
-    const k = KLASS[klass] || KLASS.infantry;
+    const k = { ...(KLASS[klass] || KLASS.infantry), ...(card.klassOverride || {}) };
     const aT = roster[0]?.armorTier || 0;
     const wT = roster[0]?.weaponTier || 0;
     for (let i = 0; i < (card.amount || 1); i++) {

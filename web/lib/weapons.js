@@ -15,7 +15,7 @@ export function buildWeaponArm(team, raceKey, helmetMat, weaponTier = 0, klass =
   wpn.scale.setScalar(1 + weaponTier * 0.10);
   arm.add(wpn);
   const metal = (t) => lambert(t > 1 ? 0xffffff : t > 0 ? 0xe8e8f0 : 0xc8c8c8, true);
-  const style = klass === 'archer' ? 'bow' : klass === 'mage' ? 'staff' : raceKey;
+  const style = (klass === 'archer' || klass === 'flyer') ? 'bow' : klass === 'mage' ? 'staff' : raceKey;
   if (style === 'staff') {
     const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 1.5, 6), lambert(0x3a2a1a));
     pole.position.set(0.05, -0.10, 0.15);
@@ -92,13 +92,15 @@ export function makeHorse(team) {
   return g;
 }
 
-export function makeWings(team) {
+export function makeWings(team, raceKey, swarm = false) {
   const g = new THREE.Group();
-  const wMat = new THREE.MeshLambertMaterial({ color: team.accent, transparent: true, opacity: 0.92, side: THREE.DoubleSide });
-  const wingL = new THREE.Mesh(new THREE.PlaneGeometry(2.2, 1.1), wMat);
-  wingL.position.set(-1.3, 1.4, 0); wingL.rotation.y = Math.PI / 2; wingL.rotation.z = 0.15;
-  const wingR = new THREE.Mesh(new THREE.PlaneGeometry(2.2, 1.1), wMat);
-  wingR.position.set( 1.3, 1.4, 0); wingR.rotation.y = -Math.PI / 2; wingR.rotation.z = -0.15;
+  const color = raceKey === 'skeletons' ? 0x1a1a20 : raceKey === 'elves' ? 0xe8d8b0 : team.accent;
+  const wMat = new THREE.MeshLambertMaterial({ color, transparent: true, opacity: 0.92, side: THREE.DoubleSide });
+  const w = swarm ? 1.4 : 2.2, h = swarm ? 0.7 : 1.1, off = swarm ? 0.85 : 1.3;
+  const wingL = new THREE.Mesh(new THREE.PlaneGeometry(w, h), wMat);
+  wingL.position.set(-off, 1.4, 0); wingL.rotation.y = Math.PI / 2; wingL.rotation.z = 0.15;
+  const wingR = new THREE.Mesh(new THREE.PlaneGeometry(w, h), wMat);
+  wingR.position.set( off, 1.4, 0); wingR.rotation.y = -Math.PI / 2; wingR.rotation.z = -0.15;
   g.add(wingL, wingR);
   g.userData.wingL = wingL;
   g.userData.wingR = wingR;
