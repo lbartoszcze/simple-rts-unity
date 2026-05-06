@@ -24,7 +24,13 @@
   </style>
 </head>
 <body>
-  <h1>🥋 Combat phases — guard, wind-up, strike, recover</h1>
+  <h1>🎬 Loaded 3D model — actual rigged character with skeletal animation</h1>
+  <p class="sub">Demonstrating that the prior cells (lego figures stitched together from BoxGeometry + SphereGeometry primitives) hit a hard ceiling no amount of "add another sphere" will fix. This cell loads a free CC0 rigged humanoid (.glb) from threejs.org and drives one of its baked Mixamo clips. Same three.js scene, same lighting — drastically different result. Reload if it doesn't appear immediately (it has to fetch ~8MB).</p>
+  <div class="row" style="grid-template-columns: 1fr 1fr;">
+    <div class="cell"><h2>RIGGED · IDLE</h2><canvas data-soldier="Idle"></canvas><p>Imported skinned mesh, PBR materials, idle animation clip from the .glb.</p></div>
+    <div class="cell"><h2>RIGGED · WALK</h2><canvas data-soldier="Walk"></canvas><p>Same model, walk clip — bones interpolate smoothly across keyframes.</p></div>
+  </div>
+  <h1 style="margin-top: 32px">🥋 Combat phases — guard, wind-up, strike, recover (procedural primitives)</h1>
   <p class="sub">Every melee attack cycles through four phases. The shield arm rises in guard, drops during the strike (committed), then rises high again on recover. The weapon arc differs per weapon — sword slashes, spear thrusts, axe chops.</p>
   <div class="row" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
     <div class="cell"><h2>GUARD</h2><canvas data-phase="0.00"></canvas><p>Idle ready stance — shield at low guard, weapon poised.</p></div>
@@ -56,6 +62,39 @@
     import * as THREE from 'three';
     import { makeUnit, updateUnitVisuals } from '../units.js';
     import { weaponPose } from '../lib/weapons.js';
+    import { loadHumanoid, buildHumanoidUnit, playClip } from '../art/loader.js';
+
+    async function buildSoldierScene(canvas, clipName) {
+      const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.outputColorSpace = THREE.SRGBColorSpace;
+      renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.0;
+      const scene = new THREE.Scene(); scene.background = new THREE.Color(0x7fc05a);
+      const sun = new THREE.DirectionalLight(0xfff2d0, 2.4); sun.position.set(4, 8, 3); sun.castShadow = true;
+      sun.shadow.mapSize.set(2048, 2048); sun.shadow.camera.left = -4; sun.shadow.camera.right = 4; sun.shadow.camera.top = 4; sun.shadow.camera.bottom = -4;
+      scene.add(sun); scene.add(new THREE.HemisphereLight(0xbfe4ff, 0x7a8b5a, 0.6));
+      const ground = new THREE.Mesh(new THREE.PlaneGeometry(30, 30), new THREE.MeshLambertMaterial({ color: 0x7fc05a }));
+      ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; scene.add(ground);
+      const camera = new THREE.PerspectiveCamera(28, 1, 0.1, 80);
+      camera.position.set(2.6, 2.4, 5.2); camera.lookAt(0, 1.4, 0);
+      function resize() { const w = canvas.clientWidth, h = canvas.clientHeight; renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); }
+      resize();
+      try { await loadHumanoid(); } catch (e) { console.error(e); return; }
+      const u = buildHumanoidUnit({ livery: 0x4a7dd1 });
+      scene.add(u.root);
+      playClip(u, clipName);
+      const clock = new THREE.Clock();
+      function loop() {
+        const dt = clock.getDelta();
+        u.mixer.update(dt);
+        u.root.rotation.y = -Math.PI * 0.18 + Math.sin(performance.now() * 0.0006) * 0.20;
+        renderer.render(scene, camera);
+        requestAnimationFrame(loop);
+      }
+      loop();
+    }
+    document.querySelectorAll('canvas[data-soldier]').forEach((c) => buildSoldierScene(c, c.dataset.soldier));
 
     function buildScene(canvas, tier) {
       const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
