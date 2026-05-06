@@ -242,6 +242,7 @@ export function showRacePicker(meta, onPick, onMetaChange) {
         return;
       }
       picker.classList.add('hidden');
+      resetPicks();
       onPick(key);
     });
     list.appendChild(el);
