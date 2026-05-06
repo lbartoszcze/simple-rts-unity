@@ -3,7 +3,7 @@ import * as THREE from 'three';
 const lambert = (color, flat = false) => new THREE.MeshLambertMaterial({ color, flatShading: flat });
 const basic = (color) => new THREE.MeshBasicMaterial({ color });
 
-export function buildWeaponArm(team, raceKey, helmetMat, weaponTier = 0) {
+export function buildWeaponArm(team, raceKey, helmetMat, weaponTier = 0, klass = 'infantry') {
   const liveryMat = lambert(team.livery);
   const arm = new THREE.Group();
   arm.position.set(0.50, 1.65, 0);
@@ -15,7 +15,23 @@ export function buildWeaponArm(team, raceKey, helmetMat, weaponTier = 0) {
   wpn.scale.setScalar(1 + weaponTier * 0.10);
   arm.add(wpn);
   const metal = (t) => lambert(t > 1 ? 0xffffff : t > 0 ? 0xe8e8f0 : 0xc8c8c8, true);
-  if (raceKey === 'humans') {
+  const style = klass === 'archer' ? 'bow' : klass === 'mage' ? 'staff' : raceKey;
+  if (style === 'staff') {
+    const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 1.5, 6), lambert(0x3a2a1a));
+    pole.position.set(0.05, -0.10, 0.15);
+    const orb = new THREE.Mesh(new THREE.SphereGeometry(0.16, 10, 8),
+      new THREE.MeshBasicMaterial({ color: 0x9be2ff }));
+    orb.position.set(0.05, 0.62, 0.15);
+    pole.castShadow = true;
+    wpn.add(pole, orb);
+  } else if (style === 'bow' || raceKey === 'elves' && klass !== 'mage') {
+    const bow = new THREE.Mesh(new THREE.TorusGeometry(0.45, 0.04, 6, 16, Math.PI), lambert(0x6b4423));
+    bow.position.set(0.05, -0.35, 0.15); bow.rotation.z = -Math.PI / 2;
+    const string = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.88, 0.02), basic(0xfaf6e0));
+    string.position.set(0.0, -0.35, 0.15);
+    bow.castShadow = true;
+    wpn.add(bow, string);
+  } else if (raceKey === 'humans') {
     const blade = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.78, 0.05), metal(weaponTier));
     blade.position.set(0.12, -0.10, 0.15); blade.rotation.z = -0.22;
     const cross = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.05, 0.05), helmetMat);

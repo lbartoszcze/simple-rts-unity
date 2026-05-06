@@ -77,14 +77,10 @@ function spawnRoster(teamIdx, roster, baseZ, raceKey) {
     const x = (col - (cols - 1) * 0.5) * SPACING;
     const z = baseZ + row * SPACING * (baseZ > 0 ? 1 : -1);
     const u = makeUnit(teamIdx, x, z, w, raceKey);
-    u.maxHp = w.maxHp;
-    u.hp = Math.max(1, w.currentHp);
-    u.damage = w.damage;
-    u.speed = w.speed;
-    u.range = w.range;
-    u.rosterIdx = i;
-    u.bossId = w.bossId;
-    u.isBoss = !!w.isBoss;
+    u.maxHp = w.maxHp; u.hp = Math.max(1, w.currentHp);
+    u.damage = w.damage; u.speed = w.speed; u.range = w.range;
+    u.rosterIdx = i; u.bossId = w.bossId; u.isBoss = !!w.isBoss;
+    u.mesh.position.y = w.hoverY || 0;
     units.push(u);
     scene.add(u.mesh);
     if (u.isBoss) swapToBossMesh(u, scene);

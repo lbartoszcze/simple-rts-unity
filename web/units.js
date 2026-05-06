@@ -21,7 +21,7 @@ function lambert(color, flat = false) {
 function basic(color) { return new THREE.MeshBasicMaterial({ color }); }
 
 
-function makeBody(team, raceKey, armorTier = 0, weaponTier = 0) {
+function makeBody(team, raceKey, armorTier = 0, weaponTier = 0, klass = 'infantry') {
   const v = RACE_VISUALS[raceKey] || RACE_VISUALS.humans;
   const liveryMat = lambert(team.livery);
   const accentMat = lambert(team.accent);
@@ -108,12 +108,13 @@ function makeBody(team, raceKey, armorTier = 0, weaponTier = 0) {
   sboss.position.set(-0.63, 1.30, 0.05);
   g.add(shieldDisc, sboss);
 
-  const weaponArm = buildWeaponArm(team, raceKey, helmetMat, weaponTier);
+  const weaponArm = buildWeaponArm(team, raceKey, helmetMat, weaponTier, klass);
   g.add(weaponArm);
   g.userData.weaponArm = weaponArm;
   g.rotation.order = 'YXZ';
 
-  g.scale.set(v.width, v.scaleY, v.width);
+  const ks = klass === 'beast' ? 1.45 : klass === 'archer' ? 0.94 : 1.0;
+  g.scale.set(v.width * ks, v.scaleY * ks, v.width * ks);
   return g;
 }
 
@@ -152,7 +153,7 @@ export function makeUnit(teamIdx, x, z, stats, raceKey) {
   const root = new THREE.Group();
   root.position.set(x, 0, z);
 
-  const body = makeBody(team, raceKey, stats?.armorTier || 0, stats?.weaponTier || 0);
+  const body = makeBody(team, raceKey, stats?.armorTier || 0, stats?.weaponTier || 0, stats?.klass);
   const ring = makeRing(team);
   const hp = makeHpBar();
   root.add(body, ring, hp);
@@ -170,7 +171,8 @@ export function makeUnit(teamIdx, x, z, stats, raceKey) {
     damage: stats ? stats.damage : 22,
     speed: stats ? stats.speed : 7,
     range: stats ? stats.range : 2.4,
-    swingPeriod: SWING_PERIOD[raceKey] || 1.0,
+    swingPeriod: stats?.swingPeriod || SWING_PERIOD[raceKey] || 1.0,
+    klass: stats?.klass || 'infantry',
     swingT: 0,
     hitDealt: false,
     x, z,
