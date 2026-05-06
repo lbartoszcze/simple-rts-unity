@@ -105,6 +105,51 @@ export function applyCard(card, roster, spells, race, buildings) {
   }
 }
 
+const META_KEY = 'simple-rts-meta-v1';
+const RACE_COST = { humans: 0, dwarves: 8, elves: 18, skeletons: 32 };
+
+export function loadMeta() {
+  try {
+    const raw = localStorage.getItem(META_KEY);
+    if (raw) {
+      const m = JSON.parse(raw);
+      m.unlocked = m.unlocked || ['humans'];
+      m.best = m.best || {};
+      m.gold = m.gold || 0;
+      m.lifetimeGold = m.lifetimeGold || 0;
+      m.runs = m.runs || 0;
+      return m;
+    }
+  } catch (e) {}
+  return { gold: 0, lifetimeGold: 0, unlocked: ['humans'], best: {}, runs: 0 };
+}
+
+export function saveMeta(m) {
+  try { localStorage.setItem(META_KEY, JSON.stringify(m)); } catch (e) {}
+}
+
+export function awardGold(meta, round, isBoss) {
+  const earned = isBoss ? 5 : 1;
+  meta.gold += earned;
+  meta.lifetimeGold += earned;
+  return earned;
+}
+
+export function recordRunEnd(meta, race, round) {
+  meta.runs += 1;
+  if (!meta.best[race] || round > meta.best[race]) meta.best[race] = round;
+}
+
+export function unlockCost(race) { return RACE_COST[race] || 0; }
+export function isUnlocked(meta, race) { return meta.unlocked.includes(race); }
+export function tryUnlock(meta, race) {
+  const cost = unlockCost(race);
+  if (isUnlocked(meta, race) || meta.gold < cost) return false;
+  meta.gold -= cost;
+  meta.unlocked.push(race);
+  return true;
+}
+
 export function pickThree(race, rng = Math.random) {
   const pool = RACES[race].cards.slice();
   const out = [];
@@ -115,26 +160,39 @@ export function pickThree(race, rng = Math.random) {
   return out;
 }
 
-export function showRacePicker(onPick) {
+export function showRacePicker(meta, onPick, onMetaChange) {
   const picker = document.getElementById('cardpicker');
   const title = document.getElementById('cardpicker-title');
   const list = document.getElementById('cards');
-  title.textContent = 'Choose your race';
+  title.innerHTML = `Choose your race <small style="font-weight:400;color:#a3a99a;font-size:14px;letter-spacing:0;">${meta.gold} 🪙 · ${meta.runs} runs</small>`;
   list.innerHTML = '';
   for (const key of Object.keys(RACES)) {
     const r = RACES[key];
+    const unlocked = isUnlocked(meta, key);
+    const cost = unlockCost(key);
+    const best = meta.best[key] || 0;
     const el = document.createElement('div');
-    el.className = 'card';
+    el.className = 'card' + (unlocked ? '' : ' locked');
     el.dataset.tier = 'rare';
     el.innerHTML = `
       <div class="icon">${r.icon}</div>
-      <div class="tag">${r.id}</div>
+      <div class="tag">${r.id}${best ? ' · best R' + best : ''}</div>
       <div class="name">${r.name}</div>
       <div class="desc">${r.flavor}<br><br>
         ${r.base.count} warriors · ${r.base.hp} HP<br>
-        ${r.base.damage} dmg · ${r.base.speed} spd · ${r.base.range} rng</div>
+        ${r.base.damage} dmg · ${r.base.speed} spd · ${r.base.range} rng
+        ${unlocked ? '' : `<br><br><b style="color:#f3c259;">🔒 ${cost} 🪙 to unlock</b>`}</div>
     `;
-    el.addEventListener('click', () => { picker.classList.add('hidden'); onPick(key); });
+    el.addEventListener('click', () => {
+      if (!unlocked) {
+        if (!tryUnlock(meta, key)) return;
+        if (onMetaChange) onMetaChange();
+        showRacePicker(meta, onPick, onMetaChange);
+        return;
+      }
+      picker.classList.add('hidden');
+      onPick(key);
+    });
     list.appendChild(el);
   }
   picker.classList.remove('hidden');

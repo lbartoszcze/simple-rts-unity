@@ -1,7 +1,8 @@
 import * as THREE from 'three';
-import { scene, camera, renderer, setProjectiles, updateFx, trackCamera, resetCameraTarget } from './scene.js';
+import { scene, camera, renderer, setProjectiles, updateFx, trackCamera, resetCameraTarget, spawnFx } from './scene.js';
 import { makeUnit, updateUnitVisuals } from './units.js';
-import { RACES, applyCard, showCardPicker, showRacePicker } from './lib/cards.js';
+import { RACES, applyCard, showCardPicker, showRacePicker,
+         loadMeta, saveMeta, awardGold, recordRunEnd } from './lib/cards.js';
 import { runAllSpells } from './lib/spells.js';
 import { applyBuildings, buildingHealBonus, placeBuildings } from './lib/buildings.js';
 import { isBossRound, bossRoster, bossForRound, swapToBossMesh } from './lib/bosses.js';
@@ -20,6 +21,7 @@ const spellsBar = document.getElementById('spells');
 const buildingsBar = document.getElementById('buildings');
 
 const ENEMY_RACES = ['skeletons', 'dwarves', 'elves', 'humans'];
+const meta = loadMeta();
 let playerRace = 'humans';
 let enemyRace = 'skeletons';
 let playerRoster = [];
@@ -148,31 +150,39 @@ function nearestEnemy(u) {
   return { u: best, d2: bestD };
 }
 
-function step(dt) {
+function step(dt, t) {
   for (const u of units) {
     if (u.hp <= 0) continue;
-    if (!u.attackTarget || u.attackTarget.hp <= 0) {
-      u.attackTarget = nearestEnemy(u).u;
-    }
+    if (!u.attackTarget || u.attackTarget.hp <= 0) u.attackTarget = nearestEnemy(u).u;
     if (!u.attackTarget) { u.vx = 0; u.vz = 0; continue; }
     const dx = u.attackTarget.x - u.x;
     const dz = u.attackTarget.z - u.z;
     const dist = Math.hypot(dx, dz);
     if (dist < u.range) {
       u.vx = 0; u.vz = 0;
-      u.attackTarget.hp -= u.damage * dt;
-      if (u.range >= RANGED_THRESHOLD) {
-        u.fireCooldown = (u.fireCooldown || 0) - dt;
-        if (u.fireCooldown <= 0) {
-          projectiles.push({
-            x1: u.x, y1: 1.6, z1: u.z,
-            x2: u.attackTarget.x, y2: 1.6, z2: u.attackTarget.z,
-            ttl: PROJ_TTL,
-          });
-          u.fireCooldown = 0.18;
+      u.swingT += dt;
+      if (u.swingT >= u.swingPeriod) { u.swingT = 0; u.hitDealt = false; }
+      const sp = u.swingT / u.swingPeriod;
+      if (sp > 0.55 && !u.hitDealt) {
+        u.hitDealt = true;
+        const tgt = u.attackTarget;
+        if (tgt && tgt.hp > 0) {
+          tgt.hp -= u.damage * u.swingPeriod;
+          tgt.recoilStart = t;
+          tgt.recoilDirX = -dx / dist;
+          tgt.recoilDirZ = -dz / dist;
+          spawnFx(tgt.x, tgt.z, 0.55, 0xffe066, 0.15);
+          if (u.range >= RANGED_THRESHOLD) {
+            projectiles.push({
+              x1: u.x, y1: 1.6, z1: u.z,
+              x2: tgt.x, y2: 1.6, z2: tgt.z,
+              ttl: PROJ_TTL,
+            });
+          }
         }
       }
     } else {
+      u.swingT = 0; u.hitDealt = false;
       u.vx = (dx / dist) * u.speed;
       u.vz = (dz / dist) * u.speed;
     }
@@ -231,7 +241,9 @@ function onWin() {
   phase = 'cardpick';
   wins++;
   syncRosterFromUnits();
-  scoreLabel.textContent = `${RACES[playerRace].icon} ${RACES[playerRace].name} · ${wins} ${wins === 1 ? 'win' : 'wins'}`;
+  const earned = awardGold(meta, round, isBossRound(round));
+  saveMeta(meta);
+  scoreLabel.textContent = `${RACES[playerRace].icon} ${RACES[playerRace].name} · ${wins} ${wins === 1 ? 'win' : 'wins'} · ${meta.gold} 🪙 (+${earned})`;
   refreshHud();
   setTimeout(() => {
     showCardPicker(playerRace, round, (card) => {
@@ -246,7 +258,10 @@ function onWin() {
 function onLoss() {
   phase = 'gameover';
   syncRosterFromUnits();
-  banner.innerHTML = `Defeat — round ${round}<small>${wins} ${wins === 1 ? 'win' : 'wins'} in this run</small><button id="retry">New Run</button>`;
+  recordRunEnd(meta, playerRace, round);
+  saveMeta(meta);
+  const best = meta.best[playerRace] || round;
+  banner.innerHTML = `Defeat — round ${round}<small>${wins} ${wins === 1 ? 'win' : 'wins'} · ${meta.gold} 🪙 banked · best ${RACES[playerRace].name} run: R${best}</small><button id="retry">New Run</button>`;
   banner.className = 'lose';
   banner.classList.remove('hidden');
   setTimeout(() => {
@@ -256,7 +271,7 @@ function onLoss() {
 }
 
 function startGame() {
-  showRacePicker((raceKey) => {
+  showRacePicker(meta, (raceKey) => {
     playerRace = raceKey;
     playerRoster = makeBaseRoster(raceKey);
     playerSpells = [];
@@ -264,17 +279,18 @@ function startGame() {
     round = 1;
     wins = 0;
     startRound();
-  });
+  }, () => saveMeta(meta));
 }
 
 let last = performance.now();
 function frame(now) {
   const dt = Math.min(0.05, (now - last) / 1000);
   last = now;
-  if (phase === 'battle') step(dt);
+  const t = now / 1000;
+  if (phase === 'battle') step(dt, t);
   updateFx(dt);
   trackCamera(units);
-  for (const u of units) updateUnitVisuals(u, camera, now / 1000);
+  for (const u of units) updateUnitVisuals(u, camera, t);
   renderer.render(scene, camera);
   requestAnimationFrame(frame);
 }

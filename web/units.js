@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { buildWeaponArm } from './lib/weapons.js';
 
 export const MAX_HP = 100;
 
@@ -19,48 +20,6 @@ function lambert(color, flat = false) {
 }
 function basic(color) { return new THREE.MeshBasicMaterial({ color }); }
 
-function addWeapon(g, raceKey, helmetMat) {
-  if (raceKey === 'humans') {
-    const blade = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.78, 0.05),
-      lambert(0xc8c8c8, true));
-    blade.position.set(0.62, 1.55, 0.15); blade.rotation.z = -0.22;
-    const cross = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.05, 0.05), helmetMat);
-    cross.position.set(0.55, 1.16, 0.15); cross.rotation.z = -0.22;
-    const hilt = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.18, 6),
-      lambert(0x3a2a1a));
-    hilt.position.set(0.52, 1.05, 0.15); hilt.rotation.z = -0.22;
-    const pommel = new THREE.Mesh(new THREE.SphereGeometry(0.06, 6, 6), helmetMat);
-    pommel.position.set(0.49, 0.96, 0.15);
-    blade.castShadow = true; cross.castShadow = true; hilt.castShadow = true;
-    g.add(blade, cross, hilt, pommel);
-  } else if (raceKey === 'dwarves') {
-    const handle = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.85, 6),
-      lambert(0x3a2a1a));
-    handle.position.set(0.58, 1.20, 0.15); handle.rotation.z = -0.18;
-    const head = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.32, 0.32),
-      lambert(0x707378, true));
-    head.position.set(0.66, 1.65, 0.15); head.rotation.z = -0.18;
-    handle.castShadow = true; head.castShadow = true;
-    g.add(handle, head);
-  } else if (raceKey === 'elves') {
-    const bow = new THREE.Mesh(new THREE.TorusGeometry(0.45, 0.04, 6, 16, Math.PI),
-      lambert(0x6b4423));
-    bow.position.set(0.55, 1.30, 0.15); bow.rotation.z = -Math.PI / 2;
-    const string = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.88, 0.02), basic(0xfaf6e0));
-    string.position.set(0.50, 1.30, 0.15);
-    bow.castShadow = true;
-    g.add(bow, string);
-  } else if (raceKey === 'skeletons') {
-    const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 1.30, 6),
-      lambert(0x3a2a1a));
-    pole.position.set(0.55, 1.40, 0.15); pole.rotation.z = -0.10;
-    const blade = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.10, 0.05),
-      lambert(0xc8c8c8, true));
-    blade.position.set(0.85, 2.00, 0.15); blade.rotation.z = -0.45;
-    pole.castShadow = true; blade.castShadow = true;
-    g.add(pole, blade);
-  }
-}
 
 function makeBody(team, raceKey) {
   const v = RACE_VISUALS[raceKey] || RACE_VISUALS.humans;
@@ -96,7 +55,6 @@ function makeBody(team, raceKey) {
   paldR.position.set( 0.50, 1.65, 0); paldR.scale.set(1, 0.7, 1); paldR.castShadow = true;
   const armGeom = new THREE.CylinderGeometry(0.10, 0.12, 0.50, 6);
   const armL = new THREE.Mesh(armGeom, liveryMat); armL.position.set(-0.45, 1.30, 0); armL.castShadow = true;
-  const armR = new THREE.Mesh(armGeom, liveryMat); armR.position.set( 0.45, 1.30, 0); armR.castShadow = true;
 
   const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.10, 0.12, 0.16, 6),
     raceKey === 'skeletons' ? boneMat : skinMat);
@@ -114,7 +72,7 @@ function makeBody(team, raceKey) {
   const cape = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.85, 0.04), accentMat);
   cape.position.set(0, 1.30, -0.40); cape.rotation.x = -0.10;
 
-  g.add(bootL, bootR, legL, legR, belt, torso, chest, paldL, paldR, armL, armR, neck, head, eyeL, eyeR, cape);
+  g.add(bootL, bootR, legL, legR, belt, torso, chest, paldL, paldR, armL, neck, head, eyeL, eyeR, cape);
 
   if (v.capH > 0) {
     const cap = new THREE.Mesh(new THREE.ConeGeometry(0.32, v.capH, 8), helmetMat);
@@ -149,7 +107,10 @@ function makeBody(team, raceKey) {
   sboss.position.set(-0.63, 1.30, 0.05);
   g.add(shieldDisc, sboss);
 
-  addWeapon(g, raceKey, helmetMat);
+  const weaponArm = buildWeaponArm(team, raceKey, helmetMat);
+  g.add(weaponArm);
+  g.userData.weaponArm = weaponArm;
+  g.rotation.order = 'YXZ';
 
   g.scale.set(v.width, v.scaleY, v.width);
   return g;
@@ -183,6 +144,8 @@ function makeHpBar() {
   return grp;
 }
 
+const SWING_PERIOD = { humans: 1.0, dwarves: 1.4, elves: 0.7, skeletons: 0.9 };
+
 export function makeUnit(teamIdx, x, z, stats, raceKey) {
   const team = TEAM_PALETTE[teamIdx];
   const root = new THREE.Group();
@@ -198,6 +161,7 @@ export function makeUnit(teamIdx, x, z, stats, raceKey) {
     body,
     ring,
     hpBar: hp,
+    weaponArm: body.userData.weaponArm,
     team: teamIdx,
     raceKey: raceKey || 'humans',
     maxHp: stats ? stats.hp : MAX_HP,
@@ -205,6 +169,9 @@ export function makeUnit(teamIdx, x, z, stats, raceKey) {
     damage: stats ? stats.damage : 22,
     speed: stats ? stats.speed : 7,
     range: stats ? stats.range : 2.4,
+    swingPeriod: SWING_PERIOD[raceKey] || 1.0,
+    swingT: 0,
+    hitDealt: false,
     x, z,
     vx: 0, vz: 0,
     attackTarget: null,
@@ -244,26 +211,32 @@ export function updateUnitVisuals(u, camera, t) {
   }
 
   const moving = Math.hypot(u.vx, u.vz) > 0.4;
-  const targeting = u.attackTarget && u.attackTarget.hp > 0;
-  const distSq = targeting ? (u.attackTarget.x - u.x) ** 2 + (u.attackTarget.z - u.z) ** 2 : 1e9;
-  const attacking = !moving && targeting && distSq < (u.range + 0.5) ** 2;
-
-  if (moving) {
-    const phase = t * 9 + u.x * 0.7;
-    u.body.position.y = Math.abs(Math.sin(phase)) * 0.11;
-    u.body.rotation.x = Math.sin(phase * 0.5) * 0.05;
-    u.body.rotation.z = 0;
-  } else if (attacking) {
-    const phase = t * 7 + u.x * 0.3;
-    const lunge = (Math.sin(phase) + 1) * 0.5;
-    u.body.position.y = lunge * 0.06;
-    u.body.rotation.x = lunge * 0.32;
-    u.body.rotation.z = 0;
-  } else {
-    u.body.position.y = 0;
-    u.body.rotation.x = 0;
-    u.body.rotation.z = 0;
+  const tgt = u.attackTarget && u.attackTarget.hp > 0 ? u.attackTarget : null;
+  const dSq = tgt ? (tgt.x - u.x) ** 2 + (tgt.z - u.z) ** 2 : 1e9;
+  const attacking = !moving && tgt && dSq < (u.range + 0.5) ** 2;
+  let armA = 0, tilt = 0, bobY = 0;
+  if (attacking) {
+    const sp = (u.swingT || 0) / (u.swingPeriod || 1.0);
+    if (sp < 0.4) { const k = sp / 0.4; armA = 2.0 * k; tilt = -0.06 * k; }
+    else if (sp < 0.55) { const k = (sp - 0.4) / 0.15; armA = 2.0 - 2.5 * k; tilt = -0.06 + 0.36 * k; }
+    else { const k = (sp - 0.55) / 0.45; armA = -0.5 + 0.5 * k; tilt = 0.30 - 0.30 * k; }
+  } else if (moving) {
+    const ph = t * 9 + u.x * 0.7;
+    bobY = Math.abs(Math.sin(ph)) * 0.11;
+    armA = Math.sin(ph * 0.5) * 0.25; tilt = Math.sin(ph * 0.5) * 0.04;
   }
+  if (u.weaponArm) u.weaponArm.rotation.x = armA;
+  u.body.rotation.x = tilt; u.body.rotation.z = 0;
+  let recX = 0, recZ = 0;
+  if (u.recoilStart != null) {
+    const age = t - u.recoilStart;
+    if (age < 0.20) {
+      const fade = 1 - age / 0.20;
+      recX = (u.recoilDirX || 0) * 0.22 * fade;
+      recZ = (u.recoilDirZ || 0) * 0.22 * fade;
+    } else u.recoilStart = null;
+  }
+  u.body.position.set(recX, bobY, recZ);
 
   if (u.team === 0) {
     u.ring.visible = true;

@@ -194,6 +194,9 @@ canvas { display: block; width: 100%; height: 100%; cursor: default; }
 .card[data-tier="combo"]:hover { box-shadow: 0 14px 40px rgba(108, 214, 255, 0.5); }
 .card[data-tier="rare"]   { border-color: var(--rare); }
 .card[data-tier="rare"]:hover   { box-shadow: 0 14px 40px rgba(184, 141, 255, 0.5); }
+.card.locked { opacity: 0.55; filter: grayscale(0.55); border-color: #555 !important; }
+.card.locked:hover { transform: translateY(-4px) scale(1.02); border-color: var(--accent) !important; opacity: 0.85; }
+.card.locked .icon { filter: grayscale(0.7); }
 
 .card .icon { font-size: 44px; line-height: 1; }
 .card .name { font-size: 18px; font-weight: 700; letter-spacing: 0.03em; color: var(--ink); }
