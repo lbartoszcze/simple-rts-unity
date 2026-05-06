@@ -67,8 +67,8 @@
       scene.add(sun); scene.add(new THREE.HemisphereLight(0xbfe4ff, 0x7a8b5a, 0.6));
       const ground = new THREE.Mesh(new THREE.PlaneGeometry(30, 30), new THREE.MeshLambertMaterial({ color: 0x7fc05a }));
       ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; scene.add(ground);
-      const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
-      camera.position.set(0, 1.0, 3.5); camera.lookAt(0, 0.9, 0);
+      const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 100);
+      camera.position.set(0.6, 1.6, 3.5); camera.lookAt(0, 1.0, 0);
       function resize() { const w = canvas.clientWidth, h = canvas.clientHeight; renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); }
       resize();
       try { await loadHumanoid(); console.log('[demo] humanoid loaded, building'); } catch (e) { console.error('[demo] load failed', e); return; }
