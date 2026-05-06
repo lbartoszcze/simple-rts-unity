@@ -74,6 +74,7 @@ function spawnRoster(teamIdx, roster, baseZ, raceKey) {
     const u = makeUnit(teamIdx, x, z, w, raceKey);
     u.maxHp = w.maxHp; u.hp = Math.max(1, w.currentHp);
     u.damage = w.damage; u.baseSpeed = u.speed = w.speed; u.baseRange = u.range = w.range;
+    u.kiteRatio = w.kiteRatio;
     u.rosterIdx = i; u.bossId = w.bossId; u.isBoss = !!w.isBoss;
     u.mesh.position.y = w.hoverY || 0;
     units.push(u);
@@ -143,7 +144,8 @@ function step(dt, t) {
     if (!u.attackTarget) { u.vx = 0; u.vz = 0; continue; }
     const dx = u.attackTarget.x - u.x;
     const dz = u.attackTarget.z - u.z, dist = Math.hypot(dx, dz);
-    const kiteAt = (u.klass === 'archer' || u.klass === 'mage' || u.klass === 'flyer') ? u.range * 0.7 : 0;
+    const kr = u.kiteRatio != null ? u.kiteRatio : ((u.klass === 'archer' || u.klass === 'mage' || u.klass === 'flyer') ? 0.7 : 0);
+    const kiteAt = u.range * kr;
     if (dist < u.range) {
       if (kiteAt && dist < kiteAt) { u.vx = -(dx/dist) * u.speed * 0.75; u.vz = -(dz/dist) * u.speed * 0.75; }
       else { u.vx = 0; u.vz = 0; }
