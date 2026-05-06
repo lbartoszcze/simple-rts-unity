@@ -3,7 +3,14 @@
 ## ▶ Play in your browser
 **https://lbartoszcze.github.io/simple-rts-unity/**
 
-No install. Left-drag to box-select your blue units. Right-click the ground to move them in formation. Right-click a red enemy to attack. Wipe out the red team to win. Source under [`web/`](web/), auto-deployed to GitHub Pages on every push.
+No install. A 3D auto-battle roguelike in the visual style of Thronefall and *Diplomacy Is Not An Option*:
+
+1. Pick your race — **Humans**, **Dwarves**, **Elves**, or **Skeletons**. Each has its own base stats and its own card pool.
+2. Watch your army auto-fight a wave of a different race.
+3. Win → draw 3 random race-specific cards (Iron Plate, Berserker Pact, Longbow, Raise Dead, ...). Pick one. Repeat.
+4. Lose → start a new run with any race.
+
+Camera: WASD or screen edge to pan, scroll to zoom. Source under [`web/`](web/), auto-deployed to GitHub Pages on every push.
 
 ---
 

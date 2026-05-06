@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>simple-rts — 3D</title>
+  <title>simple-rts — auto-battle roguelike</title>
   <link rel="stylesheet" href="style.css">
   <script type="importmap">
   {
@@ -17,15 +17,21 @@
   <header>
     <h1>simple-rts</h1>
     <p>
-      <b>Left-drag</b> to box-select your blue troops.
-      <b>Right-click ground</b> to move them in formation.
-      <b>Right-click a red soldier</b> to attack.
-      <b>WASD</b> or screen edge to pan, <b>scroll</b> to zoom.
+      Auto-battle roguelike. Watch your blue army fight the red waves on its own.
+      Win the round → pick a <b>random card</b> to power up your warriors.
+      <b>WASD</b> or screen edge to pan the camera, <b>scroll</b> to zoom.
     </p>
   </header>
   <div id="stage">
     <canvas id="game"></canvas>
-    <div id="drag-box" class="hidden"></div>
+    <div id="hud">
+      <span id="round-label">Round 1</span>
+      <span id="score-label">0 wins</span>
+    </div>
+  </div>
+  <div id="cardpicker" class="hidden">
+    <h2 id="cardpicker-title">Victory — choose a blessing</h2>
+    <div id="cards"></div>
   </div>
   <div id="banner" class="hidden"></div>
   <script type="module" src="game.js"></script>
