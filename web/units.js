@@ -1,6 +1,7 @@
 import * as THREE from 'three';
-import { buildWeaponArm, makeHorse, makeWings, buildArmorTier, deriveWeaponStyle, animForWeapon, weaponPose } from './lib/weapons.js';
+import { makeHorse, makeWings, deriveWeaponStyle, animForWeapon, weaponPose } from './lib/weapons.js';
 import { buildStatusAuras, updateStatusAuras } from './lib/modes/effects.js';
+import { makeBody } from './art/anatomy.js';
 
 export const MAX_HP = 100;
 
@@ -9,112 +10,6 @@ const TEAM_PALETTE = [
   { livery: 0xc44545, accent: 0x2a2a2a, ring: 0xff8b6b },
 ];
 
-const RACE_VISUALS = {
-  humans:    { skin: 0xe6c39a, helmet: 0xc4a14a, scaleY: 1.00, width: 1.00, accessory: null,    capH: 0.45 },
-  dwarves:   { skin: 0xd9a06d, helmet: 0x707378, scaleY: 0.78, width: 1.16, accessory: 'beard', capH: 0.32 },
-  elves:     { skin: 0xd2e6b4, helmet: 0x4a8a4a, scaleY: 1.10, width: 0.90, accessory: 'ears',  capH: 0.65 },
-  skeletons: { skin: 0xeee5d0, helmet: 0x6a6a6a, scaleY: 0.95, width: 0.92, accessory: 'skull', capH: 0.0  },
-};
-
-function lambert(color, flat = false) {
-  return new THREE.MeshLambertMaterial({ color, flatShading: flat });
-}
-function basic(color) { return new THREE.MeshBasicMaterial({ color }); }
-
-
-function makeBody(team, raceKey, armorTier = 0, weaponTier = 0, klass = 'infantry', magicType = null, weaponStyle = null) {
-  const v = RACE_VISUALS[raceKey] || RACE_VISUALS.humans;
-  const liveryMat = lambert(team.livery);
-  const accentMat = lambert(team.accent);
-  const skinMat   = lambert(v.skin);
-  const helmetMat = lambert(v.helmet, true);
-  const boneMat   = lambert(0xeee5d0);
-  const dark      = lambert(0x2a2a2a);
-  const beltMat   = lambert(0x4a3a2a);
-  const eyeMat    = basic(0x101015);
-
-  const g = new THREE.Group();
-
-  const bootGeom = new THREE.CylinderGeometry(0.16, 0.20, 0.30, 6);
-  const bootL = new THREE.Mesh(bootGeom, dark); bootL.position.set(-0.18, 0.15, 0); bootL.castShadow = true;
-  const bootR = new THREE.Mesh(bootGeom, dark); bootR.position.set( 0.18, 0.15, 0); bootR.castShadow = true;
-  const legGeom = new THREE.CylinderGeometry(0.16, 0.18, 0.50, 6);
-  const legL = new THREE.Mesh(legGeom, accentMat); legL.position.set(-0.18, 0.55, 0); legL.castShadow = true;
-  const legR = new THREE.Mesh(legGeom, accentMat); legR.position.set( 0.18, 0.55, 0); legR.castShadow = true;
-  const belt = new THREE.Mesh(new THREE.TorusGeometry(0.40, 0.06, 6, 14), beltMat);
-  belt.rotation.x = Math.PI / 2; belt.position.y = 0.85;
-
-  const torso = new THREE.Mesh(new THREE.CylinderGeometry(0.38, 0.46, 0.85, 8), liveryMat);
-  torso.position.y = 1.30; torso.castShadow = true;
-  const tierArmor = buildArmorTier(team, raceKey, armorTier);
-
-  const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.10, 0.12, 0.16, 6),
-    raceKey === 'skeletons' ? boneMat : skinMat);
-  neck.position.y = 1.78;
-  const head = new THREE.Mesh(
-    new THREE.SphereGeometry(raceKey === 'skeletons' ? 0.24 : 0.27, 12, 10),
-    raceKey === 'skeletons' ? boneMat : skinMat
-  );
-  head.position.y = 2.00; head.castShadow = true;
-
-  const eyeGeom = new THREE.SphereGeometry(raceKey === 'skeletons' ? 0.06 : 0.04, 6, 6);
-  const eyeL = new THREE.Mesh(eyeGeom, eyeMat); eyeL.position.set(-0.10, 2.04, 0.22);
-  const eyeR = new THREE.Mesh(eyeGeom, eyeMat); eyeR.position.set( 0.10, 2.04, 0.22);
-  const nose = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.12, 0.08),
-    raceKey === 'skeletons' ? boneMat : skinMat);
-  nose.position.set(0, 1.96, 0.26);
-  const mouth = new THREE.Mesh(new THREE.BoxGeometry(0.10, 0.02, 0.02), basic(0x4a2a18));
-  mouth.position.set(0, 1.86, 0.25);
-  const kneeGeom = new THREE.SphereGeometry(0.13, 8, 6);
-  const kneeL = new THREE.Mesh(kneeGeom, accentMat); kneeL.position.set(-0.18, 0.55, 0.06); kneeL.scale.set(1, 0.6, 1);
-  const kneeR = new THREE.Mesh(kneeGeom, accentMat); kneeR.position.set( 0.18, 0.55, 0.06); kneeR.scale.set(1, 0.6, 1);
-  const cape = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.85, 0.04), accentMat);
-  cape.position.set(0, 1.30, -0.40); cape.rotation.x = -0.10;
-  g.add(bootL, bootR, legL, legR, kneeL, kneeR, belt, torso, neck, head, eyeL, eyeR, nose, mouth, cape, tierArmor);
-
-  if (v.capH > 0) {
-    const cap = new THREE.Mesh(new THREE.ConeGeometry(0.32, v.capH, 8), helmetMat);
-    cap.position.y = 2.20 + v.capH * 0.5 - 0.10; cap.castShadow = true;
-    const brim = new THREE.Mesh(new THREE.TorusGeometry(0.30, 0.04, 6, 14), helmetMat);
-    brim.rotation.x = Math.PI / 2; brim.position.y = 2.18;
-    g.add(cap, brim);
-  }
-
-  if (v.accessory === 'beard') {
-    const beard = new THREE.Mesh(new THREE.SphereGeometry(0.20, 8, 6), lambert(0x6e3f1f));
-    beard.position.set(0, 1.85, 0.18); beard.scale.set(1.0, 0.85, 0.7); beard.castShadow = true;
-    g.add(beard);
-  } else if (v.accessory === 'ears') {
-    const earGeom = new THREE.ConeGeometry(0.06, 0.22, 6); const earMat = lambert(v.skin);
-    const earL = new THREE.Mesh(earGeom, earMat); earL.position.set(-0.27, 2.10, 0); earL.rotation.z = Math.PI / 2;
-    const earR = new THREE.Mesh(earGeom, earMat); earR.position.set( 0.27, 2.10, 0); earR.rotation.z = -Math.PI / 2;
-    g.add(earL, earR);
-  } else if (v.accessory === 'skull') {
-    const jaw = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.05, 0.18), boneMat); jaw.position.set(0, 1.86, 0.05); g.add(jaw);
-  }
-
-  const shieldArm = new THREE.Group(); shieldArm.position.set(-0.50, 1.65, 0);
-  const sUp = new THREE.Mesh(new THREE.CylinderGeometry(0.10, 0.12, 0.50, 6), liveryMat); sUp.position.set(0.05, -0.35, 0); sUp.castShadow = true;
-  const sLow = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.10, 0.32, 6), skinMat); sLow.position.set(0.05, -0.74, 0); sLow.castShadow = true;
-  const sHand = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.10, 0.18), skinMat); sHand.position.set(0.05, -0.92, 0.05); sHand.castShadow = true;
-  const shieldDisc = new THREE.Mesh(new THREE.CylinderGeometry(0.30, 0.30, 0.05, 16), liveryMat);
-  shieldDisc.position.set(-0.08, -0.92, 0.10); shieldDisc.rotation.z = Math.PI / 2; shieldDisc.castShadow = true;
-  const sboss = new THREE.Mesh(new THREE.SphereGeometry(0.07, 8, 6), accentMat); sboss.position.set(-0.13, -0.92, 0.10);
-  shieldArm.add(sUp, sLow, sHand, shieldDisc, sboss);
-  const TWO_HAND = new Set(['spear', 'pike', 'halberd', 'lance']);
-  const twoHand = TWO_HAND.has(weaponStyle);
-  if (twoHand) { shieldDisc.visible = false; sboss.visible = false; shieldArm.rotation.y = -0.55; }
-  g.add(shieldArm); g.userData.shieldArm = shieldArm; g.userData.twoHand = twoHand;
-
-  const weaponArm = buildWeaponArm(team, raceKey, helmetMat, weaponTier, klass, magicType, weaponStyle);
-  g.add(weaponArm);
-  g.userData.weaponArm = weaponArm;
-  g.rotation.order = 'YXZ';
-
-  const ks = klass === 'beast' ? 1.45 : klass === 'archer' ? 0.94 : 1.0;
-  g.scale.set(v.width * ks, v.scaleY * ks, v.width * ks);
-  return g;
-}
 
 function makeRing(team) {
   const ring = new THREE.Mesh(
