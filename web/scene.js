@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { buildLandmarks } from './terrain/landmarks.js';
 
 export const canvas = document.getElementById('game');
 export const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
@@ -218,6 +219,7 @@ export function setMap(key) {
   scene.fog = new THREE.Fog(m.fog, m.fogNear, m.fogFar);
   while (sceneryGroup.children.length) sceneryGroup.remove(sceneryGroup.children[0]);
   POPULATE[key](m.density);
+  buildLandmarks(key, sceneryGroup);
 }
 
 setMap('meadow');
