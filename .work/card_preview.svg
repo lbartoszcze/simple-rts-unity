@@ -15,6 +15,7 @@
     <linearGradient id="lf-1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#7be08a"/><stop offset="100%" stop-color="#1a4a2a"/></linearGradient>
     <radialGradient id="dr-1" cx="0.4" cy="0.35" r="0.7"><stop offset="0%" stop-color="#e0f8ff"/><stop offset="100%" stop-color="#0a4060"/></radialGradient>
     <radialGradient id="vig-1" cx="0.5" cy="0.5" r="0.72"><stop offset="55%" stop-color="#0c1226" stop-opacity="0"/><stop offset="100%" stop-color="#0c1226" stop-opacity="0.7"/></radialGradient>
+    <filter id="tint-1" x="0" y="0" width="100%" height="100%"><feColorMatrix type="matrix" values="0.97 0 0 0 0  0 0.81 0 0 0  0 0 0.42 0 0  0 0 0 1 0"/><feGaussianBlur stdDeviation="0.3"/></filter>
   </defs>
   <rect width="100" height="100" rx="6" fill="#0c1226"/>
   <rect x="2" y="2" width="96" height="96" rx="5" fill="url(#bg-1)"/>
@@ -27,7 +28,7 @@
   <path d="M0 4 L16 4" stroke="#d6a93f" stroke-width="0.5" opacity="0.6"/><path d="M84 4 L100 4" stroke="#d6a93f" stroke-width="0.5" opacity="0.6"/><path d="M0 96 L16 96" stroke="#d6a93f" stroke-width="0.5" opacity="0.6"/><path d="M84 96 L100 96" stroke="#d6a93f" stroke-width="0.5" opacity="0.6"/>
   <circle cx="50" cy="48" r="38" fill="url(#halo-1)"/>
   <circle cx="50" cy="48" r="22" fill="#bdbdbd" opacity="0.10"/>
-  <path d="M50 12 Q22 20 22 42 Q22 72 50 92 Q78 72 78 42 Q78 20 50 12 Z" fill="url(#m-1)" stroke="#1a1a20" stroke-width="1.4"/><path d="M50 12 Q26 20 26 42 Q28 50 32 56 Q40 30 50 18 Z" fill="#fff" opacity="0.18"/><path d="M50 16 L50 86 M28 44 L72 44" stroke="url(#g-1)" stroke-width="3.5" stroke-linecap="round"/><circle cx="50" cy="44" r="6" fill="url(#g-1)" stroke="#3a1a05" stroke-width="0.7"/><circle cx="50" cy="44" r="2.5" fill="#c83030"/><circle cx="49" cy="43" r="0.8" fill="#fff" opacity="0.9"/><circle cx="32" cy="28" r="1.5" fill="url(#g-1)" stroke="#3a1a05" stroke-width="0.4"/><circle cx="68" cy="28" r="1.5" fill="url(#g-1)" stroke="#3a1a05" stroke-width="0.4"/><circle cx="34" cy="68" r="1.5" fill="url(#g-1)" stroke="#3a1a05" stroke-width="0.4"/><circle cx="66" cy="68" r="1.5" fill="url(#g-1)" stroke="#3a1a05" stroke-width="0.4"/>
+  <image href="file:///Users/lukaszbartoszcze/work/simple-rts-unity/web/art/cards/shield.svg" x="14" y="14" width="72" height="72" preserveAspectRatio="xMidYMid meet" filter="url(#tint-1)"/>
   <path d="M50 2 L57 9 L50 16 L43 9 Z" fill="#0c1226" stroke="#d6a93f" stroke-width="0.7"/>
   <circle cx="50" cy="9" r="2.2" fill="#bdbdbd" stroke="#d6a93f" stroke-width="0.4"/>
   <circle cx="49.2" cy="8.2" r="0.7" fill="#fff" opacity="0.9"/>
@@ -53,6 +54,7 @@
     <linearGradient id="lf-2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#7be08a"/><stop offset="100%" stop-color="#1a4a2a"/></linearGradient>
     <radialGradient id="dr-2" cx="0.4" cy="0.35" r="0.7"><stop offset="0%" stop-color="#e0f8ff"/><stop offset="100%" stop-color="#0a4060"/></radialGradient>
     <radialGradient id="vig-2" cx="0.5" cy="0.5" r="0.72"><stop offset="55%" stop-color="#0c1226" stop-opacity="0"/><stop offset="100%" stop-color="#0c1226" stop-opacity="0.7"/></radialGradient>
+    <filter id="tint-2" x="0" y="0" width="100%" height="100%"><feColorMatrix type="matrix" values="0.97 0 0 0 0  0 0.81 0 0 0  0 0 0.42 0 0  0 0 0 1 0"/><feGaussianBlur stdDeviation="0.3"/></filter>
   </defs>
   <rect width="100" height="100" rx="6" fill="#0c1226"/>
   <rect x="2" y="2" width="96" height="96" rx="5" fill="url(#bg-2)"/>
@@ -65,7 +67,7 @@
   <path d="M0 4 L16 4" stroke="#d6a93f" stroke-width="0.5" opacity="0.6"/><path d="M84 4 L100 4" stroke="#d6a93f" stroke-width="0.5" opacity="0.6"/><path d="M0 96 L16 96" stroke="#d6a93f" stroke-width="0.5" opacity="0.6"/><path d="M84 96 L100 96" stroke="#d6a93f" stroke-width="0.5" opacity="0.6"/>
   <circle cx="50" cy="48" r="38" fill="url(#halo-2)"/>
   <circle cx="50" cy="48" r="22" fill="#bdbdbd" opacity="0.10"/>
-  <rect x="46" y="69" width="8" height="22" fill="url(#w-2)" stroke="#1a0c08" stroke-width="0.5"/><line x1="46" y1="74" x2="54" y2="74" stroke="#5a3a2a" stroke-width="0.4"/><line x1="46" y1="80" x2="54" y2="80" stroke="#5a3a2a" stroke-width="0.4"/><line x1="46" y1="86" x2="54" y2="86" stroke="#5a3a2a" stroke-width="0.4"/><circle cx="50" cy="92" r="4.6" fill="url(#g-2)" stroke="#3a1a05" stroke-width="0.6"/><circle cx="48.5" cy="90.5" r="1.4" fill="#fff5d8" opacity="0.75"/><rect x="30" y="62" width="40" height="6" rx="1" fill="url(#g-2)" stroke="#3a1a05" stroke-width="0.6"/><circle cx="32" cy="65" r="1.7" fill="#c83030"/><circle cx="68" cy="65" r="1.7" fill="#c83030"/><path d="M50 11 L55 56 L50 60 L45 56 Z" fill="url(#m-2)" stroke="#1a1a20" stroke-width="0.7"/><line x1="50" y1="13" x2="50" y2="58" stroke="#ffffff" stroke-width="0.8" opacity="0.85"/><path d="M50 13 L52.5 28 L50 26 L47.5 28 Z" fill="#ffffff" opacity="0.7"/>
+  <image href="file:///Users/lukaszbartoszcze/work/simple-rts-unity/web/art/cards/sword.svg" x="14" y="14" width="72" height="72" preserveAspectRatio="xMidYMid meet" filter="url(#tint-2)"/>
   <path d="M50 2 L57 9 L50 16 L43 9 Z" fill="#0c1226" stroke="#d6a93f" stroke-width="0.7"/>
   <circle cx="50" cy="9" r="2.2" fill="#bdbdbd" stroke="#d6a93f" stroke-width="0.4"/>
   <circle cx="49.2" cy="8.2" r="0.7" fill="#fff" opacity="0.9"/>
@@ -91,6 +93,7 @@
     <linearGradient id="lf-3" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#7be08a"/><stop offset="100%" stop-color="#1a4a2a"/></linearGradient>
     <radialGradient id="dr-3" cx="0.4" cy="0.35" r="0.7"><stop offset="0%" stop-color="#e0f8ff"/><stop offset="100%" stop-color="#0a4060"/></radialGradient>
     <radialGradient id="vig-3" cx="0.5" cy="0.5" r="0.72"><stop offset="55%" stop-color="#0c1226" stop-opacity="0"/><stop offset="100%" stop-color="#0c1226" stop-opacity="0.7"/></radialGradient>
+    <filter id="tint-3" x="0" y="0" width="100%" height="100%"><feColorMatrix type="matrix" values="0.97 0 0 0 0  0 0.81 0 0 0  0 0 0.42 0 0  0 0 0 1 0"/><feGaussianBlur stdDeviation="0.3"/></filter>
   </defs>
   <rect width="100" height="100" rx="6" fill="#0c1226"/>
   <rect x="2" y="2" width="96" height="96" rx="5" fill="url(#bg-3)"/>
@@ -103,7 +106,7 @@
   <path d="M0 4 L16 4" stroke="#d6a93f" stroke-width="0.5" opacity="0.6"/><path d="M84 4 L100 4" stroke="#d6a93f" stroke-width="0.5" opacity="0.6"/><path d="M0 96 L16 96" stroke="#d6a93f" stroke-width="0.5" opacity="0.6"/><path d="M84 96 L100 96" stroke="#d6a93f" stroke-width="0.5" opacity="0.6"/>
   <circle cx="50" cy="48" r="38" fill="url(#halo-3)"/>
   <circle cx="50" cy="48" r="22" fill="#b88dff" opacity="0.10"/>
-  <g opacity="0.7"><line x1="50" y1="6" x2="50" y2="92" stroke="url(#g-3)" stroke-width="2.5" stroke-linecap="round"/><line x1="6" y1="50" x2="94" y2="50" stroke="url(#g-3)" stroke-width="2.5" stroke-linecap="round"/></g><g opacity="0.5"><line x1="20" y1="20" x2="80" y2="80" stroke="url(#g-3)" stroke-width="1.7" stroke-linecap="round"/><line x1="80" y1="20" x2="20" y2="80" stroke="url(#g-3)" stroke-width="1.7" stroke-linecap="round"/></g><g opacity="0.4"><line x1="50" y1="14" x2="34" y2="22" stroke="#fff5b8" stroke-width="1"/><line x1="50" y1="14" x2="66" y2="22" stroke="#fff5b8" stroke-width="1"/><line x1="50" y1="86" x2="34" y2="78" stroke="#fff5b8" stroke-width="1"/><line x1="50" y1="86" x2="66" y2="78" stroke="#fff5b8" stroke-width="1"/></g><circle cx="50" cy="50" r="20" fill="url(#fl-3)" opacity="0.55"/><circle cx="50" cy="50" r="13" fill="#fff5b8"/><circle cx="50" cy="50" r="9" fill="#ffffff"/><circle cx="46" cy="46" r="3" fill="#fff" opacity="0.9"/>
+  <image href="file:///Users/lukaszbartoszcze/work/simple-rts-unity/web/art/cards/holy.svg" x="14" y="14" width="72" height="72" preserveAspectRatio="xMidYMid meet" filter="url(#tint-3)"/>
   <path d="M50 2 L57 9 L50 16 L43 9 Z" fill="#0c1226" stroke="#d6a93f" stroke-width="0.7"/>
   <circle cx="50" cy="9" r="2.2" fill="#b88dff" stroke="#d6a93f" stroke-width="0.4"/>
   <circle cx="49.2" cy="8.2" r="0.7" fill="#fff" opacity="0.9"/>
@@ -129,6 +132,7 @@
     <linearGradient id="lf-4" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#7be08a"/><stop offset="100%" stop-color="#1a4a2a"/></linearGradient>
     <radialGradient id="dr-4" cx="0.4" cy="0.35" r="0.7"><stop offset="0%" stop-color="#e0f8ff"/><stop offset="100%" stop-color="#0a4060"/></radialGradient>
     <radialGradient id="vig-4" cx="0.5" cy="0.5" r="0.72"><stop offset="55%" stop-color="#0c1226" stop-opacity="0"/><stop offset="100%" stop-color="#0c1226" stop-opacity="0.7"/></radialGradient>
+    <filter id="tint-4" x="0" y="0" width="100%" height="100%"><feColorMatrix type="matrix" values="0.97 0 0 0 0  0 0.81 0 0 0  0 0 0.42 0 0  0 0 0 1 0"/><feGaussianBlur stdDeviation="0.3"/></filter>
   </defs>
   <rect width="100" height="100" rx="6" fill="#0c1226"/>
   <rect x="2" y="2" width="96" height="96" rx="5" fill="url(#bg-4)"/>
@@ -141,7 +145,7 @@
   <path d="M0 4 L16 4" stroke="#d6a93f" stroke-width="0.5" opacity="0.6"/><path d="M84 4 L100 4" stroke="#d6a93f" stroke-width="0.5" opacity="0.6"/><path d="M0 96 L16 96" stroke="#d6a93f" stroke-width="0.5" opacity="0.6"/><path d="M84 96 L100 96" stroke="#d6a93f" stroke-width="0.5" opacity="0.6"/>
   <circle cx="50" cy="48" r="38" fill="url(#halo-4)"/>
   <circle cx="50" cy="48" r="22" fill="#b88dff" opacity="0.10"/>
-  <rect x="34" y="78" width="32" height="10" fill="#3a3a40" stroke="#1a1a20" stroke-width="0.7"/><rect x="38" y="34" width="24" height="46" fill="url(#m-4)" stroke="#1a1a20" stroke-width="1"/><path d="M38 34 L42 34 L42 80 L38 80 Z" fill="#1a1a20" opacity="0.4"/><line x1="38" y1="46" x2="62" y2="46" stroke="#3a3a40" stroke-width="0.6"/><line x1="38" y1="58" x2="62" y2="58" stroke="#3a3a40" stroke-width="0.6"/><line x1="38" y1="70" x2="62" y2="70" stroke="#3a3a40" stroke-width="0.6"/><rect x="34" y="26" width="32" height="10" fill="url(#m-4)" stroke="#1a1a20" stroke-width="0.9"/><rect x="36" y="28" width="3" height="6" fill="#1a1a20"/><rect x="44" y="28" width="3" height="6" fill="#1a1a20"/><rect x="53" y="28" width="3" height="6" fill="#1a1a20"/><rect x="61" y="28" width="3" height="6" fill="#1a1a20"/><rect x="46" y="60" width="8" height="12" fill="#06090f" stroke="#1a1a20" stroke-width="0.5"/><circle cx="50" cy="42" r="2" fill="#06090f"/><polygon points="50,4 50,26 38,26" fill="#c83030" stroke="#5a1010" stroke-width="0.6"/><line x1="50" y1="4" x2="50" y2="26" stroke="url(#w-4)" stroke-width="1"/>
+  <image href="file:///Users/lukaszbartoszcze/work/simple-rts-unity/web/art/cards/tower.svg" x="14" y="14" width="72" height="72" preserveAspectRatio="xMidYMid meet" filter="url(#tint-4)"/>
   <path d="M50 2 L57 9 L50 16 L43 9 Z" fill="#0c1226" stroke="#d6a93f" stroke-width="0.7"/>
   <circle cx="50" cy="9" r="2.2" fill="#b88dff" stroke="#d6a93f" stroke-width="0.4"/>
   <circle cx="49.2" cy="8.2" r="0.7" fill="#fff" opacity="0.9"/>
@@ -167,6 +171,7 @@
     <linearGradient id="lf-5" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#7be08a"/><stop offset="100%" stop-color="#1a4a2a"/></linearGradient>
     <radialGradient id="dr-5" cx="0.4" cy="0.35" r="0.7"><stop offset="0%" stop-color="#e0f8ff"/><stop offset="100%" stop-color="#0a4060"/></radialGradient>
     <radialGradient id="vig-5" cx="0.5" cy="0.5" r="0.72"><stop offset="55%" stop-color="#0c1226" stop-opacity="0"/><stop offset="100%" stop-color="#0c1226" stop-opacity="0.7"/></radialGradient>
+    <filter id="tint-5" x="0" y="0" width="100%" height="100%"><feColorMatrix type="matrix" values="0.97 0 0 0 0  0 0.81 0 0 0  0 0 0.42 0 0  0 0 0 1 0"/><feGaussianBlur stdDeviation="0.3"/></filter>
   </defs>
   <rect width="100" height="100" rx="6" fill="#0c1226"/>
   <rect x="2" y="2" width="96" height="96" rx="5" fill="url(#bg-5)"/>
@@ -179,7 +184,7 @@
   <path d="M0 4 L16 4" stroke="#d6a93f" stroke-width="0.5" opacity="0.6"/><path d="M84 4 L100 4" stroke="#d6a93f" stroke-width="0.5" opacity="0.6"/><path d="M0 96 L16 96" stroke="#d6a93f" stroke-width="0.5" opacity="0.6"/><path d="M84 96 L100 96" stroke="#d6a93f" stroke-width="0.5" opacity="0.6"/>
   <circle cx="50" cy="48" r="38" fill="url(#halo-5)"/>
   <circle cx="50" cy="48" r="22" fill="#6cd6ff" opacity="0.10"/>
-  <rect x="30" y="10" width="3" height="84" fill="url(#w-5)" stroke="#1a0c08" stroke-width="0.4"/><circle cx="31.5" cy="10" r="3" fill="url(#g-5)" stroke="#3a1a05" stroke-width="0.5"/><circle cx="31.5" cy="9" r="1" fill="#fff" opacity="0.7"/><path d="M33 14 L82 18 L74 36 L82 54 L33 50 Z" fill="#c83030" stroke="#5a1010" stroke-width="1.2"/><path d="M33 14 L82 18 L78 26 L33 22 Z" fill="#ff5050" opacity="0.4"/><path d="M33 50 L72 47 L72 54 L82 54 L33 50 Z" fill="#7a1010" opacity="0.5"/><circle cx="56" cy="34" r="6" fill="url(#g-5)" stroke="#3a1a05" stroke-width="0.7"/><path d="M52 34 L60 34 M56 30 L56 38" stroke="#5a1010" stroke-width="1.2"/><circle cx="56" cy="34" r="2" fill="#c83030"/><line x1="33" y1="62" x2="33" y2="80" stroke="url(#g-5)" stroke-width="0.8"/><circle cx="33" cy="82" r="1.5" fill="url(#g-5)"/>
+  <image href="file:///Users/lukaszbartoszcze/work/simple-rts-unity/web/art/cards/banner.svg" x="14" y="14" width="72" height="72" preserveAspectRatio="xMidYMid meet" filter="url(#tint-5)"/>
   <path d="M50 2 L57 9 L50 16 L43 9 Z" fill="#0c1226" stroke="#d6a93f" stroke-width="0.7"/>
   <circle cx="50" cy="9" r="2.2" fill="#6cd6ff" stroke="#d6a93f" stroke-width="0.4"/>
   <circle cx="49.2" cy="8.2" r="0.7" fill="#fff" opacity="0.9"/>
@@ -205,6 +210,7 @@
     <linearGradient id="lf-6" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#7be08a"/><stop offset="100%" stop-color="#1a4a2a"/></linearGradient>
     <radialGradient id="dr-6" cx="0.4" cy="0.35" r="0.7"><stop offset="0%" stop-color="#e0f8ff"/><stop offset="100%" stop-color="#0a4060"/></radialGradient>
     <radialGradient id="vig-6" cx="0.5" cy="0.5" r="0.72"><stop offset="55%" stop-color="#0c1226" stop-opacity="0"/><stop offset="100%" stop-color="#0c1226" stop-opacity="0.7"/></radialGradient>
+    <filter id="tint-6" x="0" y="0" width="100%" height="100%"><feColorMatrix type="matrix" values="0.97 0 0 0 0  0 0.81 0 0 0  0 0 0.42 0 0  0 0 0 1 0"/><feGaussianBlur stdDeviation="0.3"/></filter>
   </defs>
   <rect width="100" height="100" rx="6" fill="#0c1226"/>
   <rect x="2" y="2" width="96" height="96" rx="5" fill="url(#bg-6)"/>
@@ -217,7 +223,7 @@
   <path d="M0 4 L16 4" stroke="#d6a93f" stroke-width="0.5" opacity="0.6"/><path d="M84 4 L100 4" stroke="#d6a93f" stroke-width="0.5" opacity="0.6"/><path d="M0 96 L16 96" stroke="#d6a93f" stroke-width="0.5" opacity="0.6"/><path d="M84 96 L100 96" stroke="#d6a93f" stroke-width="0.5" opacity="0.6"/>
   <circle cx="50" cy="48" r="38" fill="url(#halo-6)"/>
   <circle cx="50" cy="48" r="22" fill="#b88dff" opacity="0.10"/>
-  <path d="M28 60 Q28 18 50 18 Q72 18 72 60 L72 72 L28 72 Z" fill="url(#m-6)" stroke="#1a1a20" stroke-width="1.2"/><path d="M28 60 Q28 22 50 20 Q60 22 64 30 Q40 30 32 50 Q30 56 28 60 Z" fill="#fff" opacity="0.22"/><rect x="42" y="34" width="16" height="22" rx="1" fill="#06090f" stroke="#1a1a20" stroke-width="0.6"/><line x1="44" y1="38" x2="56" y2="38" stroke="#3a3a45" stroke-width="0.5"/><line x1="44" y1="44" x2="56" y2="44" stroke="#3a3a45" stroke-width="0.5"/><line x1="44" y1="50" x2="56" y2="50" stroke="#3a3a45" stroke-width="0.5"/><circle cx="34" cy="62" r="1.6" fill="url(#g-6)" stroke="#3a1a05" stroke-width="0.4"/><circle cx="66" cy="62" r="1.6" fill="url(#g-6)" stroke="#3a1a05" stroke-width="0.4"/><path d="M50 18 L50 6 Q56 4 60 8 L60 14 Q56 16 50 14 Z" fill="#c83030" stroke="#5a1010" stroke-width="0.5"/><path d="M50 14 L60 14 L60 8 L52 6" fill="#ff5050" opacity="0.5"/>
+  <image href="file:///Users/lukaszbartoszcze/work/simple-rts-unity/web/art/cards/helmet.svg" x="14" y="14" width="72" height="72" preserveAspectRatio="xMidYMid meet" filter="url(#tint-6)"/>
   <path d="M50 2 L57 9 L50 16 L43 9 Z" fill="#0c1226" stroke="#d6a93f" stroke-width="0.7"/>
   <circle cx="50" cy="9" r="2.2" fill="#b88dff" stroke="#d6a93f" stroke-width="0.4"/>
   <circle cx="49.2" cy="8.2" r="0.7" fill="#fff" opacity="0.9"/>
@@ -244,6 +250,7 @@
     <linearGradient id="lf-7" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#7be08a"/><stop offset="100%" stop-color="#1a4a2a"/></linearGradient>
     <radialGradient id="dr-7" cx="0.4" cy="0.35" r="0.7"><stop offset="0%" stop-color="#e0f8ff"/><stop offset="100%" stop-color="#0a4060"/></radialGradient>
     <radialGradient id="vig-7" cx="0.5" cy="0.5" r="0.72"><stop offset="55%" stop-color="#1a0f08" stop-opacity="0"/><stop offset="100%" stop-color="#1a0f08" stop-opacity="0.7"/></radialGradient>
+    <filter id="tint-7" x="0" y="0" width="100%" height="100%"><feColorMatrix type="matrix" values="0.95 0 0 0 0  0 0.68 0 0 0  0 0 0.42 0 0  0 0 0 1 0"/><feGaussianBlur stdDeviation="0.3"/></filter>
   </defs>
   <rect width="100" height="100" rx="6" fill="#1a0f08"/>
   <rect x="2" y="2" width="96" height="96" rx="5" fill="url(#bg-7)"/>
@@ -256,7 +263,7 @@
   <path d="M0 4 L16 4" stroke="#c4844a" stroke-width="0.5" opacity="0.6"/><path d="M84 4 L100 4" stroke="#c4844a" stroke-width="0.5" opacity="0.6"/><path d="M0 96 L16 96" stroke="#c4844a" stroke-width="0.5" opacity="0.6"/><path d="M84 96 L100 96" stroke="#c4844a" stroke-width="0.5" opacity="0.6"/>
   <circle cx="50" cy="48" r="38" fill="url(#halo-7)"/>
   <circle cx="50" cy="48" r="22" fill="#b88dff" opacity="0.10"/>
-  <path d="M18 60 L82 60 L74 76 L26 76 Z" fill="url(#m-7)" stroke="#1a1a20" stroke-width="1.1"/><path d="M18 60 L82 60 L80 64 L20 64 Z" fill="#fff" opacity="0.18"/><rect x="34" y="40" width="32" height="22" fill="#1a1a20" stroke="#06090f" stroke-width="1"/><rect x="34" y="40" width="32" height="4" fill="#fff" opacity="0.18"/><path d="M28 28 L72 28 L78 42 L22 42 Z" fill="#1a1a20" stroke="#06090f" stroke-width="1"/><path d="M28 28 L72 28 L74 32 L26 32 Z" fill="#fff" opacity="0.22"/><rect x="34" y="76" width="32" height="14" fill="url(#w-7)" stroke="#1a0c08" stroke-width="0.6"/><line x1="36" y1="80" x2="64" y2="80" stroke="#1a0c08" stroke-width="0.4"/><line x1="36" y1="86" x2="64" y2="86" stroke="#1a0c08" stroke-width="0.4"/><circle cx="60" cy="35" r="1.7" fill="url(#g-7)"/><circle cx="40" cy="35" r="1.5" fill="url(#g-7)"/><path d="M64 18 L70 12 M70 22 L78 22 M64 26 L74 28" stroke="#fff5a0" stroke-width="1.2" stroke-linecap="round"/>
+  <image href="file:///Users/lukaszbartoszcze/work/simple-rts-unity/web/art/cards/anvil.svg" x="14" y="14" width="72" height="72" preserveAspectRatio="xMidYMid meet" filter="url(#tint-7)"/>
   <path d="M50 2 L57 9 L50 16 L43 9 Z" fill="#1a0f08" stroke="#c4844a" stroke-width="0.7"/>
   <circle cx="50" cy="9" r="2.2" fill="#b88dff" stroke="#c4844a" stroke-width="0.4"/>
   <circle cx="49.2" cy="8.2" r="0.7" fill="#fff" opacity="0.9"/>
@@ -282,6 +289,7 @@
     <linearGradient id="lf-8" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#7be08a"/><stop offset="100%" stop-color="#1a4a2a"/></linearGradient>
     <radialGradient id="dr-8" cx="0.4" cy="0.35" r="0.7"><stop offset="0%" stop-color="#e0f8ff"/><stop offset="100%" stop-color="#0a4060"/></radialGradient>
     <radialGradient id="vig-8" cx="0.5" cy="0.5" r="0.72"><stop offset="55%" stop-color="#1a0f08" stop-opacity="0"/><stop offset="100%" stop-color="#1a0f08" stop-opacity="0.7"/></radialGradient>
+    <filter id="tint-8" x="0" y="0" width="100%" height="100%"><feColorMatrix type="matrix" values="0.95 0 0 0 0  0 0.68 0 0 0  0 0 0.42 0 0  0 0 0 1 0"/><feGaussianBlur stdDeviation="0.3"/></filter>
   </defs>
   <rect width="100" height="100" rx="6" fill="#1a0f08"/>
   <rect x="2" y="2" width="96" height="96" rx="5" fill="url(#bg-8)"/>
@@ -294,7 +302,7 @@
   <path d="M0 4 L16 4" stroke="#c4844a" stroke-width="0.5" opacity="0.6"/><path d="M84 4 L100 4" stroke="#c4844a" stroke-width="0.5" opacity="0.6"/><path d="M0 96 L16 96" stroke="#c4844a" stroke-width="0.5" opacity="0.6"/><path d="M84 96 L100 96" stroke="#c4844a" stroke-width="0.5" opacity="0.6"/>
   <circle cx="50" cy="48" r="38" fill="url(#halo-8)"/>
   <circle cx="50" cy="48" r="22" fill="#6cd6ff" opacity="0.10"/>
-  <rect x="44" y="54" width="12" height="34" fill="url(#w-8)" stroke="#1a0c08" stroke-width="0.6"/><line x1="44" y1="62" x2="56" y2="62" stroke="#5a3a2a" stroke-width="0.5"/><line x1="44" y1="74" x2="56" y2="74" stroke="#5a3a2a" stroke-width="0.5"/><line x1="44" y1="86" x2="56" y2="86" stroke="#5a3a2a" stroke-width="0.5"/><rect x="42" y="84" width="16" height="6" fill="url(#g-8)" stroke="#3a1a05" stroke-width="0.5"/><path d="M22 18 L78 18 L74 54 L26 54 Z" fill="url(#m-8)" stroke="#1a1a20" stroke-width="1.2"/><path d="M22 18 L78 18 L75 28 L25 28 Z" fill="#fff" opacity="0.3"/><line x1="26" y1="36" x2="74" y2="36" stroke="#3a3a40" stroke-width="0.6"/><circle cx="32" cy="44" r="1.8" fill="url(#g-8)" stroke="#3a1a05" stroke-width="0.4"/><circle cx="68" cy="44" r="1.8" fill="url(#g-8)" stroke="#3a1a05" stroke-width="0.4"/><circle cx="50" cy="44" r="2" fill="url(#g-8)" stroke="#3a1a05" stroke-width="0.4"/>
+  <image href="file:///Users/lukaszbartoszcze/work/simple-rts-unity/web/art/cards/hammer.svg" x="14" y="14" width="72" height="72" preserveAspectRatio="xMidYMid meet" filter="url(#tint-8)"/>
   <path d="M50 2 L57 9 L50 16 L43 9 Z" fill="#1a0f08" stroke="#c4844a" stroke-width="0.7"/>
   <circle cx="50" cy="9" r="2.2" fill="#6cd6ff" stroke="#c4844a" stroke-width="0.4"/>
   <circle cx="49.2" cy="8.2" r="0.7" fill="#fff" opacity="0.9"/>
@@ -320,6 +328,7 @@
     <linearGradient id="lf-9" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#7be08a"/><stop offset="100%" stop-color="#1a4a2a"/></linearGradient>
     <radialGradient id="dr-9" cx="0.4" cy="0.35" r="0.7"><stop offset="0%" stop-color="#e0f8ff"/><stop offset="100%" stop-color="#0a4060"/></radialGradient>
     <radialGradient id="vig-9" cx="0.5" cy="0.5" r="0.72"><stop offset="55%" stop-color="#1a0f08" stop-opacity="0"/><stop offset="100%" stop-color="#1a0f08" stop-opacity="0.7"/></radialGradient>
+    <filter id="tint-9" x="0" y="0" width="100%" height="100%"><feColorMatrix type="matrix" values="0.95 0 0 0 0  0 0.68 0 0 0  0 0 0.42 0 0  0 0 0 1 0"/><feGaussianBlur stdDeviation="0.3"/></filter>
   </defs>
   <rect width="100" height="100" rx="6" fill="#1a0f08"/>
   <rect x="2" y="2" width="96" height="96" rx="5" fill="url(#bg-9)"/>
@@ -332,7 +341,7 @@
   <path d="M0 4 L16 4" stroke="#c4844a" stroke-width="0.5" opacity="0.6"/><path d="M84 4 L100 4" stroke="#c4844a" stroke-width="0.5" opacity="0.6"/><path d="M0 96 L16 96" stroke="#c4844a" stroke-width="0.5" opacity="0.6"/><path d="M84 96 L100 96" stroke="#c4844a" stroke-width="0.5" opacity="0.6"/>
   <circle cx="50" cy="48" r="38" fill="url(#halo-9)"/>
   <circle cx="50" cy="48" r="22" fill="#bdbdbd" opacity="0.10"/>
-  <path d="M50 50 L50 88 L46 88 L46 50 Z" fill="url(#w-9)" stroke="#1a0c08" stroke-width="0.6"/><line x1="46" y1="60" x2="50" y2="60" stroke="#5a3a2a" stroke-width="0.5"/><line x1="46" y1="72" x2="50" y2="72" stroke="#5a3a2a" stroke-width="0.5"/><line x1="46" y1="84" x2="50" y2="84" stroke="#5a3a2a" stroke-width="0.5"/><path d="M48 78 L48 88 L52 88 L52 78 Z" fill="url(#g-9)" stroke="#3a1a05" stroke-width="0.4"/><path d="M30 26 L60 18 Q76 28 76 50 Q76 70 60 80 L30 70 Q42 50 30 26 Z" fill="url(#m-9)" stroke="#1a1a20" stroke-width="1.2"/><path d="M30 26 L60 18 Q70 24 72 38 Q60 30 42 36 Q34 30 30 26 Z" fill="#fff" opacity="0.25"/><line x1="38" y1="42" x2="68" y2="42" stroke="url(#g-9)" stroke-width="1.3"/><line x1="38" y1="58" x2="68" y2="58" stroke="url(#g-9)" stroke-width="1.3"/><circle cx="48" cy="50" r="3" fill="url(#g-9)" stroke="#3a1a05" stroke-width="0.5"/><circle cx="48" cy="50" r="1.2" fill="#1a0c08"/>
+  <image href="file:///Users/lukaszbartoszcze/work/simple-rts-unity/web/art/cards/axe.svg" x="14" y="14" width="72" height="72" preserveAspectRatio="xMidYMid meet" filter="url(#tint-9)"/>
   <path d="M50 2 L57 9 L50 16 L43 9 Z" fill="#1a0f08" stroke="#c4844a" stroke-width="0.7"/>
   <circle cx="50" cy="9" r="2.2" fill="#bdbdbd" stroke="#c4844a" stroke-width="0.4"/>
   <circle cx="49.2" cy="8.2" r="0.7" fill="#fff" opacity="0.9"/>
@@ -358,6 +367,7 @@
     <linearGradient id="lf-a" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#7be08a"/><stop offset="100%" stop-color="#1a4a2a"/></linearGradient>
     <radialGradient id="dr-a" cx="0.4" cy="0.35" r="0.7"><stop offset="0%" stop-color="#e0f8ff"/><stop offset="100%" stop-color="#0a4060"/></radialGradient>
     <radialGradient id="vig-a" cx="0.5" cy="0.5" r="0.72"><stop offset="55%" stop-color="#1a0f08" stop-opacity="0"/><stop offset="100%" stop-color="#1a0f08" stop-opacity="0.7"/></radialGradient>
+    <filter id="tint-a" x="0" y="0" width="100%" height="100%"><feColorMatrix type="matrix" values="0.95 0 0 0 0  0 0.68 0 0 0  0 0 0.42 0 0  0 0 0 1 0"/><feGaussianBlur stdDeviation="0.3"/></filter>
   </defs>
   <rect width="100" height="100" rx="6" fill="#1a0f08"/>
   <rect x="2" y="2" width="96" height="96" rx="5" fill="url(#bg-a)"/>
@@ -370,7 +380,7 @@
   <path d="M0 4 L16 4" stroke="#c4844a" stroke-width="0.5" opacity="0.6"/><path d="M84 4 L100 4" stroke="#c4844a" stroke-width="0.5" opacity="0.6"/><path d="M0 96 L16 96" stroke="#c4844a" stroke-width="0.5" opacity="0.6"/><path d="M84 96 L100 96" stroke="#c4844a" stroke-width="0.5" opacity="0.6"/>
   <circle cx="50" cy="48" r="38" fill="url(#halo-a)"/>
   <circle cx="50" cy="48" r="22" fill="#6cd6ff" opacity="0.10"/>
-  <path d="M6 88 L34 36 L48 56 L60 22 L74 42 L94 88 Z" fill="url(#m-a)" stroke="#1a1a20" stroke-width="1.2"/><path d="M6 88 L34 36 L40 46 L20 88 Z" fill="#1a1a20" opacity="0.4"/><path d="M48 56 L60 22 L66 32 L52 60 Z" fill="#1a1a20" opacity="0.35"/><path d="M28 44 L34 36 L40 46 L34 44 Z" fill="#fff"/><path d="M55 30 L60 22 L66 32 L60 30 Z" fill="#fff"/><path d="M68 38 L74 42 L80 50 L72 44 Z" fill="#fff"/><circle cx="76" cy="20" r="3" fill="#fff5b8" opacity="0.7"/>
+  <image href="file:///Users/lukaszbartoszcze/work/simple-rts-unity/web/art/cards/mountain.svg" x="14" y="14" width="72" height="72" preserveAspectRatio="xMidYMid meet" filter="url(#tint-a)"/>
   <path d="M50 2 L57 9 L50 16 L43 9 Z" fill="#1a0f08" stroke="#c4844a" stroke-width="0.7"/>
   <circle cx="50" cy="9" r="2.2" fill="#6cd6ff" stroke="#c4844a" stroke-width="0.4"/>
   <circle cx="49.2" cy="8.2" r="0.7" fill="#fff" opacity="0.9"/>
@@ -396,6 +406,7 @@
     <linearGradient id="lf-b" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#7be08a"/><stop offset="100%" stop-color="#1a4a2a"/></linearGradient>
     <radialGradient id="dr-b" cx="0.4" cy="0.35" r="0.7"><stop offset="0%" stop-color="#e0f8ff"/><stop offset="100%" stop-color="#0a4060"/></radialGradient>
     <radialGradient id="vig-b" cx="0.5" cy="0.5" r="0.72"><stop offset="55%" stop-color="#1a0f08" stop-opacity="0"/><stop offset="100%" stop-color="#1a0f08" stop-opacity="0.7"/></radialGradient>
+    <filter id="tint-b" x="0" y="0" width="100%" height="100%"><feColorMatrix type="matrix" values="0.95 0 0 0 0  0 0.68 0 0 0  0 0 0.42 0 0  0 0 0 1 0"/><feGaussianBlur stdDeviation="0.3"/></filter>
   </defs>
   <rect width="100" height="100" rx="6" fill="#1a0f08"/>
   <rect x="2" y="2" width="96" height="96" rx="5" fill="url(#bg-b)"/>
@@ -408,7 +419,7 @@
   <path d="M0 4 L16 4" stroke="#c4844a" stroke-width="0.5" opacity="0.6"/><path d="M84 4 L100 4" stroke="#c4844a" stroke-width="0.5" opacity="0.6"/><path d="M0 96 L16 96" stroke="#c4844a" stroke-width="0.5" opacity="0.6"/><path d="M84 96 L100 96" stroke="#c4844a" stroke-width="0.5" opacity="0.6"/>
   <circle cx="50" cy="48" r="38" fill="url(#halo-b)"/>
   <circle cx="50" cy="48" r="22" fill="#bdbdbd" opacity="0.10"/>
-  <path d="M28 30 L72 30 L68 84 L32 84 Z" fill="url(#w-b)" stroke="#1a0c08" stroke-width="1.1"/><path d="M28 30 L72 30 L70 38 L30 38 Z" fill="#1a0c08" opacity="0.5"/><path d="M30 38 L36 84 L34 84 L28 38 Z" fill="#1a0c08" opacity="0.5"/><line x1="32" y1="60" x2="68" y2="60" stroke="#1a0c08" stroke-width="0.6"/><path d="M72 42 L86 42 L86 70 L70 70" fill="none" stroke="url(#w-b)" stroke-width="3.5"/><path d="M72 42 L86 42 L86 70 L70 70" fill="none" stroke="#1a0c08" stroke-width="0.5"/><ellipse cx="50" cy="30" rx="22" ry="3" fill="#fff8d8"/><ellipse cx="50" cy="29" rx="20" ry="1.8" fill="#fff" opacity="0.7"/><path d="M30 26 Q40 18 50 22 Q60 18 70 26" fill="none" stroke="#fff" stroke-width="2"/><circle cx="42" cy="22" r="1.5" fill="#fff" opacity="0.8"/><circle cx="58" cy="22" r="1.5" fill="#fff" opacity="0.8"/>
+  <image href="file:///Users/lukaszbartoszcze/work/simple-rts-unity/web/art/cards/mug.svg" x="14" y="14" width="72" height="72" preserveAspectRatio="xMidYMid meet" filter="url(#tint-b)"/>
   <path d="M50 2 L57 9 L50 16 L43 9 Z" fill="#1a0f08" stroke="#c4844a" stroke-width="0.7"/>
   <circle cx="50" cy="9" r="2.2" fill="#bdbdbd" stroke="#c4844a" stroke-width="0.4"/>
   <circle cx="49.2" cy="8.2" r="0.7" fill="#fff" opacity="0.9"/>
@@ -434,6 +445,7 @@
     <linearGradient id="lf-c" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#7be08a"/><stop offset="100%" stop-color="#1a4a2a"/></linearGradient>
     <radialGradient id="dr-c" cx="0.4" cy="0.35" r="0.7"><stop offset="0%" stop-color="#e0f8ff"/><stop offset="100%" stop-color="#0a4060"/></radialGradient>
     <radialGradient id="vig-c" cx="0.5" cy="0.5" r="0.72"><stop offset="55%" stop-color="#1a0f08" stop-opacity="0"/><stop offset="100%" stop-color="#1a0f08" stop-opacity="0.7"/></radialGradient>
+    <filter id="tint-c" x="0" y="0" width="100%" height="100%"><feColorMatrix type="matrix" values="0.95 0 0 0 0  0 0.68 0 0 0  0 0 0.42 0 0  0 0 0 1 0"/><feGaussianBlur stdDeviation="0.3"/></filter>
   </defs>
   <rect width="100" height="100" rx="6" fill="#1a0f08"/>
   <rect x="2" y="2" width="96" height="96" rx="5" fill="url(#bg-c)"/>
@@ -446,7 +458,7 @@
   <path d="M0 4 L16 4" stroke="#c4844a" stroke-width="0.5" opacity="0.6"/><path d="M84 4 L100 4" stroke="#c4844a" stroke-width="0.5" opacity="0.6"/><path d="M0 96 L16 96" stroke="#c4844a" stroke-width="0.5" opacity="0.6"/><path d="M84 96 L100 96" stroke="#c4844a" stroke-width="0.5" opacity="0.6"/>
   <circle cx="50" cy="48" r="38" fill="url(#halo-c)"/>
   <circle cx="50" cy="48" r="22" fill="#b88dff" opacity="0.10"/>
-  <line x1="6" y1="86" x2="94" y2="86" stroke="#5a4a35" stroke-width="2"/><line x1="6" y1="84" x2="94" y2="84" stroke="#9a8d72" stroke-width="0.6" opacity="0.5"/><circle cx="32" cy="80" r="6.5" fill="#1a1a20" stroke="#06090f" stroke-width="0.5"/><circle cx="32" cy="80" r="2.5" fill="#3a3a40"/><circle cx="68" cy="80" r="6.5" fill="#1a1a20" stroke="#06090f" stroke-width="0.5"/><circle cx="68" cy="80" r="2.5" fill="#3a3a40"/><rect x="20" y="44" width="60" height="30" fill="url(#w-c)" stroke="#1a0c08" stroke-width="1"/><line x1="32" y1="44" x2="32" y2="74" stroke="#1a0c08" stroke-width="0.6"/><line x1="50" y1="44" x2="50" y2="74" stroke="#1a0c08" stroke-width="0.6"/><line x1="68" y1="44" x2="68" y2="74" stroke="#1a0c08" stroke-width="0.6"/><rect x="18" y="48" width="64" height="3" fill="#3a3a40" stroke="#1a1a20" stroke-width="0.4"/><rect x="18" y="68" width="64" height="3" fill="#3a3a40" stroke="#1a1a20" stroke-width="0.4"/><circle cx="34" cy="58" r="2.5" fill="url(#g-c)" stroke="#3a1a05" stroke-width="0.4"/><circle cx="50" cy="62" r="3" fill="url(#g-c)" stroke="#3a1a05" stroke-width="0.4"/><circle cx="64" cy="58" r="2.5" fill="url(#g-c)" stroke="#3a1a05" stroke-width="0.4"/>
+  <image href="file:///Users/lukaszbartoszcze/work/simple-rts-unity/web/art/cards/minecart.svg" x="14" y="14" width="72" height="72" preserveAspectRatio="xMidYMid meet" filter="url(#tint-c)"/>
   <path d="M50 2 L57 9 L50 16 L43 9 Z" fill="#1a0f08" stroke="#c4844a" stroke-width="0.7"/>
   <circle cx="50" cy="9" r="2.2" fill="#b88dff" stroke="#c4844a" stroke-width="0.4"/>
   <circle cx="49.2" cy="8.2" r="0.7" fill="#fff" opacity="0.9"/>
@@ -473,6 +485,7 @@
     <linearGradient id="lf-d" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#7be08a"/><stop offset="100%" stop-color="#1a4a2a"/></linearGradient>
     <radialGradient id="dr-d" cx="0.4" cy="0.35" r="0.7"><stop offset="0%" stop-color="#e0f8ff"/><stop offset="100%" stop-color="#0a4060"/></radialGradient>
     <radialGradient id="vig-d" cx="0.5" cy="0.5" r="0.72"><stop offset="55%" stop-color="#06160d" stop-opacity="0"/><stop offset="100%" stop-color="#06160d" stop-opacity="0.7"/></radialGradient>
+    <filter id="tint-d" x="0" y="0" width="100%" height="100%"><feColorMatrix type="matrix" values="0.78 0 0 0 0  0 0.96 0 0 0  0 0 0.82 0 0  0 0 0 1 0"/><feGaussianBlur stdDeviation="0.3"/></filter>
   </defs>
   <rect width="100" height="100" rx="6" fill="#06160d"/>
   <rect x="2" y="2" width="96" height="96" rx="5" fill="url(#bg-d)"/>
@@ -485,7 +498,7 @@
   <path d="M0 4 L16 4" stroke="#a8e8b8" stroke-width="0.5" opacity="0.6"/><path d="M84 4 L100 4" stroke="#a8e8b8" stroke-width="0.5" opacity="0.6"/><path d="M0 96 L16 96" stroke="#a8e8b8" stroke-width="0.5" opacity="0.6"/><path d="M84 96 L100 96" stroke="#a8e8b8" stroke-width="0.5" opacity="0.6"/>
   <circle cx="50" cy="48" r="38" fill="url(#halo-d)"/>
   <circle cx="50" cy="48" r="22" fill="#bdbdbd" opacity="0.10"/>
-  <path d="M28 14 Q12 50 28 86" stroke="url(#w-d)" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M28 16 Q14 50 28 84" stroke="#5a3a18" stroke-width="1" fill="none" opacity="0.6"/><line x1="28" y1="14" x2="28" y2="86" stroke="#fdf8e0" stroke-width="0.8"/><circle cx="28" cy="14" r="1.5" fill="url(#g-d)"/><circle cx="28" cy="86" r="1.5" fill="url(#g-d)"/><line x1="28" y1="50" x2="86" y2="50" stroke="#cfd5df" stroke-width="2.2"/><line x1="28" y1="50" x2="86" y2="50" stroke="#fff" stroke-width="0.8" opacity="0.7"/><path d="M82 46 L92 50 L82 54 L84 50 Z" fill="url(#m-d)" stroke="#1a1a20" stroke-width="0.6"/><path d="M22 46 L28 48 L22 54 Z" fill="#7be08a"/><path d="M22 50 L28 50" stroke="#3a6a3a" stroke-width="0.7"/>
+  <image href="file:///Users/lukaszbartoszcze/work/simple-rts-unity/web/art/cards/bow.svg" x="14" y="14" width="72" height="72" preserveAspectRatio="xMidYMid meet" filter="url(#tint-d)"/>
   <path d="M50 2 L57 9 L50 16 L43 9 Z" fill="#06160d" stroke="#a8e8b8" stroke-width="0.7"/>
   <circle cx="50" cy="9" r="2.2" fill="#bdbdbd" stroke="#a8e8b8" stroke-width="0.4"/>
   <circle cx="49.2" cy="8.2" r="0.7" fill="#fff" opacity="0.9"/>
@@ -511,6 +524,7 @@
     <linearGradient id="lf-e" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#7be08a"/><stop offset="100%" stop-color="#1a4a2a"/></linearGradient>
     <radialGradient id="dr-e" cx="0.4" cy="0.35" r="0.7"><stop offset="0%" stop-color="#e0f8ff"/><stop offset="100%" stop-color="#0a4060"/></radialGradient>
     <radialGradient id="vig-e" cx="0.5" cy="0.5" r="0.72"><stop offset="55%" stop-color="#06160d" stop-opacity="0"/><stop offset="100%" stop-color="#06160d" stop-opacity="0.7"/></radialGradient>
+    <filter id="tint-e" x="0" y="0" width="100%" height="100%"><feColorMatrix type="matrix" values="0.78 0 0 0 0  0 0.96 0 0 0  0 0 0.82 0 0  0 0 0 1 0"/><feGaussianBlur stdDeviation="0.3"/></filter>
   </defs>
   <rect width="100" height="100" rx="6" fill="#06160d"/>
   <rect x="2" y="2" width="96" height="96" rx="5" fill="url(#bg-e)"/>
@@ -523,7 +537,7 @@
   <path d="M0 4 L16 4" stroke="#a8e8b8" stroke-width="0.5" opacity="0.6"/><path d="M84 4 L100 4" stroke="#a8e8b8" stroke-width="0.5" opacity="0.6"/><path d="M0 96 L16 96" stroke="#a8e8b8" stroke-width="0.5" opacity="0.6"/><path d="M84 96 L100 96" stroke="#a8e8b8" stroke-width="0.5" opacity="0.6"/>
   <circle cx="50" cy="48" r="38" fill="url(#halo-e)"/>
   <circle cx="50" cy="48" r="22" fill="#bdbdbd" opacity="0.10"/>
-  <path d="M50 92 Q18 60 24 24 Q70 18 74 50 Q72 84 50 92 Z" fill="url(#lf-e)" stroke="#0f3a1c" stroke-width="1.2"/><path d="M50 92 Q22 62 26 28 Q42 24 54 36 Q40 60 50 92 Z" fill="#fff" opacity="0.18"/><path d="M50 92 L42 30" stroke="#0f3a1c" stroke-width="1.4" fill="none"/><path d="M48 80 L62 70" stroke="#0f3a1c" stroke-width="0.8" fill="none"/><path d="M46 66 L62 56" stroke="#0f3a1c" stroke-width="0.8" fill="none"/><path d="M44 52 L60 42" stroke="#0f3a1c" stroke-width="0.8" fill="none"/><path d="M44 38 L54 32" stroke="#0f3a1c" stroke-width="0.8" fill="none"/><circle cx="38" cy="36" r="2.5" fill="url(#dr-e)" opacity="0.85"/><circle cx="37" cy="34.5" r="0.8" fill="#fff" opacity="0.95"/>
+  <image href="file:///Users/lukaszbartoszcze/work/simple-rts-unity/web/art/cards/leaf.svg" x="14" y="14" width="72" height="72" preserveAspectRatio="xMidYMid meet" filter="url(#tint-e)"/>
   <path d="M50 2 L57 9 L50 16 L43 9 Z" fill="#06160d" stroke="#a8e8b8" stroke-width="0.7"/>
   <circle cx="50" cy="9" r="2.2" fill="#bdbdbd" stroke="#a8e8b8" stroke-width="0.4"/>
   <circle cx="49.2" cy="8.2" r="0.7" fill="#fff" opacity="0.9"/>
@@ -549,6 +563,7 @@
     <linearGradient id="lf-f" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#7be08a"/><stop offset="100%" stop-color="#1a4a2a"/></linearGradient>
     <radialGradient id="dr-f" cx="0.4" cy="0.35" r="0.7"><stop offset="0%" stop-color="#e0f8ff"/><stop offset="100%" stop-color="#0a4060"/></radialGradient>
     <radialGradient id="vig-f" cx="0.5" cy="0.5" r="0.72"><stop offset="55%" stop-color="#06160d" stop-opacity="0"/><stop offset="100%" stop-color="#06160d" stop-opacity="0.7"/></radialGradient>
+    <filter id="tint-f" x="0" y="0" width="100%" height="100%"><feColorMatrix type="matrix" values="0.78 0 0 0 0  0 0.96 0 0 0  0 0 0.82 0 0  0 0 0 1 0"/><feGaussianBlur stdDeviation="0.3"/></filter>
   </defs>
   <rect width="100" height="100" rx="6" fill="#06160d"/>
   <rect x="2" y="2" width="96" height="96" rx="5" fill="url(#bg-f)"/>
@@ -561,7 +576,7 @@
   <path d="M0 4 L16 4" stroke="#a8e8b8" stroke-width="0.5" opacity="0.6"/><path d="M84 4 L100 4" stroke="#a8e8b8" stroke-width="0.5" opacity="0.6"/><path d="M0 96 L16 96" stroke="#a8e8b8" stroke-width="0.5" opacity="0.6"/><path d="M84 96 L100 96" stroke="#a8e8b8" stroke-width="0.5" opacity="0.6"/>
   <circle cx="50" cy="48" r="38" fill="url(#halo-f)"/>
   <circle cx="50" cy="48" r="22" fill="#6cd6ff" opacity="0.10"/>
-  <circle cx="50" cy="50" r="32" fill="url(#g-f)" opacity="0.18"/><circle cx="50" cy="50" r="28" fill="#fff5d0"/><circle cx="50" cy="50" r="28" fill="url(#g-f)" opacity="0.15"/><circle cx="60" cy="44" r="26" fill="url(#bg-f-X)" /><circle cx="60" cy="44" r="26" fill="#0c1226"/><circle cx="36" cy="40" r="2.6" fill="#bba88c" opacity="0.85"/><circle cx="42" cy="58" r="2" fill="#bba88c" opacity="0.85"/><circle cx="32" cy="50" r="1.5" fill="#bba88c" opacity="0.85"/><circle cx="40" cy="48" r="0.9" fill="#bba88c" opacity="0.6"/><circle cx="20" cy="20" r="1" fill="#fff" opacity="0.8"/><circle cx="80" cy="22" r="0.7" fill="#fff" opacity="0.7"/><circle cx="74" cy="74" r="1.2" fill="#fff" opacity="0.85"/><circle cx="14" cy="68" r="0.6" fill="#fff" opacity="0.6"/>
+  <image href="file:///Users/lukaszbartoszcze/work/simple-rts-unity/web/art/cards/moon.svg" x="14" y="14" width="72" height="72" preserveAspectRatio="xMidYMid meet" filter="url(#tint-f)"/>
   <path d="M50 2 L57 9 L50 16 L43 9 Z" fill="#06160d" stroke="#a8e8b8" stroke-width="0.7"/>
   <circle cx="50" cy="9" r="2.2" fill="#6cd6ff" stroke="#a8e8b8" stroke-width="0.4"/>
   <circle cx="49.2" cy="8.2" r="0.7" fill="#fff" opacity="0.9"/>
@@ -587,6 +602,7 @@
     <linearGradient id="lf-g" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#7be08a"/><stop offset="100%" stop-color="#1a4a2a"/></linearGradient>
     <radialGradient id="dr-g" cx="0.4" cy="0.35" r="0.7"><stop offset="0%" stop-color="#e0f8ff"/><stop offset="100%" stop-color="#0a4060"/></radialGradient>
     <radialGradient id="vig-g" cx="0.5" cy="0.5" r="0.72"><stop offset="55%" stop-color="#06160d" stop-opacity="0"/><stop offset="100%" stop-color="#06160d" stop-opacity="0.7"/></radialGradient>
+    <filter id="tint-g" x="0" y="0" width="100%" height="100%"><feColorMatrix type="matrix" values="0.78 0 0 0 0  0 0.96 0 0 0  0 0 0.82 0 0  0 0 0 1 0"/><feGaussianBlur stdDeviation="0.3"/></filter>
   </defs>
   <rect width="100" height="100" rx="6" fill="#06160d"/>
   <rect x="2" y="2" width="96" height="96" rx="5" fill="url(#bg-g)"/>
@@ -599,7 +615,7 @@
   <path d="M0 4 L16 4" stroke="#a8e8b8" stroke-width="0.5" opacity="0.6"/><path d="M84 4 L100 4" stroke="#a8e8b8" stroke-width="0.5" opacity="0.6"/><path d="M0 96 L16 96" stroke="#a8e8b8" stroke-width="0.5" opacity="0.6"/><path d="M84 96 L100 96" stroke="#a8e8b8" stroke-width="0.5" opacity="0.6"/>
   <circle cx="50" cy="48" r="38" fill="url(#halo-g)"/>
   <circle cx="50" cy="48" r="22" fill="#b88dff" opacity="0.10"/>
-  <path d="M50 10 Q30 50 30 70 Q30 90 50 90 Q70 90 70 70 Q70 50 50 10 Z" fill="url(#dr-g)" stroke="#0a4060" stroke-width="1.2"/><path d="M50 10 Q34 50 34 70 Q34 80 42 84 Q38 60 48 30 Q44 22 50 10 Z" fill="#fff" opacity="0.4"/><path d="M44 60 Q42 76 50 82" stroke="#fff" stroke-width="2" fill="none" opacity="0.7"/><circle cx="42" cy="46" r="3.5" fill="#fff" opacity="0.65"/><ellipse cx="50" cy="92" rx="14" ry="1.5" fill="#0a4060" opacity="0.4"/>
+  <image href="file:///Users/lukaszbartoszcze/work/simple-rts-unity/web/art/cards/drop.svg" x="14" y="14" width="72" height="72" preserveAspectRatio="xMidYMid meet" filter="url(#tint-g)"/>
   <path d="M50 2 L57 9 L50 16 L43 9 Z" fill="#06160d" stroke="#a8e8b8" stroke-width="0.7"/>
   <circle cx="50" cy="9" r="2.2" fill="#b88dff" stroke="#a8e8b8" stroke-width="0.4"/>
   <circle cx="49.2" cy="8.2" r="0.7" fill="#fff" opacity="0.9"/>
@@ -625,6 +641,7 @@
     <linearGradient id="lf-h" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#7be08a"/><stop offset="100%" stop-color="#1a4a2a"/></linearGradient>
     <radialGradient id="dr-h" cx="0.4" cy="0.35" r="0.7"><stop offset="0%" stop-color="#e0f8ff"/><stop offset="100%" stop-color="#0a4060"/></radialGradient>
     <radialGradient id="vig-h" cx="0.5" cy="0.5" r="0.72"><stop offset="55%" stop-color="#06160d" stop-opacity="0"/><stop offset="100%" stop-color="#06160d" stop-opacity="0.7"/></radialGradient>
+    <filter id="tint-h" x="0" y="0" width="100%" height="100%"><feColorMatrix type="matrix" values="0.78 0 0 0 0  0 0.96 0 0 0  0 0 0.82 0 0  0 0 0 1 0"/><feGaussianBlur stdDeviation="0.3"/></filter>
   </defs>
   <rect width="100" height="100" rx="6" fill="#06160d"/>
   <rect x="2" y="2" width="96" height="96" rx="5" fill="url(#bg-h)"/>
@@ -637,7 +654,7 @@
   <path d="M0 4 L16 4" stroke="#a8e8b8" stroke-width="0.5" opacity="0.6"/><path d="M84 4 L100 4" stroke="#a8e8b8" stroke-width="0.5" opacity="0.6"/><path d="M0 96 L16 96" stroke="#a8e8b8" stroke-width="0.5" opacity="0.6"/><path d="M84 96 L100 96" stroke="#a8e8b8" stroke-width="0.5" opacity="0.6"/>
   <circle cx="50" cy="48" r="38" fill="url(#halo-h)"/>
   <circle cx="50" cy="48" r="22" fill="#b88dff" opacity="0.10"/>
-  <ellipse cx="50" cy="92" rx="22" ry="2.5" fill="#0a0810" opacity="0.5"/><rect x="46" y="62" width="8" height="28" fill="url(#w-h)" stroke="#1a0c08" stroke-width="0.6"/><line x1="48" y1="68" x2="52" y2="68" stroke="#1a0c08" stroke-width="0.4"/><line x1="48" y1="78" x2="52" y2="78" stroke="#1a0c08" stroke-width="0.4"/><path d="M50 14 L24 50 L36 50 L20 70 L80 70 L64 50 L76 50 Z" fill="url(#lf-h)" stroke="#0f3a1c" stroke-width="1.2"/><path d="M50 14 L24 50 L36 50 L24 64 L50 50 Z" fill="#fff" opacity="0.18"/><path d="M50 14 L26 48" stroke="#0f3a1c" stroke-width="0.6" fill="none" opacity="0.7"/><path d="M50 50 L20 70" stroke="#0f3a1c" stroke-width="0.6" fill="none" opacity="0.5"/><circle cx="42" cy="38" r="1.4" fill="#fdf8a0" opacity="0.7"/><circle cx="58" cy="56" r="1.2" fill="#fdf8a0" opacity="0.7"/>
+  <image href="file:///Users/lukaszbartoszcze/work/simple-rts-unity/web/art/cards/tree.svg" x="14" y="14" width="72" height="72" preserveAspectRatio="xMidYMid meet" filter="url(#tint-h)"/>
   <path d="M50 2 L57 9 L50 16 L43 9 Z" fill="#06160d" stroke="#a8e8b8" stroke-width="0.7"/>
   <circle cx="50" cy="9" r="2.2" fill="#b88dff" stroke="#a8e8b8" stroke-width="0.4"/>
   <circle cx="49.2" cy="8.2" r="0.7" fill="#fff" opacity="0.9"/>
@@ -663,6 +680,7 @@
     <linearGradient id="lf-i" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#7be08a"/><stop offset="100%" stop-color="#1a4a2a"/></linearGradient>
     <radialGradient id="dr-i" cx="0.4" cy="0.35" r="0.7"><stop offset="0%" stop-color="#e0f8ff"/><stop offset="100%" stop-color="#0a4060"/></radialGradient>
     <radialGradient id="vig-i" cx="0.5" cy="0.5" r="0.72"><stop offset="55%" stop-color="#06160d" stop-opacity="0"/><stop offset="100%" stop-color="#06160d" stop-opacity="0.7"/></radialGradient>
+    <filter id="tint-i" x="0" y="0" width="100%" height="100%"><feColorMatrix type="matrix" values="0.78 0 0 0 0  0 0.96 0 0 0  0 0 0.82 0 0  0 0 0 1 0"/><feGaussianBlur stdDeviation="0.3"/></filter>
   </defs>
   <rect width="100" height="100" rx="6" fill="#06160d"/>
   <rect x="2" y="2" width="96" height="96" rx="5" fill="url(#bg-i)"/>
@@ -675,7 +693,7 @@
   <path d="M0 4 L16 4" stroke="#a8e8b8" stroke-width="0.5" opacity="0.6"/><path d="M84 4 L100 4" stroke="#a8e8b8" stroke-width="0.5" opacity="0.6"/><path d="M0 96 L16 96" stroke="#a8e8b8" stroke-width="0.5" opacity="0.6"/><path d="M84 96 L100 96" stroke="#a8e8b8" stroke-width="0.5" opacity="0.6"/>
   <circle cx="50" cy="48" r="38" fill="url(#halo-i)"/>
   <circle cx="50" cy="48" r="22" fill="#bdbdbd" opacity="0.10"/>
-  <path d="M50 92 Q18 60 24 24 Q70 18 74 50 Q72 84 50 92 Z" fill="url(#lf-i)" stroke="#0f3a1c" stroke-width="1.2"/><path d="M50 92 Q22 62 26 28 Q42 24 54 36 Q40 60 50 92 Z" fill="#fff" opacity="0.18"/><path d="M50 92 L42 30" stroke="#0f3a1c" stroke-width="1.4" fill="none"/><path d="M48 80 L62 70" stroke="#0f3a1c" stroke-width="0.8" fill="none"/><path d="M46 66 L62 56" stroke="#0f3a1c" stroke-width="0.8" fill="none"/><path d="M44 52 L60 42" stroke="#0f3a1c" stroke-width="0.8" fill="none"/><path d="M44 38 L54 32" stroke="#0f3a1c" stroke-width="0.8" fill="none"/><circle cx="38" cy="36" r="2.5" fill="url(#dr-i)" opacity="0.85"/><circle cx="37" cy="34.5" r="0.8" fill="#fff" opacity="0.95"/>
+  <image href="file:///Users/lukaszbartoszcze/work/simple-rts-unity/web/art/cards/leaf.svg" x="14" y="14" width="72" height="72" preserveAspectRatio="xMidYMid meet" filter="url(#tint-i)"/>
   <path d="M50 2 L57 9 L50 16 L43 9 Z" fill="#06160d" stroke="#a8e8b8" stroke-width="0.7"/>
   <circle cx="50" cy="9" r="2.2" fill="#bdbdbd" stroke="#a8e8b8" stroke-width="0.4"/>
   <circle cx="49.2" cy="8.2" r="0.7" fill="#fff" opacity="0.9"/>
@@ -702,6 +720,7 @@
     <linearGradient id="lf-j" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#7be08a"/><stop offset="100%" stop-color="#1a4a2a"/></linearGradient>
     <radialGradient id="dr-j" cx="0.4" cy="0.35" r="0.7"><stop offset="0%" stop-color="#e0f8ff"/><stop offset="100%" stop-color="#0a4060"/></radialGradient>
     <radialGradient id="vig-j" cx="0.5" cy="0.5" r="0.72"><stop offset="55%" stop-color="#0a0518" stop-opacity="0"/><stop offset="100%" stop-color="#0a0518" stop-opacity="0.7"/></radialGradient>
+    <filter id="tint-j" x="0" y="0" width="100%" height="100%"><feColorMatrix type="matrix" values="0.85 0 0 0 0  0 0.72 0 0 0  0 0 1.00 0 0  0 0 0 1 0"/><feGaussianBlur stdDeviation="0.3"/></filter>
   </defs>
   <rect width="100" height="100" rx="6" fill="#0a0518"/>
   <rect x="2" y="2" width="96" height="96" rx="5" fill="url(#bg-j)"/>
@@ -714,7 +733,7 @@
   <path d="M0 4 L16 4" stroke="#b88dff" stroke-width="0.5" opacity="0.6"/><path d="M84 4 L100 4" stroke="#b88dff" stroke-width="0.5" opacity="0.6"/><path d="M0 96 L16 96" stroke="#b88dff" stroke-width="0.5" opacity="0.6"/><path d="M84 96 L100 96" stroke="#b88dff" stroke-width="0.5" opacity="0.6"/>
   <circle cx="50" cy="48" r="38" fill="url(#halo-j)"/>
   <circle cx="50" cy="48" r="22" fill="#bdbdbd" opacity="0.10"/>
-  <path d="M28 38 Q28 16 50 16 Q72 16 72 38 L72 60 L64 60 L64 78 L58 78 L54 70 L46 70 L42 78 L36 78 L36 60 L28 60 Z" fill="url(#b-j)" stroke="#5a4a35" stroke-width="1.2"/><path d="M28 38 Q28 18 50 16 Q60 18 64 22 Q40 24 32 50 Q30 56 28 60 Z" fill="#fff" opacity="0.22"/><ellipse cx="40" cy="42" rx="6.5" ry="8" fill="#06090f"/><ellipse cx="60" cy="42" rx="6.5" ry="8" fill="#06090f"/><circle cx="40" cy="42" r="2" fill="#b88dff"/><circle cx="60" cy="42" r="2" fill="#b88dff"/><circle cx="39" cy="41" r="0.8" fill="#fff" opacity="0.9"/><circle cx="59" cy="41" r="0.8" fill="#fff" opacity="0.9"/><path d="M44 56 Q47 60 50 56 Q53 60 56 56" fill="none" stroke="#06090f" stroke-width="1.2"/><line x1="44" y1="64" x2="44" y2="78" stroke="#5a4a35" stroke-width="0.6"/><line x1="50" y1="64" x2="50" y2="78" stroke="#5a4a35" stroke-width="0.6"/><line x1="56" y1="64" x2="56" y2="78" stroke="#5a4a35" stroke-width="0.6"/>
+  <image href="file:///Users/lukaszbartoszcze/work/simple-rts-unity/web/art/cards/skull.svg" x="14" y="14" width="72" height="72" preserveAspectRatio="xMidYMid meet" filter="url(#tint-j)"/>
   <path d="M50 2 L57 9 L50 16 L43 9 Z" fill="#0a0518" stroke="#b88dff" stroke-width="0.7"/>
   <circle cx="50" cy="9" r="2.2" fill="#bdbdbd" stroke="#b88dff" stroke-width="0.4"/>
   <circle cx="49.2" cy="8.2" r="0.7" fill="#fff" opacity="0.9"/>
@@ -740,6 +759,7 @@
     <linearGradient id="lf-k" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#7be08a"/><stop offset="100%" stop-color="#1a4a2a"/></linearGradient>
     <radialGradient id="dr-k" cx="0.4" cy="0.35" r="0.7"><stop offset="0%" stop-color="#e0f8ff"/><stop offset="100%" stop-color="#0a4060"/></radialGradient>
     <radialGradient id="vig-k" cx="0.5" cy="0.5" r="0.72"><stop offset="55%" stop-color="#0a0518" stop-opacity="0"/><stop offset="100%" stop-color="#0a0518" stop-opacity="0.7"/></radialGradient>
+    <filter id="tint-k" x="0" y="0" width="100%" height="100%"><feColorMatrix type="matrix" values="0.85 0 0 0 0  0 0.72 0 0 0  0 0 1.00 0 0  0 0 0 1 0"/><feGaussianBlur stdDeviation="0.3"/></filter>
   </defs>
   <rect width="100" height="100" rx="6" fill="#0a0518"/>
   <rect x="2" y="2" width="96" height="96" rx="5" fill="url(#bg-k)"/>
@@ -752,7 +772,7 @@
   <path d="M0 4 L16 4" stroke="#b88dff" stroke-width="0.5" opacity="0.6"/><path d="M84 4 L100 4" stroke="#b88dff" stroke-width="0.5" opacity="0.6"/><path d="M0 96 L16 96" stroke="#b88dff" stroke-width="0.5" opacity="0.6"/><path d="M84 96 L100 96" stroke="#b88dff" stroke-width="0.5" opacity="0.6"/>
   <circle cx="50" cy="48" r="38" fill="url(#halo-k)"/>
   <circle cx="50" cy="48" r="22" fill="#bdbdbd" opacity="0.10"/>
-  <rect x="48" y="22" width="4" height="62" fill="url(#b-k)" stroke="#5a4a35" stroke-width="0.4"/><line x1="48" y1="38" x2="52" y2="38" stroke="#5a4a35" stroke-width="0.4"/><line x1="48" y1="58" x2="52" y2="58" stroke="#5a4a35" stroke-width="0.4"/><line x1="48" y1="76" x2="52" y2="76" stroke="#5a4a35" stroke-width="0.4"/><path d="M50 6 L40 28 L46 24 L50 30 L54 24 L60 28 Z" fill="url(#b-k)" stroke="#5a4a35" stroke-width="0.7"/><line x1="50" y1="10" x2="50" y2="28" stroke="#b88dff" stroke-width="0.6" opacity="0.7"/><circle cx="46" cy="84" r="3.5" fill="url(#b-k)" stroke="#5a4a35" stroke-width="0.5"/><circle cx="54" cy="84" r="3.5" fill="url(#b-k)" stroke="#5a4a35" stroke-width="0.5"/>
+  <image href="file:///Users/lukaszbartoszcze/work/simple-rts-unity/web/art/cards/bonespear.svg" x="14" y="14" width="72" height="72" preserveAspectRatio="xMidYMid meet" filter="url(#tint-k)"/>
   <path d="M50 2 L57 9 L50 16 L43 9 Z" fill="#0a0518" stroke="#b88dff" stroke-width="0.7"/>
   <circle cx="50" cy="9" r="2.2" fill="#bdbdbd" stroke="#b88dff" stroke-width="0.4"/>
   <circle cx="49.2" cy="8.2" r="0.7" fill="#fff" opacity="0.9"/>
@@ -778,6 +798,7 @@
     <linearGradient id="lf-l" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#7be08a"/><stop offset="100%" stop-color="#1a4a2a"/></linearGradient>
     <radialGradient id="dr-l" cx="0.4" cy="0.35" r="0.7"><stop offset="0%" stop-color="#e0f8ff"/><stop offset="100%" stop-color="#0a4060"/></radialGradient>
     <radialGradient id="vig-l" cx="0.5" cy="0.5" r="0.72"><stop offset="55%" stop-color="#0a0518" stop-opacity="0"/><stop offset="100%" stop-color="#0a0518" stop-opacity="0.7"/></radialGradient>
+    <filter id="tint-l" x="0" y="0" width="100%" height="100%"><feColorMatrix type="matrix" values="0.85 0 0 0 0  0 0.72 0 0 0  0 0 1.00 0 0  0 0 0 1 0"/><feGaussianBlur stdDeviation="0.3"/></filter>
   </defs>
   <rect width="100" height="100" rx="6" fill="#0a0518"/>
   <rect x="2" y="2" width="96" height="96" rx="5" fill="url(#bg-l)"/>
@@ -790,7 +811,7 @@
   <path d="M0 4 L16 4" stroke="#b88dff" stroke-width="0.5" opacity="0.6"/><path d="M84 4 L100 4" stroke="#b88dff" stroke-width="0.5" opacity="0.6"/><path d="M0 96 L16 96" stroke="#b88dff" stroke-width="0.5" opacity="0.6"/><path d="M84 96 L100 96" stroke="#b88dff" stroke-width="0.5" opacity="0.6"/>
   <circle cx="50" cy="48" r="38" fill="url(#halo-l)"/>
   <circle cx="50" cy="48" r="22" fill="#b88dff" opacity="0.10"/>
-  <g opacity="0.6"><path d="M14 56 Q26 44 38 56 Q50 68 62 56 Q74 44 86 56 L86 80 L14 80 Z" fill="url(#d-l)" stroke="#7a4ab5" stroke-width="1"/></g><path d="M10 60 Q24 46 38 60 Q52 74 66 60 Q80 46 90 60 L90 88 L10 88 Z" fill="url(#d-l)" stroke="#7a4ab5" stroke-width="1.2"/><path d="M10 60 Q24 46 38 60 Q44 64 38 70 Q24 56 10 70 Z" fill="#fff" opacity="0.16"/><path d="M14 66 Q26 54 38 66 Q50 78 62 66 Q74 54 86 66" fill="none" stroke="#a884d8" stroke-width="1.4"/><path d="M16 74 Q28 64 40 74 Q52 84 64 74 Q76 64 84 74" fill="none" stroke="#d8b0ff" stroke-width="0.8" opacity="0.7"/><circle cx="28" cy="36" r="1.5" fill="#b88dff" opacity="0.85"/><circle cx="50" cy="28" r="1.2" fill="#fff" opacity="0.85"/><circle cx="72" cy="34" r="1.6" fill="#b88dff" opacity="0.85"/><path d="M22 48 Q24 50 26 48 Q24 52 22 48 Z" fill="#fff" opacity="0.6"/><path d="M76 48 Q78 50 80 48 Q78 52 76 48 Z" fill="#fff" opacity="0.6"/>
+  <image href="file:///Users/lukaszbartoszcze/work/simple-rts-unity/web/art/cards/darkwave.svg" x="14" y="14" width="72" height="72" preserveAspectRatio="xMidYMid meet" filter="url(#tint-l)"/>
   <path d="M50 2 L57 9 L50 16 L43 9 Z" fill="#0a0518" stroke="#b88dff" stroke-width="0.7"/>
   <circle cx="50" cy="9" r="2.2" fill="#b88dff" stroke="#b88dff" stroke-width="0.4"/>
   <circle cx="49.2" cy="8.2" r="0.7" fill="#fff" opacity="0.9"/>
@@ -816,6 +837,7 @@
     <linearGradient id="lf-m" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#7be08a"/><stop offset="100%" stop-color="#1a4a2a"/></linearGradient>
     <radialGradient id="dr-m" cx="0.4" cy="0.35" r="0.7"><stop offset="0%" stop-color="#e0f8ff"/><stop offset="100%" stop-color="#0a4060"/></radialGradient>
     <radialGradient id="vig-m" cx="0.5" cy="0.5" r="0.72"><stop offset="55%" stop-color="#0a0518" stop-opacity="0"/><stop offset="100%" stop-color="#0a0518" stop-opacity="0.7"/></radialGradient>
+    <filter id="tint-m" x="0" y="0" width="100%" height="100%"><feColorMatrix type="matrix" values="0.85 0 0 0 0  0 0.72 0 0 0  0 0 1.00 0 0  0 0 0 1 0"/><feGaussianBlur stdDeviation="0.3"/></filter>
   </defs>
   <rect width="100" height="100" rx="6" fill="#0a0518"/>
   <rect x="2" y="2" width="96" height="96" rx="5" fill="url(#bg-m)"/>
@@ -828,7 +850,7 @@
   <path d="M0 4 L16 4" stroke="#b88dff" stroke-width="0.5" opacity="0.6"/><path d="M84 4 L100 4" stroke="#b88dff" stroke-width="0.5" opacity="0.6"/><path d="M0 96 L16 96" stroke="#b88dff" stroke-width="0.5" opacity="0.6"/><path d="M84 96 L100 96" stroke="#b88dff" stroke-width="0.5" opacity="0.6"/>
   <circle cx="50" cy="48" r="38" fill="url(#halo-m)"/>
   <circle cx="50" cy="48" r="22" fill="#b88dff" opacity="0.10"/>
-  <ellipse cx="50" cy="92" rx="32" ry="3" fill="#06090f" opacity="0.7"/><rect x="16" y="78" width="68" height="8" fill="url(#w-m)" stroke="#1a0c08" stroke-width="0.6"/><path d="M26 78 L26 36 Q26 22 50 22 Q74 22 74 36 L74 78 Z" fill="url(#m-m)" stroke="#1a1a20" stroke-width="1.2"/><path d="M26 78 L26 38 Q26 24 36 22 Q40 30 38 50 Q34 64 30 78 Z" fill="#fff" opacity="0.18"/><path d="M44 44 L44 68 M56 44 L56 68 M44 56 L56 56" stroke="#1a1a20" stroke-width="2" stroke-linecap="round"/><circle cx="50" cy="40" r="2" fill="#b88dff" opacity="0.7"/><path d="M14 88 L20 84 L26 88" stroke="#3a6a3a" stroke-width="0.8" fill="none"/><path d="M74 88 L80 84 L86 88" stroke="#3a6a3a" stroke-width="0.8" fill="none"/>
+  <image href="file:///Users/lukaszbartoszcze/work/simple-rts-unity/web/art/cards/tomb.svg" x="14" y="14" width="72" height="72" preserveAspectRatio="xMidYMid meet" filter="url(#tint-m)"/>
   <path d="M50 2 L57 9 L50 16 L43 9 Z" fill="#0a0518" stroke="#b88dff" stroke-width="0.7"/>
   <circle cx="50" cy="9" r="2.2" fill="#b88dff" stroke="#b88dff" stroke-width="0.4"/>
   <circle cx="49.2" cy="8.2" r="0.7" fill="#fff" opacity="0.9"/>
@@ -854,6 +876,7 @@
     <linearGradient id="lf-n" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#7be08a"/><stop offset="100%" stop-color="#1a4a2a"/></linearGradient>
     <radialGradient id="dr-n" cx="0.4" cy="0.35" r="0.7"><stop offset="0%" stop-color="#e0f8ff"/><stop offset="100%" stop-color="#0a4060"/></radialGradient>
     <radialGradient id="vig-n" cx="0.5" cy="0.5" r="0.72"><stop offset="55%" stop-color="#0a0518" stop-opacity="0"/><stop offset="100%" stop-color="#0a0518" stop-opacity="0.7"/></radialGradient>
+    <filter id="tint-n" x="0" y="0" width="100%" height="100%"><feColorMatrix type="matrix" values="0.85 0 0 0 0  0 0.72 0 0 0  0 0 1.00 0 0  0 0 0 1 0"/><feGaussianBlur stdDeviation="0.3"/></filter>
   </defs>
   <rect width="100" height="100" rx="6" fill="#0a0518"/>
   <rect x="2" y="2" width="96" height="96" rx="5" fill="url(#bg-n)"/>
@@ -866,7 +889,7 @@
   <path d="M0 4 L16 4" stroke="#b88dff" stroke-width="0.5" opacity="0.6"/><path d="M84 4 L100 4" stroke="#b88dff" stroke-width="0.5" opacity="0.6"/><path d="M0 96 L16 96" stroke="#b88dff" stroke-width="0.5" opacity="0.6"/><path d="M84 96 L100 96" stroke="#b88dff" stroke-width="0.5" opacity="0.6"/>
   <circle cx="50" cy="48" r="38" fill="url(#halo-n)"/>
   <circle cx="50" cy="48" r="22" fill="#b88dff" opacity="0.10"/>
-  <ellipse cx="50" cy="92" rx="40" ry="3" fill="#06090f" opacity="0.7"/><path d="M8 88 L16 60 L8 38 L92 38 L84 60 L92 88 Z" fill="url(#m-n)" stroke="#1a1a20" stroke-width="1.2"/><path d="M8 88 L16 60 L8 38 L20 38 L18 60 L14 88 Z" fill="#1a1a20" opacity="0.5"/><path d="M50 12 L8 38 L92 38 Z" fill="#3a3a40" stroke="#1a1a20" stroke-width="1.1"/><path d="M50 12 L8 38 L20 38 L50 18 Z" fill="#fff" opacity="0.18"/><rect x="22" y="44" width="6" height="38" fill="#1a1a20"/><rect x="34" y="44" width="6" height="38" fill="#1a1a20"/><rect x="60" y="44" width="6" height="38" fill="#1a1a20"/><rect x="72" y="44" width="6" height="38" fill="#1a1a20"/><path d="M42 50 Q42 42 50 42 Q58 42 58 50 L58 84 L42 84 Z" fill="#06090f"/><circle cx="50" cy="64" r="3.5" fill="#b88dff"/><circle cx="50" cy="64" r="6" fill="#b88dff" opacity="0.3"/><circle cx="49" cy="63" r="1" fill="#fff" opacity="0.9"/>
+  <image href="file:///Users/lukaszbartoszcze/work/simple-rts-unity/web/art/cards/crypt.svg" x="14" y="14" width="72" height="72" preserveAspectRatio="xMidYMid meet" filter="url(#tint-n)"/>
   <path d="M50 2 L57 9 L50 16 L43 9 Z" fill="#0a0518" stroke="#b88dff" stroke-width="0.7"/>
   <circle cx="50" cy="9" r="2.2" fill="#b88dff" stroke="#b88dff" stroke-width="0.4"/>
   <circle cx="49.2" cy="8.2" r="0.7" fill="#fff" opacity="0.9"/>
@@ -892,6 +915,7 @@
     <linearGradient id="lf-o" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#7be08a"/><stop offset="100%" stop-color="#1a4a2a"/></linearGradient>
     <radialGradient id="dr-o" cx="0.4" cy="0.35" r="0.7"><stop offset="0%" stop-color="#e0f8ff"/><stop offset="100%" stop-color="#0a4060"/></radialGradient>
     <radialGradient id="vig-o" cx="0.5" cy="0.5" r="0.72"><stop offset="55%" stop-color="#0a0518" stop-opacity="0"/><stop offset="100%" stop-color="#0a0518" stop-opacity="0.7"/></radialGradient>
+    <filter id="tint-o" x="0" y="0" width="100%" height="100%"><feColorMatrix type="matrix" values="0.85 0 0 0 0  0 0.72 0 0 0  0 0 1.00 0 0  0 0 0 1 0"/><feGaussianBlur stdDeviation="0.3"/></filter>
   </defs>
   <rect width="100" height="100" rx="6" fill="#0a0518"/>
   <rect x="2" y="2" width="96" height="96" rx="5" fill="url(#bg-o)"/>
@@ -904,7 +928,7 @@
   <path d="M0 4 L16 4" stroke="#b88dff" stroke-width="0.5" opacity="0.6"/><path d="M84 4 L100 4" stroke="#b88dff" stroke-width="0.5" opacity="0.6"/><path d="M0 96 L16 96" stroke="#b88dff" stroke-width="0.5" opacity="0.6"/><path d="M84 96 L100 96" stroke="#b88dff" stroke-width="0.5" opacity="0.6"/>
   <circle cx="50" cy="48" r="38" fill="url(#halo-o)"/>
   <circle cx="50" cy="48" r="22" fill="#6cd6ff" opacity="0.10"/>
-  <rect x="46" y="69" width="8" height="22" fill="url(#d-o)" stroke="#08040c" stroke-width="0.5"/><line x1="46" y1="76" x2="54" y2="76" stroke="#3a1a4a" stroke-width="0.4"/><line x1="46" y1="84" x2="54" y2="84" stroke="#3a1a4a" stroke-width="0.4"/><circle cx="50" cy="92" r="4.6" fill="url(#d-o)" stroke="#08040c" stroke-width="0.6"/><circle cx="50" cy="92" r="1.6" fill="#b88dff"/><rect x="30" y="62" width="40" height="6" rx="1" fill="url(#d-o)" stroke="#08040c" stroke-width="0.6"/><circle cx="32" cy="65" r="1.7" fill="#d8b0ff"/><circle cx="68" cy="65" r="1.7" fill="#d8b0ff"/><path d="M50 11 L55 56 L50 60 L45 56 Z" fill="url(#m-o)" stroke="#08040c" stroke-width="0.7" opacity="0.9"/><line x1="50" y1="13" x2="50" y2="58" stroke="#b88dff" stroke-width="0.9" opacity="0.85"/><path d="M48 28 L52 28 L50 24 Z" fill="#b88dff" opacity="0.5"/>
+  <image href="file:///Users/lukaszbartoszcze/work/simple-rts-unity/web/art/cards/darksword.svg" x="14" y="14" width="72" height="72" preserveAspectRatio="xMidYMid meet" filter="url(#tint-o)"/>
   <path d="M50 2 L57 9 L50 16 L43 9 Z" fill="#0a0518" stroke="#b88dff" stroke-width="0.7"/>
   <circle cx="50" cy="9" r="2.2" fill="#6cd6ff" stroke="#b88dff" stroke-width="0.4"/>
   <circle cx="49.2" cy="8.2" r="0.7" fill="#fff" opacity="0.9"/>

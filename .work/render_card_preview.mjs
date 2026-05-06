@@ -1,5 +1,6 @@
 import { writeFileSync } from 'fs';
-import { cardArtSvg } from '../web/art/card-art.js';
+globalThis.window = { CARD_ART_BASE: 'file:///Users/lukaszbartoszcze/work/simple-rts-unity/web/art/cards' };
+const { cardArtSvg } = await import('../web/art/card-art.js');
 
 const SAMPLES = [
   { race: 'humans',    cards: [

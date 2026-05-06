@@ -125,7 +125,7 @@ function pickTarget(u) {
     const d2 = (u.x - v.x) ** 2 + (u.z - v.z) ** 2;
     let s = d2;
     if (u.klass === 'cavalry' || u.klass === 'flyer') s = v.range >= 3 ? d2 * 0.35 : d2;
-    else if (u.klass === 'archer' || u.klass === 'mage') s = v.hp * 60 + d2 * 0.05;
+    else if (u.klass === 'archer' || u.klass === 'mage') s = (d2 < u.range * u.range) ? v.hp - 1000 : v.hp + d2 * 0.5;
     else if (u.klass === 'beast') s = d2 + (v.range >= 3 ? d2 * 0.5 : 0);
     if (s < bestScore) { bestScore = s; best = v; }
   }
