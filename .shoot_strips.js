@@ -1,3 +1,25 @@
+// Also: poly counter — run with `node .shoot_strips.js polys`
+if (process.argv.includes('polys')) {
+  const fs = require('fs'); const path = require('path');
+  const dir = __dirname + '/web/art/models';
+  for (const fn of fs.readdirSync(dir).sort()) {
+    if (!fn.endsWith('.glb')) continue;
+    const buf = fs.readFileSync(path.join(dir, fn));
+    const jsonLen = buf.readUInt32LE(12);
+    const j = JSON.parse(buf.slice(20, 20 + jsonLen).toString());
+    const acc = j.accessors || [];
+    let tri = 0, vert = 0;
+    for (const mesh of j.meshes || []) for (const prim of mesh.primitives || []) {
+      const mode = prim.mode == null ? 4 : prim.mode;
+      if (prim.indices != null) tri += mode === 4 ? Math.floor(acc[prim.indices].count / 3) : 0;
+      else if (prim.attributes && prim.attributes.POSITION != null) tri += mode === 4 ? Math.floor(acc[prim.attributes.POSITION].count / 3) : 0;
+      if (prim.attributes && prim.attributes.POSITION != null) vert += acc[prim.attributes.POSITION].count;
+    }
+    console.log(fn.padEnd(20), 'tris=' + tri.toString().padStart(6), 'verts=' + vert.toString().padStart(6), 'size=' + (buf.length / 1024).toFixed(1) + 'KB');
+  }
+  process.exit(0);
+}
+
 const { chromium } = require('playwright');
 const fs = require('fs');
 const path = require('path');
