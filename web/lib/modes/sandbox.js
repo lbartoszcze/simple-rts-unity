@@ -14,8 +14,10 @@ function buildRoster(race, comp) {
   const out = [];
   const armorTier = comp.armorTier | 0;
   const weaponTier = comp.weaponTier | 0;
+  const weaponStyle = comp.weaponStyle || null;
+  const META = new Set(['race', 'armorTier', 'weaponTier', 'weaponStyle']);
   for (const klass of Object.keys(comp)) {
-    if (klass === 'race' || klass === 'armorTier' || klass === 'weaponTier') continue;
+    if (META.has(klass)) continue;
     const k = KLASS[klass] || KLASS.infantry;
     const count = comp[klass] | 0;
     for (let i = 0; i < count; i++) {
@@ -26,7 +28,7 @@ function buildRoster(race, comp) {
         speed: k.speed ?? base.speed,
         range: k.range ?? base.range,
         klass, swingPeriod: k.swing, hoverY: k.y || 0,
-        armorTier, weaponTier,
+        armorTier, weaponTier, weaponStyle,
       });
     }
   }

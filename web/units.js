@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { buildWeaponArm, makeHorse, makeWings, buildArmorTier } from './lib/weapons.js';
+import { buildWeaponArm, makeHorse, makeWings, buildArmorTier, deriveWeaponStyle, animForWeapon, weaponPose } from './lib/weapons.js';
 import { buildStatusAuras, updateStatusAuras } from './lib/modes/effects.js';
 
 export const MAX_HP = 100;
@@ -22,7 +22,7 @@ function lambert(color, flat = false) {
 function basic(color) { return new THREE.MeshBasicMaterial({ color }); }
 
 
-function makeBody(team, raceKey, armorTier = 0, weaponTier = 0, klass = 'infantry', magicType = null) {
+function makeBody(team, raceKey, armorTier = 0, weaponTier = 0, klass = 'infantry', magicType = null, weaponStyle = null) {
   const v = RACE_VISUALS[raceKey] || RACE_VISUALS.humans;
   const liveryMat = lambert(team.livery);
   const accentMat = lambert(team.accent);
@@ -62,11 +62,17 @@ function makeBody(team, raceKey, armorTier = 0, weaponTier = 0, klass = 'infantr
   const eyeGeom = new THREE.SphereGeometry(raceKey === 'skeletons' ? 0.06 : 0.04, 6, 6);
   const eyeL = new THREE.Mesh(eyeGeom, eyeMat); eyeL.position.set(-0.10, 2.04, 0.22);
   const eyeR = new THREE.Mesh(eyeGeom, eyeMat); eyeR.position.set( 0.10, 2.04, 0.22);
-
+  const nose = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.12, 0.08),
+    raceKey === 'skeletons' ? boneMat : skinMat);
+  nose.position.set(0, 1.96, 0.26);
+  const mouth = new THREE.Mesh(new THREE.BoxGeometry(0.10, 0.02, 0.02), basic(0x4a2a18));
+  mouth.position.set(0, 1.86, 0.25);
+  const kneeGeom = new THREE.SphereGeometry(0.13, 8, 6);
+  const kneeL = new THREE.Mesh(kneeGeom, accentMat); kneeL.position.set(-0.18, 0.55, 0.06); kneeL.scale.set(1, 0.6, 1);
+  const kneeR = new THREE.Mesh(kneeGeom, accentMat); kneeR.position.set( 0.18, 0.55, 0.06); kneeR.scale.set(1, 0.6, 1);
   const cape = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.85, 0.04), accentMat);
   cape.position.set(0, 1.30, -0.40); cape.rotation.x = -0.10;
-
-  g.add(bootL, bootR, legL, legR, belt, torso, armL, neck, head, eyeL, eyeR, cape, tierArmor);
+  g.add(bootL, bootR, legL, legR, kneeL, kneeR, belt, torso, armL, neck, head, eyeL, eyeR, nose, mouth, cape, tierArmor);
 
   if (v.capH > 0) {
     const cap = new THREE.Mesh(new THREE.ConeGeometry(0.32, v.capH, 8), helmetMat);
@@ -101,7 +107,7 @@ function makeBody(team, raceKey, armorTier = 0, weaponTier = 0, klass = 'infantr
   sboss.position.set(-0.63, 1.30, 0.05);
   g.add(shieldDisc, sboss);
 
-  const weaponArm = buildWeaponArm(team, raceKey, helmetMat, weaponTier, klass, magicType);
+  const weaponArm = buildWeaponArm(team, raceKey, helmetMat, weaponTier, klass, magicType, weaponStyle);
   g.add(weaponArm);
   g.userData.weaponArm = weaponArm;
   g.rotation.order = 'YXZ';
@@ -146,7 +152,8 @@ export function makeUnit(teamIdx, x, z, stats, raceKey) {
   const root = new THREE.Group();
   root.position.set(x, 0, z);
 
-  const body = makeBody(team, raceKey, stats?.armorTier || 0, stats?.weaponTier || 0, stats?.klass, raceKey);
+  const weaponStyle = deriveWeaponStyle(raceKey, stats?.klass, stats?.weaponStyle);
+  const body = makeBody(team, raceKey, stats?.armorTier || 0, stats?.weaponTier || 0, stats?.klass, raceKey, weaponStyle);
   const ring = makeRing(team);
   const hp = makeHpBar();
   root.add(body, ring, hp);
@@ -172,6 +179,7 @@ export function makeUnit(teamIdx, x, z, stats, raceKey) {
     range: stats ? stats.range : 2.4,
     swingPeriod: stats?.swingPeriod || SWING_PERIOD[raceKey] || 1.0,
     klass: stats?.klass || 'infantry',
+    weaponStyle, weaponAnim: animForWeapon(weaponStyle),
     swingT: 0,
     hitDealt: false,
     bodyBaseY,
@@ -220,18 +228,21 @@ export function updateUnitVisuals(u, camera, t) {
   const tgt = u.attackTarget && u.attackTarget.hp > 0 ? u.attackTarget : null;
   const dSq = tgt ? (tgt.x - u.x) ** 2 + (tgt.z - u.z) ** 2 : 1e9;
   const attacking = !moving && tgt && dSq < (u.range + 0.5) ** 2;
-  let armA = 0, tilt = 0, bobY = 0;
+  let armA = 0, tilt = 0, bobY = 0, armZ = 0, armRotZ = 0;
   if (attacking) {
     const sp = (u.swingT || 0) / (u.swingPeriod || 1.0);
-    if (sp < 0.4) { const k = sp / 0.4; armA = 2.0 * k; tilt = -0.06 * k; }
-    else if (sp < 0.55) { const k = (sp - 0.4) / 0.15; armA = 2.0 - 2.5 * k; tilt = -0.06 + 0.36 * k; }
-    else { const k = (sp - 0.55) / 0.45; armA = -0.5 + 0.5 * k; tilt = 0.30 - 0.30 * k; }
+    const r = weaponPose(u.weaponAnim || 'slash', sp);
+    armA = r.armA; tilt = r.tilt; armZ = r.armZ || 0; armRotZ = r.armRotZ || 0;
   } else if (moving) {
     const ph = t * 9 + u.x * 0.7;
     bobY = Math.abs(Math.sin(ph)) * 0.11;
     armA = Math.sin(ph * 0.5) * 0.25; tilt = Math.sin(ph * 0.5) * 0.04;
   }
-  if (u.weaponArm) u.weaponArm.rotation.x = armA;
+  if (u.weaponArm) {
+    u.weaponArm.rotation.x = armA;
+    u.weaponArm.rotation.z = armRotZ;
+    u.weaponArm.position.z = armZ;
+  }
   u.body.rotation.x = tilt; u.body.rotation.z = 0;
   let recX = 0, recZ = 0;
   if (u.recoilStart != null) {

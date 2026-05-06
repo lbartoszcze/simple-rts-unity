@@ -5,17 +5,62 @@ const basic = (color) => new THREE.MeshBasicMaterial({ color });
 
 const ORB_COLOR = { humans: 0xfff5b8, dwarves: 0xff5530, elves: 0xb88dff, skeletons: 0x9be2ff };
 
-export function buildWeaponArm(team, raceKey, helmetMat, weaponTier = 0, klass = 'infantry', orbRace = null) {
+export function deriveWeaponStyle(raceKey, klass, override = null) {
+  if (override) return override;
+  if (klass === 'archer' || klass === 'flyer') return 'bow';
+  if (klass === 'mage') return 'staff';
+  if (klass === 'cavalry') return 'lance';
+  if (raceKey === 'elves') return 'spear';
+  if (raceKey === 'dwarves') return 'axe';
+  if (raceKey === 'skeletons') return 'scythe';
+  return 'sword';
+}
+
+const ANIM_FOR_STYLE = { sword: 'slash', axe: 'chop', scythe: 'slash', bow: 'bow', staff: 'cast', spear: 'thrust', pike: 'thrust', lance: 'thrust', halberd: 'chop', mace: 'swing' };
+export function animForWeapon(style) { return ANIM_FOR_STYLE[style] || 'slash'; }
+
+export function weaponPose(anim, sp) {
+  if (anim === 'thrust') {
+    if (sp < 0.35) { const k = sp / 0.35; return { armA: -0.40 * k, tilt: 0.04 * k, armZ: -0.20 * k }; }
+    if (sp < 0.50) { const k = (sp - 0.35) / 0.15; return { armA: -0.40 + 0.60 * k, tilt: 0.04 - 0.20 * k, armZ: -0.20 + 0.85 * k }; }
+    const k = (sp - 0.50) / 0.50; return { armA: 0.20 - 0.20 * k, tilt: -0.16 + 0.16 * k, armZ: 0.65 - 0.65 * k };
+  }
+  if (anim === 'chop') {
+    if (sp < 0.45) { const k = sp / 0.45; return { armA: -1.60 * k, tilt: -0.10 * k }; }
+    if (sp < 0.55) { const k = (sp - 0.45) / 0.10; return { armA: -1.60 + 4.00 * k, tilt: -0.10 + 0.50 * k }; }
+    const k = (sp - 0.55) / 0.45; return { armA: 2.40 - 2.40 * k, tilt: 0.40 - 0.40 * k };
+  }
+  if (anim === 'swing') {
+    if (sp < 0.35) { const k = sp / 0.35; return { armA: 0.60 * k, tilt: 0.04 * k, armRotZ: -0.80 * k }; }
+    if (sp < 0.50) { const k = (sp - 0.35) / 0.15; return { armA: 0.60 + 1.20 * k, tilt: 0.04 - 0.06 * k, armRotZ: -0.80 + 1.60 * k }; }
+    const k = (sp - 0.50) / 0.50; return { armA: 1.80 - 1.80 * k, tilt: 0, armRotZ: 0.80 - 0.80 * k };
+  }
+  if (anim === 'cast') {
+    if (sp < 0.4) { const k = sp / 0.4; return { armA: 0.80 * k, tilt: -0.02 * k }; }
+    const k = (sp - 0.4) / 0.6; return { armA: 0.80 - 0.80 * k, tilt: -0.02 + 0.02 * k };
+  }
+  if (sp < 0.4) { const k = sp / 0.4; return { armA: 2.0 * k, tilt: -0.06 * k }; }
+  if (sp < 0.55) { const k = (sp - 0.4) / 0.15; return { armA: 2.0 - 2.5 * k, tilt: -0.06 + 0.36 * k }; }
+  const k = (sp - 0.55) / 0.45; return { armA: -0.5 + 0.5 * k, tilt: 0.30 - 0.30 * k };
+}
+
+export function buildWeaponArm(team, raceKey, helmetMat, weaponTier = 0, klass = 'infantry', orbRace = null, weaponStyle = null) {
   const liveryMat = lambert(team.livery);
+  const skinMat = lambert(raceKey === 'skeletons' ? 0xeee5d0 : (raceKey === 'elves' ? 0xd2e6b4 : (raceKey === 'dwarves' ? 0xd9a06d : 0xe6c39a)));
   const arm = new THREE.Group();
   arm.position.set(0.50, 1.65, 0);
-  const upper = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.10, 0.12, 0.50, 6), liveryMat);
+  const upper = new THREE.Mesh(new THREE.CylinderGeometry(0.10, 0.12, 0.50, 6), liveryMat);
   upper.position.set(-0.05, -0.35, 0); upper.castShadow = true;
-  arm.add(upper);
+  const forearm = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.10, 0.32, 6), skinMat);
+  forearm.position.set(-0.05, -0.74, 0); forearm.castShadow = true;
+  const hand = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.10, 0.18), skinMat);
+  hand.position.set(-0.05, -0.92, 0.05); hand.castShadow = true;
+  arm.add(upper, forearm, hand);
   const wpn = new THREE.Group();
   wpn.scale.setScalar(1 + weaponTier * 0.18);
   arm.add(wpn);
+  const style = deriveWeaponStyle(raceKey, klass, weaponStyle);
+  arm.userData.weaponStyle = style;
   const metalColor = weaponTier > 2 ? 0xfff0a8 : weaponTier > 1 ? 0xffffff : weaponTier > 0 ? 0xe8e8f0 : 0xc8c8c8;
   const emit = weaponTier >= 2 ? (weaponTier >= 3 ? 0xffe070 : 0x9be2ff) : 0x000000;
   const metal = (_t) => new THREE.MeshLambertMaterial({ color: metalColor, emissive: emit, emissiveIntensity: weaponTier >= 2 ? 0.5 : 0, flatShading: true });
@@ -24,7 +69,6 @@ export function buildWeaponArm(team, raceKey, helmetMat, weaponTier = 0, klass =
     glow.position.set(0.10, -0.05, 0.15);
     wpn.add(glow);
   }
-  const style = (klass === 'archer' || klass === 'flyer') ? 'bow' : klass === 'mage' ? 'staff' : raceKey;
   if (style === 'staff') {
     const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 1.5, 6), lambert(0x3a2a1a));
     pole.position.set(0.05, -0.10, 0.15);
@@ -33,14 +77,61 @@ export function buildWeaponArm(team, raceKey, helmetMat, weaponTier = 0, klass =
     orb.position.set(0.05, 0.62, 0.15);
     pole.castShadow = true;
     wpn.add(pole, orb);
-  } else if (style === 'bow' || raceKey === 'elves' && klass !== 'mage') {
+  } else if (style === 'bow') {
     const bow = new THREE.Mesh(new THREE.TorusGeometry(0.45, 0.04, 6, 16, Math.PI), lambert(0x6b4423));
     bow.position.set(0.05, -0.35, 0.15); bow.rotation.z = -Math.PI / 2;
     const string = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.88, 0.02), basic(0xfaf6e0));
     string.position.set(0.0, -0.35, 0.15);
     bow.castShadow = true;
     wpn.add(bow, string);
-  } else if (raceKey === 'humans') {
+  } else if (style === 'spear') {
+    const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 1.6, 6), lambert(0x6b4423));
+    pole.position.set(0.05, -0.10, 0.15);
+    const head = new THREE.Mesh(new THREE.ConeGeometry(0.09, 0.32, 6), metal(weaponTier));
+    head.position.set(0.05, 0.86, 0.15);
+    pole.castShadow = true; head.castShadow = true;
+    wpn.add(pole, head);
+  } else if (style === 'pike') {
+    const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 2.3, 6), lambert(0x6b4423));
+    pole.position.set(0.05, 0.10, 0.15);
+    const head = new THREE.Mesh(new THREE.ConeGeometry(0.07, 0.28, 6), metal(weaponTier));
+    head.position.set(0.05, 1.40, 0.15);
+    pole.castShadow = true; head.castShadow = true;
+    wpn.add(pole, head);
+  } else if (style === 'lance') {
+    const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 1.8, 8), lambert(0x6b4423));
+    pole.position.set(0.05, 0.05, 0.55); pole.rotation.x = Math.PI / 2;
+    const tip = new THREE.Mesh(new THREE.ConeGeometry(0.10, 0.36, 8), metal(weaponTier));
+    tip.position.set(0.05, 0.05, 1.45); tip.rotation.x = Math.PI / 2;
+    const grip = new THREE.Mesh(new THREE.TorusGeometry(0.10, 0.04, 6, 12), lambert(0x3a2a1a));
+    grip.position.set(0.05, 0.05, -0.30); grip.rotation.y = Math.PI / 2;
+    pole.castShadow = true; tip.castShadow = true;
+    wpn.add(pole, tip, grip);
+  } else if (style === 'halberd') {
+    const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 1.8, 6), lambert(0x6b4423));
+    pole.position.set(0.05, -0.05, 0.15);
+    const tip = new THREE.Mesh(new THREE.ConeGeometry(0.05, 0.22, 6), metal(weaponTier));
+    tip.position.set(0.05, 0.95, 0.15);
+    const head = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.24, 0.06), metal(weaponTier));
+    head.position.set(0.22, 0.65, 0.15);
+    const hook = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.06, 0.05), metal(weaponTier));
+    hook.position.set(-0.07, 0.65, 0.15); hook.rotation.z = 0.4;
+    pole.castShadow = true; head.castShadow = true; tip.castShadow = true;
+    wpn.add(pole, tip, head, hook);
+  } else if (style === 'mace') {
+    const handle = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.85, 6), lambert(0x3a2a1a));
+    handle.position.set(0.08, -0.45, 0.15);
+    const head = new THREE.Mesh(new THREE.SphereGeometry(0.20, 12, 8), metal(weaponTier));
+    head.position.set(0.08, 0.02, 0.15);
+    const sm = lambert(0x707378, true);
+    for (const [dx, dy] of [[0,0.18],[0,-0.18],[0.18,0],[-0.18,0]]) {
+      const sp = new THREE.Mesh(new THREE.ConeGeometry(0.05, 0.14, 5), sm);
+      sp.position.set(0.08 + dx, 0.02 + dy, 0.15); sp.rotation.z = Math.atan2(-dx, dy);
+      wpn.add(sp);
+    }
+    handle.castShadow = true; head.castShadow = true;
+    wpn.add(handle, head);
+  } else if (style === 'sword') {
     const bladeLen = 0.78 + weaponTier * 0.10;
     const blade = new THREE.Mesh(new THREE.BoxGeometry(0.06, bladeLen, 0.05), metal(weaponTier));
     blade.position.set(0.12, -0.10 - (bladeLen - 0.78) * 0.5, 0.15); blade.rotation.z = -0.22;
@@ -77,21 +168,16 @@ export function buildWeaponArm(team, raceKey, helmetMat, weaponTier = 0, klass =
       flR.position.set(0.22, -0.06, 0.15); flR.rotation.z = -0.42;
       wpn.add(flL, flR);
     }
-  } else if (raceKey === 'dwarves') {
+  } else if (style === 'axe') {
     const handle = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.85, 6), lambert(0x3a2a1a));
     handle.position.set(0.08, -0.45, 0.15); handle.rotation.z = -0.18;
     const head = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.32, 0.32), lambert(0x707378, true));
     head.position.set(0.16, 0.0, 0.15); head.rotation.z = -0.18;
-    handle.castShadow = true; head.castShadow = true;
-    wpn.add(handle, head);
-  } else if (raceKey === 'elves') {
-    const bow = new THREE.Mesh(new THREE.TorusGeometry(0.45, 0.04, 6, 16, Math.PI), lambert(0x6b4423));
-    bow.position.set(0.05, -0.35, 0.15); bow.rotation.z = -Math.PI / 2;
-    const string = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.88, 0.02), basic(0xfaf6e0));
-    string.position.set(0.0, -0.35, 0.15);
-    bow.castShadow = true;
-    wpn.add(bow, string);
-  } else if (raceKey === 'skeletons') {
+    const edge = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.36, 0.34), metal(weaponTier));
+    edge.position.set(0.30, 0.0, 0.15); edge.rotation.z = -0.18;
+    handle.castShadow = true; head.castShadow = true; edge.castShadow = true;
+    wpn.add(handle, head, edge);
+  } else if (style === 'scythe') {
     const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 1.30, 6), lambert(0x3a2a1a));
     pole.position.set(0.05, -0.25, 0.15); pole.rotation.z = -0.10;
     const blade = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.10, 0.05), metal(weaponTier));
