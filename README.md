@@ -1,10 +1,17 @@
 # simple-rts-unity
 
-Minimal real-time-strategy starting point for Unity 2022 LTS. Drag-select units, right-click to move them in formation, edge-pan / WASD camera, scroll to zoom.
+## ▶ Play in your browser
+**https://lbartoszcze.github.io/simple-rts-unity/**
 
-The repo ships an Editor bootstrap script — clone, open in Unity Hub, hit **Play**. No manual scene wiring.
+No install. Left-drag to box-select your blue units. Right-click the ground to move them in formation. Right-click a red enemy to attack. Wipe out the red team to win. Source under [`web/`](web/), auto-deployed to GitHub Pages on every push.
 
-## Run it
+---
+
+## Unity 2022 LTS version (under `Assets/`)
+
+The repo also ships the original Unity scaffold — drag-select units, right-click move, edge-pan / WASD camera, scroll zoom. An Editor bootstrap script sets the scene up on first open.
+
+### Run in Unity
 
 1. Install Unity Hub: https://unity.com/download
 2. Hub → **Installs → Install Editor → 2022.3 LTS** (any 2022.3.x release).
