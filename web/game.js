@@ -2,7 +2,8 @@ import * as THREE from 'three';
 import { scene, camera, renderer, setProjectiles, updateFx, trackCamera, resetCameraTarget, spawnFx } from './scene.js';
 import { makeUnit, updateUnitVisuals } from './units.js';
 import { RACES, applyCard, showCardPicker, showRacePicker,
-         loadMeta, saveMeta, awardGold, recordRunEnd } from './lib/cards.js';
+         loadMeta, saveMeta, awardRoundXp, awardRunEndXp, recordRunEnd,
+         levelFor, factionLevel } from './lib/cards.js';
 import { runAllSpells } from './lib/spells.js';
 import { applyBuildings, buildingHealBonus, placeBuildings } from './lib/buildings.js';
 import { isBossRound, bossRoster, bossForRound, swapToBossMesh } from './lib/bosses.js';
@@ -241,12 +242,12 @@ function onWin() {
   phase = 'cardpick';
   wins++;
   syncRosterFromUnits();
-  const earned = awardGold(meta, round, isBossRound(round));
+  const { gold, xp } = awardRoundXp(meta, playerRace, isBossRound(round));
   saveMeta(meta);
-  scoreLabel.textContent = `${RACES[playerRace].icon} ${RACES[playerRace].name} · ${wins} ${wins === 1 ? 'win' : 'wins'} · ${meta.gold} 🪙 (+${earned})`;
+  scoreLabel.textContent = `${RACES[playerRace].icon} L${factionLevel(meta, playerRace)} · ${wins}w · ${meta.gold} 🪙 (+${gold}) · +${xp} XP`;
   refreshHud();
   setTimeout(() => {
-    showCardPicker(playerRace, round, (card) => {
+    showCardPicker(playerRace, round, meta, (card) => {
       applyCard(card, playerRoster, playerSpells, playerRace, playerBuildings);
       refreshHud();
       round++;
@@ -259,9 +260,9 @@ function onLoss() {
   phase = 'gameover';
   syncRosterFromUnits();
   recordRunEnd(meta, playerRace, round);
+  awardRunEndXp(meta, playerRace);
   saveMeta(meta);
-  const best = meta.best[playerRace] || round;
-  banner.innerHTML = `Defeat — round ${round}<small>${wins} ${wins === 1 ? 'win' : 'wins'} · ${meta.gold} 🪙 banked · best ${RACES[playerRace].name} run: R${best}</small><button id="retry">New Run</button>`;
+  banner.innerHTML = `Defeat — round ${round}<small>User L${levelFor(meta.userXp)} · ${RACES[playerRace].name} L${factionLevel(meta, playerRace)} · ${wins}w · ${meta.gold} 🪙 · best R${meta.best[playerRace] || round}</small><button id="retry">New Run</button>`;
   banner.className = 'lose';
   banner.classList.remove('hidden');
   setTimeout(() => {

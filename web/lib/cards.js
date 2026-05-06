@@ -105,8 +105,12 @@ export function applyCard(card, roster, spells, race, buildings) {
   }
 }
 
-const META_KEY = 'simple-rts-meta-v1';
+const META_KEY = 'simple-rts-meta-v2';
 const RACE_COST = { humans: 0, dwarves: 8, elves: 18, skeletons: 32 };
+const TIER_LEVEL = { common: 1, combo: 3, rare: 6 };
+
+export function levelFor(xp) { return Math.floor(Math.sqrt((xp || 0) / 25)) + 1; }
+export function xpForLevel(lv) { return Math.pow(Math.max(1, lv) - 1, 2) * 25; }
 
 export function loadMeta() {
   try {
@@ -118,21 +122,35 @@ export function loadMeta() {
       m.gold = m.gold || 0;
       m.lifetimeGold = m.lifetimeGold || 0;
       m.runs = m.runs || 0;
+      m.userXp = m.userXp || 0;
+      m.factionXp = m.factionXp || {};
       return m;
     }
   } catch (e) {}
-  return { gold: 0, lifetimeGold: 0, unlocked: ['humans'], best: {}, runs: 0 };
+  return { gold: 0, lifetimeGold: 0, unlocked: ['humans'], best: {}, runs: 0, userXp: 0, factionXp: {} };
 }
 
 export function saveMeta(m) {
   try { localStorage.setItem(META_KEY, JSON.stringify(m)); } catch (e) {}
 }
 
-export function awardGold(meta, round, isBoss) {
-  const earned = isBoss ? 5 : 1;
-  meta.gold += earned;
-  meta.lifetimeGold += earned;
-  return earned;
+export function awardRoundXp(meta, race, isBoss) {
+  const gold = isBoss ? 5 : 1;
+  const xp = isBoss ? 25 : 5;
+  meta.gold += gold;
+  meta.lifetimeGold += gold;
+  meta.userXp += xp;
+  meta.factionXp[race] = (meta.factionXp[race] || 0) + xp;
+  return { gold, xp };
+}
+
+export function awardRunEndXp(meta, race) {
+  meta.userXp += 10;
+  meta.factionXp[race] = (meta.factionXp[race] || 0) + 10;
+}
+
+export function factionLevel(meta, race) {
+  return levelFor(meta.factionXp?.[race] || 0);
 }
 
 export function recordRunEnd(meta, race, round) {
@@ -150,8 +168,10 @@ export function tryUnlock(meta, race) {
   return true;
 }
 
-export function pickThree(race, rng = Math.random) {
-  const pool = RACES[race].cards.slice();
+export function pickThree(race, factionLv = 1, rng = Math.random) {
+  const all = RACES[race].cards;
+  const allowed = all.filter(c => factionLv >= (TIER_LEVEL[c.tier] || 1));
+  const pool = (allowed.length ? allowed : all).slice();
   const out = [];
   while (out.length < 3 && pool.length) {
     const i = Math.floor(rng() * pool.length);
@@ -160,28 +180,40 @@ export function pickThree(race, rng = Math.random) {
   return out;
 }
 
+function lockedCount(race, factionLv) {
+  let n = 0;
+  for (const c of RACES[race].cards) if (factionLv < (TIER_LEVEL[c.tier] || 1)) n++;
+  return n;
+}
+
 export function showRacePicker(meta, onPick, onMetaChange) {
   const picker = document.getElementById('cardpicker');
   const title = document.getElementById('cardpicker-title');
   const list = document.getElementById('cards');
-  title.innerHTML = `Choose your race <small style="font-weight:400;color:#a3a99a;font-size:14px;letter-spacing:0;">${meta.gold} 🪙 · ${meta.runs} runs</small>`;
+  const userLv = levelFor(meta.userXp);
+  title.innerHTML = `Choose your race <small style="font-weight:400;color:#a3a99a;font-size:14px;letter-spacing:0;">User L${userLv} · ${meta.gold} 🪙 · ${meta.runs} runs</small>`;
   list.innerHTML = '';
   for (const key of Object.keys(RACES)) {
     const r = RACES[key];
     const unlocked = isUnlocked(meta, key);
     const cost = unlockCost(key);
     const best = meta.best[key] || 0;
+    const fLv = factionLevel(meta, key);
+    const fXp = meta.factionXp?.[key] || 0;
+    const nextThresh = xpForLevel(fLv + 1);
+    const lockedCards = lockedCount(key, fLv);
     const el = document.createElement('div');
     el.className = 'card' + (unlocked ? '' : ' locked');
     el.dataset.tier = 'rare';
     el.innerHTML = `
       <div class="icon">${r.icon}</div>
-      <div class="tag">${r.id}${best ? ' · best R' + best : ''}</div>
+      <div class="tag">L${fLv} · ${r.id}${best ? ' · best R' + best : ''}</div>
       <div class="name">${r.name}</div>
-      <div class="desc">${r.flavor}<br><br>
+      <div class="desc">${r.flavor}<br>
         ${r.base.count} warriors · ${r.base.hp} HP<br>
-        ${r.base.damage} dmg · ${r.base.speed} spd · ${r.base.range} rng
-        ${unlocked ? '' : `<br><br><b style="color:#f3c259;">🔒 ${cost} 🪙 to unlock</b>`}</div>
+        ${r.base.damage} dmg · ${r.base.speed} spd · ${r.base.range} rng<br>
+        <span style="color:#a3a99a;">XP ${fXp}/${nextThresh}${lockedCards ? ` · ${lockedCards} cards locked` : ' · all cards unlocked'}</span>
+        ${unlocked ? '' : `<br><b style="color:#f3c259;">🔒 ${cost} 🪙 to unlock</b>`}</div>
     `;
     el.addEventListener('click', () => {
       if (!unlocked) {
@@ -198,13 +230,14 @@ export function showRacePicker(meta, onPick, onMetaChange) {
   picker.classList.remove('hidden');
 }
 
-export function showCardPicker(race, round, onPick) {
+export function showCardPicker(race, round, meta, onPick) {
   const picker = document.getElementById('cardpicker');
   const title = document.getElementById('cardpicker-title');
   const list = document.getElementById('cards');
-  title.textContent = `Round ${round} cleared — ${RACES[race].name} blessing`;
+  const fLv = factionLevel(meta, race);
+  title.textContent = `Round ${round} cleared — ${RACES[race].name} L${fLv} blessing`;
   list.innerHTML = '';
-  const choices = pickThree(race);
+  const choices = pickThree(race, fLv);
   for (const card of choices) {
     const el = document.createElement('div');
     el.className = 'card';
