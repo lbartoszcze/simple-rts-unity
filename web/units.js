@@ -2,6 +2,8 @@ import * as THREE from 'three';
 import { makeHorse, makeWings, deriveWeaponStyle, animForWeapon, weaponPose } from './lib/weapons.js';
 import { buildStatusAuras, updateStatusAuras } from './lib/modes/effects.js';
 import { makeBody } from './art/anatomy.js';
+import { loadHumanoid, isHumanoidReady, buildHumanoidUnit, playClip } from './art/loader.js';
+loadHumanoid().catch(() => {});
 
 export const MAX_HP = 100;
 
@@ -47,7 +49,15 @@ export function makeUnit(teamIdx, x, z, stats, raceKey) {
   root.position.set(x, 0, z);
 
   const weaponStyle = deriveWeaponStyle(raceKey, stats?.klass, stats?.weaponStyle);
-  const body = makeBody(team, raceKey, stats?.armorTier || 0, stats?.weaponTier || 0, stats?.klass, raceKey, weaponStyle);
+  let body, gltfRig = null;
+  if (isHumanoidReady() && stats?.klass !== 'cavalry' && stats?.klass !== 'flyer' && stats?.klass !== 'beast') {
+    gltfRig = buildHumanoidUnit(team);
+    body = gltfRig.root;
+    body.userData = {};
+    playClip(gltfRig, 'Idle');
+  } else {
+    body = makeBody(team, raceKey, stats?.armorTier || 0, stats?.weaponTier || 0, stats?.klass, raceKey, weaponStyle);
+  }
   const ring = makeRing(team);
   const hp = makeHpBar();
   root.add(body, ring, hp);
@@ -66,6 +76,7 @@ export function makeUnit(teamIdx, x, z, stats, raceKey) {
     weaponArm: body.userData.weaponArm,
     shieldArm: body.userData.shieldArm,
     twoHand: body.userData.twoHand,
+    gltfRig,
     team: teamIdx,
     raceKey: raceKey || 'humans',
     maxHp: stats ? stats.hp : MAX_HP,
@@ -95,6 +106,7 @@ export function updateUnitVisuals(u, camera, t) {
   u.mesh.position.x = u.x;
   u.mesh.position.z = u.z;
   updateStatusAuras(u, t);
+  if (u.gltfRig) u.gltfRig.mixer.update(1 / 60);
 
   if (u.hp <= 0) {
     if (u.deadAt == null) {
