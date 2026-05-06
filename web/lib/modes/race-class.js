@@ -1,6 +1,21 @@
 import { applyMagicHit } from './magic.js';
 
-const baseDmg = (c) => c.damage * c.swingPeriod;
+const baseDmg = (c) => c.damage * c.swingPeriod * (c.formationMul || 1);
+
+export const RACE_BUFF = {
+  humans:    { name: 'Banner of Valor', desc: '+15% damage per nearby human ally (max +60%)' },
+  dwarves:   { name: 'Stoneblood',      desc: '+30% max HP at spawn' },
+  elves:     { name: 'Forest Step',     desc: '+25% movement speed' },
+  skeletons: { name: 'Endless Tide',    desc: '+1 HP/s regen for every skeleton' },
+};
+
+export function applyRaceBuffsAtSpawn(stats, raceKey) {
+  if (raceKey === 'dwarves') {
+    stats.maxHp = Math.round(stats.maxHp * 1.3);
+    stats.currentHp = Math.min(stats.maxHp, Math.round(stats.currentHp * 1.3));
+  }
+  return stats;
+}
 const recoil = (t, ctx) => { t.recoilStart = ctx.t; t.recoilDirX = -ctx.dx / ctx.dist; t.recoilDirZ = -ctx.dz / ctx.dist; };
 
 const RACE_CLASS = {
@@ -54,7 +69,14 @@ export function tickRaceClass(units, dt, t) {
     }
     if (u.staggerUntil && t < u.staggerUntil) u.speed *= 0.2;
     if (u.rootedUntil && t < u.rootedUntil) u.speed = 0;
-    if (u.raceKey === 'skeletons' && u.klass === 'beast') u.hp = Math.min(u.maxHp, u.hp + 6 * dt);
-    if (u.raceKey === 'humans' && u.klass === 'cavalry' && u.attackTarget !== u.lastChargeTarget) u.lastChargeTarget = null;
+    if (u.raceKey === 'elves') u.speed *= 1.25;
+    if (u.raceKey === 'skeletons') u.hp = Math.min(u.maxHp, u.hp + (u.klass === 'beast' ? 6 : 1) * dt);
+    if (u.raceKey === 'skeletons' && u.klass === 'beast') {} // (legacy noop placeholder)
+    if (u.raceKey === 'humans') {
+      let near = 0;
+      for (const v of units) { if (v === u || v.team !== u.team || v.hp <= 0 || v.raceKey !== 'humans') continue; if ((u.x - v.x) ** 2 + (u.z - v.z) ** 2 < 25) near++; }
+      u.formationMul = 1 + Math.min(4, near) * 0.15;
+      if (u.klass === 'cavalry' && u.attackTarget !== u.lastChargeTarget) u.lastChargeTarget = null;
+    } else u.formationMul = 1;
   }
 }

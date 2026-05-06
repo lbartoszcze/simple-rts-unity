@@ -8,7 +8,7 @@ import { runAllSpells } from './lib/spells.js';
 import { applyBuildings, buildingHealBonus, placeBuildings } from './lib/buildings.js';
 import { isBossRound, bossRoster, bossForRound, swapToBossMesh } from './lib/bosses.js';
 import { showSandboxBuilder, showSandboxResult } from './lib/modes/sandbox.js';
-import { applyVariantHit, tickRaceClass } from './lib/modes/race-class.js';
+import { applyVariantHit, tickRaceClass, applyRaceBuffsAtSpawn } from './lib/modes/race-class.js';
 
 const TEAM_BLUE = 0;
 const TEAM_RED = 1;
@@ -70,6 +70,7 @@ function spawnRoster(teamIdx, roster, baseZ, raceKey) {
     const col = i % cols;
     const x = (col - (cols - 1) * 0.5) * SPACING;
     const z = baseZ + row * SPACING * (baseZ > 0 ? 1 : -1);
+    applyRaceBuffsAtSpawn(w, raceKey);
     const u = makeUnit(teamIdx, x, z, w, raceKey);
     u.maxHp = w.maxHp; u.hp = Math.max(1, w.currentHp);
     u.damage = w.damage; u.baseSpeed = u.speed = w.speed; u.baseRange = u.range = w.range;
