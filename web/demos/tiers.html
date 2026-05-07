@@ -73,8 +73,8 @@
       const tris = countTriangles(character);
       const tag = document.querySelector(`p[data-poly="${raceKey}"]`);
       if (tag) tag.textContent = tris.toLocaleString() + ' triangles';
-      const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 50);
-      camera.position.set(2.5, 2.4, 4.4); camera.lookAt(0, 1.2, 0);
+      const camera = new THREE.PerspectiveCamera(28, 1, 0.1, 50);
+      camera.position.set(1.6, 1.6, 3.2); camera.lookAt(0, 1.2, 0);
       function resize() { const w = canvas.clientWidth, h = canvas.clientHeight; renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); }
       resize();
       const t0 = performance.now();
