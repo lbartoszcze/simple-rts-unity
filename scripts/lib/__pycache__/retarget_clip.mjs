@@ -366,20 +366,48 @@ function retargetClip(srcName, dstName, opts = {}) {
         } else {
           // Delta: production stays at its own bind; transfer the reference's motion delta.
           let deltaW = qNorm(qMul(refWorldAtFrame.get(refName), qInv(refBindWorld.get(refName))));
-          // Clip-aware torso damping. The reference 'run' is an extreme athletic
-          // lunge; transferred raw onto a bulky armored body it crumples the
-          // upper body. Run damps torso harder than walk; idle/attack light.
-          // run is now walk-sourced, so it shares walk's torso factor.
+          // Clip-aware torso damping. The Unity #219979 reference's locomotion
+          // (RunForward as walk, Sprint as run) has a pronounced forward lean,
+          // and its melee attack has large spine rotation. Transferred raw onto
+          // the bulky armored production body — whose cape extends the
+          // silhouette — that over-rotates hips/spine/neck into a forward
+          // crumple. A heavy armored character legitimately leans far less
+          // than a lithe runner, so hard torso damping is character-appropriate
+          // (general, not a per-archetype hack).
           const torsoFactor =
-            (dstName === 'walk' || dstName === 'run') ? 0.30 :
-            (dstName === 'idle') ? 0.60 : 0.45;
-          if (pname === 'hips' || pname === 'spine_01' || pname === 'spine_02' || pname === 'spine_03') {
+            (dstName === 'run')    ? 0.15 :
+            (dstName === 'walk')   ? 0.18 :
+            (dstName === 'attack') ? 0.30 :
+            (dstName === 'idle')   ? 0.55 : 0.40;
+          if (pname === 'hips' || pname === 'spine_01' || pname === 'spine_02' ||
+              pname === 'spine_03' || pname === 'neck') {
             deltaW = attenuateAxisAngle(deltaW, torsoFactor);
           }
-          // General safety clamp: no single bone may rotate past MAX_DELTA from
-          // its bind, regardless of clip or character. Prevents the mesh-crumple
-          // failure mode when a source clip has very large joint rotations.
-          deltaW = clampAxisAngle(deltaW, 1.30); // ~74°
+          // Clip-aware arm damping. The reference melee swing rotates the
+          // shoulder/upper-arm well past 90°; transferred raw onto the
+          // production rig the geodesic skin weights at the shoulder can't
+          // hold that and the arm mesh tears apart (the torso fix above does
+          // not cover limbs). Damping the swing to a safe amplitude keeps it
+          // readable as a strike without shattering. General: any character's
+          // attack arm gets the same treatment. Locomotion arm-swing is small
+          // enough that the skin holds, so it is left undamped.
+          const armFactor = (dstName === 'attack') ? 0.45 : 1.0;
+          if (armFactor < 1.0 &&
+              (pname === 'r_shoulder' || pname === 'r_upperarm' ||
+               pname === 'r_forearm'  || pname === 'r_hand' ||
+               pname === 'l_shoulder' || pname === 'l_upperarm' ||
+               pname === 'l_forearm'  || pname === 'l_hand')) {
+            deltaW = attenuateAxisAngle(deltaW, armFactor);
+          }
+          // Clip-aware safety clamp: no single bone may rotate past this angle
+          // from its bind. Locomotion is clamped tight to kill the crumple;
+          // attack arm is already damped above, so a moderate cap keeps the
+          // residual swing bounded. General — applies to every bone/character.
+          const maxDelta =
+            (dstName === 'attack') ? 1.00 :   // ~57°
+            (dstName === 'idle')   ? 1.10 :   // ~63°
+                                     0.95;    // ~54° (walk/run)
+          deltaW = clampAxisAngle(deltaW, maxDelta);
           newW = qNorm(qMul(deltaW, prodBindWorld.get(pname)));
         }
         newLocal = qNorm(qMul(qInv(parentNewWorld), newW));
