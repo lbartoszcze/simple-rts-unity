@@ -325,6 +325,20 @@ function retargetClip(srcName, dstName, opts = {}) {
   const prodLocalsPerBone = new Map();
   for (const j of prodJoints) prodLocalsPerBone.set(j.getName(), new Float32Array(nFrames * 4));
 
+  // Per-clip reference bind = THIS clip's own frame-0 world pose. The
+  // assembled reference (assemble_reference.mjs merges per-clip anim FBXs
+  // onto a separate mesh FBX) has a mesh-node rest pose that does NOT match
+  // the rest its clips were authored against, so a delta taken against the
+  // mesh bind (refBindWorld) is garbage and collapses the production mesh
+  // for every conjugation order. Rebasing on frame 0 of this clip makes the
+  // delta "motion since clip start", which is rest-independent and correct.
+  const refBind0 = new Map();
+  {
+    const loc0 = new Map();
+    for (const refName of Object.keys(BONE_MAP)) loc0.set(refName, sampleRefAt(refAnim, refName, sampleTimes[0]));
+    for (const j of refJoints) refBind0.set(j.getName(), fullWorldRot(j.getName(), refAllNodeByName, refAllNodeParents, loc0));
+  }
+
   for (let f = 0; f < nFrames; f++) {
     const time = sampleTimes[f];
 
@@ -364,51 +378,25 @@ function retargetClip(srcName, dstName, opts = {}) {
           // Absolute: production bone gets the reference's WORLD rotation verbatim.
           newW = refWorldAtFrame.get(refName);
         } else {
-          // Delta: production stays at its own bind; transfer the reference's motion delta.
-          let deltaW = qNorm(qMul(refWorldAtFrame.get(refName), qInv(refBindWorld.get(refName))));
-          // Clip-aware torso damping. The Unity #219979 reference's locomotion
-          // (RunForward as walk, Sprint as run) has a pronounced forward lean,
-          // and its melee attack has large spine rotation. Transferred raw onto
-          // the bulky armored production body — whose cape extends the
-          // silhouette — that over-rotates hips/spine/neck into a forward
-          // crumple. A heavy armored character legitimately leans far less
-          // than a lithe runner, so hard torso damping is character-appropriate
-          // (general, not a per-archetype hack).
-          const torsoFactor =
-            (dstName === 'run')    ? 0.15 :
-            (dstName === 'walk')   ? 0.18 :
-            (dstName === 'attack') ? 0.30 :
-            (dstName === 'idle')   ? 0.55 : 0.40;
-          if (pname === 'hips' || pname === 'spine_01' || pname === 'spine_02' ||
-              pname === 'spine_03' || pname === 'neck') {
-            deltaW = attenuateAxisAngle(deltaW, torsoFactor);
-          }
-          // Clip-aware arm damping. The reference melee swing rotates the
-          // shoulder/upper-arm well past 90°; transferred raw onto the
-          // production rig the geodesic skin weights at the shoulder can't
-          // hold that and the arm mesh tears apart (the torso fix above does
-          // not cover limbs). Damping the swing to a safe amplitude keeps it
-          // readable as a strike without shattering. General: any character's
-          // attack arm gets the same treatment. Locomotion arm-swing is small
-          // enough that the skin holds, so it is left undamped.
-          const armFactor = (dstName === 'attack') ? 0.45 : 1.0;
-          if (armFactor < 1.0 &&
-              (pname === 'r_shoulder' || pname === 'r_upperarm' ||
-               pname === 'r_forearm'  || pname === 'r_hand' ||
-               pname === 'l_shoulder' || pname === 'l_upperarm' ||
-               pname === 'l_forearm'  || pname === 'l_hand')) {
-            deltaW = attenuateAxisAngle(deltaW, armFactor);
-          }
-          // Clip-aware safety clamp: no single bone may rotate past this angle
-          // from its bind. Locomotion is clamped tight to kill the crumple;
-          // attack arm is already damped above, so a moderate cap keeps the
-          // residual swing bounded. General — applies to every bone/character.
-          const maxDelta =
-            (dstName === 'attack') ? 1.00 :   // ~57°
-            (dstName === 'idle')   ? 1.10 :   // ~63°
-                                     0.95;    // ~54° (walk/run)
-          deltaW = clampAxisAngle(deltaW, maxDelta);
-          newW = qNorm(qMul(deltaW, prodBindWorld.get(pname)));
+          // Bind-LOCAL (right) delta retarget. Express the reference bone's
+          // motion as a rotation relative to its OWN bind, in its own bind
+          // frame:  refDelta = inv(refBindWorld) * refWorld(t).  Then apply
+          // that same local delta onto the production bone's bind frame:
+          //   newProdWorld = prodBindWorld * refDelta.
+          // Because the delta is bind-relative on BOTH sides (right-multiply),
+          // the fixed orientation difference between the two rigs (here the
+          // reference's Maya FBX axis-conversion tilt, ~119° about (1,1,1),
+          // vs the production auto-rig's 90°-Z bind) cancels exactly. The
+          // previous LEFT/world delta (refWorld * inv(refBind)) lived in the
+          // reference's world frame and, applied to the differently-oriented
+          // production, rotated every bone about the wrong axis — that was
+          // the forward-crumple / arm-shatter, which heavy damping only hid
+          // by deleting the motion. With the axis correct no shaping damping
+          // is needed; a wide clamp stays only as a quaternion-flip guard.
+          let refDelta = qNorm(qMul(qInv(refBind0.get(refName)),
+                                    refWorldAtFrame.get(refName)));
+          refDelta = clampAxisAngle(refDelta, 2.79); // ~160° flip guard only
+          newW = qNorm(qMul(prodBindWorld.get(pname), refDelta));
         }
         newLocal = qNorm(qMul(qInv(parentNewWorld), newW));
         prodNewWorld.set(pname, newW);
