@@ -1,0 +1,21 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Animations — pick a race</title>
+<style>
+html,body{margin:0;background:#0e0e14;color:#eee;font-family:system-ui}
+h1{font-size:18px;font-weight:600;padding:18px 20px;margin:0;border-bottom:1px solid #222;background:#16161e}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;padding:20px;max-width:900px}
+a.card{display:block;padding:26px 22px;background:#1a1a22;border:1px solid #2a2a36;border-radius:8px;color:#eee;text-decoration:none}
+a.card:hover{border-color:#2d6cdf;background:#20202b}
+a.card .name{font-size:20px;font-weight:600;text-transform:capitalize}
+a.card .sub{font-size:13px;color:#888;margin-top:6px}
+.note{padding:0 20px 22px;font-size:12px;color:#777;max-width:900px}
+</style></head><body>
+<h1>Animations — pick a race</h1>
+<div class="grid">
+  <a class="card" href="view.html?race=humans"><div class="name">Humans</div><div class="sub">knight · idle / walk / run / attack</div></a>
+  <a class="card" href="view.html?race=dwarves"><div class="name">Dwarves</div><div class="sub">stocky · idle / walk / run / attack</div></a>
+  <a class="card" href="view.html?race=elves"><div class="name">Elves</div><div class="sub">spear · idle / walk / run / attack</div></a>
+  <a class="card" href="view.html?race=skeletons"><div class="name">Skeletons</div><div class="sub">reaper · idle / walk / run / attack</div></a>
+</div>
+<div class="note">Each race opens its own page. Inside, the four clips are clickable buttons that swap a single video. Left half of each video = Mixamo reference, right half = retargeted production rig.</div>
+</body></html>

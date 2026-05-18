@@ -1,0 +1,104 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Clip frame compare</title>
+<style>html,body{margin:0;background:#1a1a22;color:#eee;font-family:system-ui;height:100vh;overflow:hidden}
+#g{display:grid;grid-template-columns:1fr 1fr;height:100%;gap:2px;background:#333}
+.p{position:relative;background:#1a1a22;overflow:hidden}.p canvas{display:block;width:100%;height:100%}
+.lab{position:absolute;top:8px;left:8px;background:rgba(0,0,0,.7);padding:6px 10px;font-size:12px;z-index:10}
+</style>
+<script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.js"}}</script>
+</head><body>
+<div id="g">
+  <div class="p" id="P0"><div class="lab">REFERENCE humans_reference.glb (Unity #219979 RPG Character — own clips)</div></div>
+  <div class="p" id="P1"><div class="lab">PRODUCTION skeletons_axe.glb (auto-rig + procedural clips)</div></div>
+</div>
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from 'https://unpkg.com/three@0.160.0/examples/jsm/loaders/GLTFLoader.js';
+
+const params = new URLSearchParams(location.search);
+const clipName = params.get('clip') || 'idle';
+const time = parseFloat(params.get('t') || '0');
+const refUrl = '../../art/models/humans_reference.glb?cb=' + Date.now();
+const prodUrl = '../../art/models/skeletons_axe.glb?cb=' + Date.now();
+
+const panes = [];
+function setup(el, url, label) {
+  const r = new THREE.WebGLRenderer({antialias:true, preserveDrawingBuffer:true});
+  r.setPixelRatio(devicePixelRatio); el.appendChild(r.domElement);
+  const s = new THREE.Scene(); s.background = new THREE.Color(0x1a1a22);
+  s.add(new THREE.AmbientLight(0xffffff,0.7));
+  const sun = new THREE.DirectionalLight(0xffffff,1.4); sun.position.set(3,6,4); s.add(sun);
+  s.add(new THREE.GridHelper(4,8,0x444466,0x333344));
+  const c = new THREE.PerspectiveCamera(35, 1, 0.01, 200);
+  function resize(){
+    const w = Math.max(1, el.clientWidth || window.innerWidth/2);
+    const h = Math.max(1, el.clientHeight || window.innerHeight);
+    r.setSize(w, h, false);
+    c.aspect = w / h;
+    c.updateProjectionMatrix();
+  }
+  resize(); addEventListener('resize', resize);
+  setTimeout(resize, 100); // force re-resize after layout
+  const pane = { r, s, c, mixer: null, action: null, ready: false };
+  panes.push(pane);
+  new GLTFLoader().load(url, gltf => {
+    const o = gltf.scene; s.add(o);
+    function bboxAllMeshes() {
+      let mn = new THREE.Vector3(+Infinity,+Infinity,+Infinity);
+      let mx = new THREE.Vector3(-Infinity,-Infinity,-Infinity);
+      o.updateMatrixWorld(true);
+      o.traverse(c => {
+        if (c.isMesh || c.isSkinnedMesh) {
+          c.geometry.computeBoundingBox();
+          const bb = c.geometry.boundingBox.clone();
+          bb.applyMatrix4(c.matrixWorld);
+          mn.min(bb.min); mx.max(bb.max);
+        }
+      });
+      return { mn, mx, sz: new THREE.Vector3().subVectors(mx, mn) };
+    }
+    const a = bboxAllMeshes();
+    const scaleFactor = 1.0 / Math.max(a.sz.y, 0.01);
+    o.scale.setScalar(scaleFactor);
+    const b = bboxAllMeshes();
+    const ce2 = new THREE.Vector3().addVectors(b.mx, b.mn).multiplyScalar(0.5);
+    o.position.sub(ce2);
+    o.position.y -= b.mn.y - ce2.y;
+    o.updateMatrixWorld(true);
+    console.log(label, 'rawY', a.sz.y.toFixed(2), 'scale', scaleFactor.toFixed(2), 'finalY', b.sz.y.toFixed(2));
+    // Fixed camera distance (both panes use same camera config now)
+    c.position.set(0, 0.55, 2.4);
+    c.lookAt(0, 0.45, 0);
+    if (gltf.animations.length) {
+      pane.mixer = new THREE.AnimationMixer(o);
+      const clip = gltf.animations.find(a => a.name.toLowerCase() === clipName.toLowerCase()) || gltf.animations[0];
+      pane.action = pane.mixer.clipAction(clip);
+      pane.action.play();
+      pane.clipDur = clip.duration;
+    }
+    pane.ready = true;
+  });
+}
+setup(document.getElementById('P0'), refUrl, 'ref');
+setup(document.getElementById('P1'), prodUrl, 'prod');
+
+window.__readyAll = () => panes.every(p => p.ready);
+window.__seekAll = (t) => {
+  for (const p of panes) {
+    if (p.mixer && p.action) {
+      const dur = p.clipDur || 1;
+      const tt = (t % dur + dur) % dur;
+      p.action.enabled = true;
+      p.action.paused = false;
+      p.action.setEffectiveWeight(1);
+      p.action.setEffectiveTimeScale(1);
+      // setTime is the documented seek API; .time = is internal
+      p.mixer.setTime(tt);
+    }
+    p.r.render(p.s, p.c);
+  }
+};
+// Initial render only — caller controls subsequent frames via __seekAll.
+setTimeout(() => window.__seekAll(0), 500);
+</script>
+</body></html>

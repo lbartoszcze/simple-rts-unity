@@ -1,0 +1,67 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Animation viewer</title>
+<style>
+html,body{margin:0;background:#0e0e14;color:#eee;font-family:system-ui}
+a{color:#9ad;text-decoration:none}
+.bar{display:flex;align-items:center;gap:16px;padding:14px 18px;background:#16161e;border-bottom:1px solid #222}
+.bar h1{font-size:17px;font-weight:600;margin:0;text-transform:capitalize}
+.bar .back{font-size:13px}
+.clips{display:flex;gap:10px;padding:14px 18px}
+.clips button{font:600 14px system-ui;color:#bbb;background:#1c1c26;border:1px solid #2c2c38;border-radius:6px;padding:9px 20px;cursor:pointer}
+.clips button:hover{color:#fff;border-color:#3a3a4a}
+.clips button.on{background:#2d6cdf;color:#fff;border-color:#2d6cdf}
+.stage{padding:6px 18px 22px}
+video{display:block;width:100%;max-width:1100px;background:#000;border:1px solid #222;border-radius:6px}
+.legend{padding:0 18px 18px;font-size:12px;color:#888}
+.legend b{color:#fff200}
+.races{display:flex;gap:10px;padding:0 18px 16px}
+.races a{font-size:13px;padding:6px 14px;border:1px solid #2c2c38;border-radius:6px;background:#1c1c26}
+.races a.cur{background:#222;color:#fff;border-color:#3a3a4a}
+</style></head><body>
+<div class="bar">
+  <a class="back" href="grid.html">&larr; all races</a>
+  <h1 id="title">race</h1>
+</div>
+<div class="races" id="races"></div>
+<div class="clips" id="clips"></div>
+<div class="stage">
+  <video id="vid" autoplay loop muted playsinline></video>
+</div>
+<div class="legend">Left half = <b>Mixamo reference</b> &nbsp;·&nbsp; right half = retargeted production rig. Click a clip above to switch.</div>
+<script>
+const RACES = ['humans','dwarves','elves','skeletons'];
+const CLIPS = ['idle','walk','run','attack'];
+const q = new URLSearchParams(location.search);
+let race = (q.get('race')||'humans').toLowerCase();
+if (!RACES.includes(race)) race = 'humans';
+document.getElementById('title').textContent = race;
+
+const racesEl = document.getElementById('races');
+for (const r of RACES) {
+  const a = document.createElement('a');
+  a.href = 'view.html?race=' + r;
+  a.textContent = r;
+  if (r === race) a.className = 'cur';
+  racesEl.appendChild(a);
+}
+
+const vid = document.getElementById('vid');
+const clipsEl = document.getElementById('clips');
+const btns = {};
+function show(clip) {
+  vid.src = 'clips/' + race + '_' + clip + '.mp4?cb=' + Date.now();
+  vid.load();
+  for (const c of CLIPS) btns[c].classList.toggle('on', c === clip);
+  history.replaceState(null,'', 'view.html?race=' + race + '&clip=' + clip);
+}
+for (const c of CLIPS) {
+  const b = document.createElement('button');
+  b.textContent = c;
+  b.onclick = () => show(c);
+  btns[c] = b;
+  clipsEl.appendChild(b);
+}
+const startClip = CLIPS.includes(q.get('clip')) ? q.get('clip') : 'walk';
+show(startClip);
+</script>
+</body></html>
