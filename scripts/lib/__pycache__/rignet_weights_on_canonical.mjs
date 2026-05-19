@@ -188,6 +188,39 @@ if (LAP > 0) {
   console.log(`[syn] laplacian smooth: ${LAP} iters, lambda=${LAMBDA}`);
 }
 
+// Per-vertex normals via area-weighted face-normal averaging. Source GLBs
+// in this pipeline (humans_full.glb) often lack a NORMAL attribute, and
+// writing zeros gives an unshaded all-black silhouette in the renderer
+// — coherent but unreadable. Recomputing here lets the rendered output
+// actually be assessable.
+{
+  const N = new Float32Array(nv * 3);
+  for (let f = 0; f < IDX.length; f += 3) {
+    const a = IDX[f], b = IDX[f+1], c = IDX[f+2];
+    const ax = POS[a*3], ay = POS[a*3+1], az = POS[a*3+2];
+    const bx = POS[b*3], by = POS[b*3+1], bz = POS[b*3+2];
+    const cx = POS[c*3], cy = POS[c*3+1], cz = POS[c*3+2];
+    const ux = bx-ax, uy = by-ay, uz = bz-az;
+    const vx = cx-ax, vy = cy-ay, vz = cz-az;
+    const nx = uy*vz - uz*vy, ny = uz*vx - ux*vz, nz = ux*vy - uy*vx;
+    N[a*3] += nx; N[a*3+1] += ny; N[a*3+2] += nz;
+    N[b*3] += nx; N[b*3+1] += ny; N[b*3+2] += nz;
+    N[c*3] += nx; N[c*3+1] += ny; N[c*3+2] += nz;
+  }
+  for (let v = 0; v < nv; v++) {
+    const x = N[v*3], y = N[v*3+1], z = N[v*3+2];
+    const L = Math.hypot(x, y, z); if (L > 1e-9) { N[v*3] = x/L; N[v*3+1] = y/L; N[v*3+2] = z/L; }
+    else { N[v*3] = 0; N[v*3+1] = 1; N[v*3+2] = 0; }
+  }
+  for (let i = 0; i < N.length; i++) NRM[i] = N[i];
+}
+
+// Preserve a material reference from the canonical mesh BEFORE disposing
+// the other primitives — otherwise the rendered output is unshaded black.
+const allPrims = meshNode.getMesh().listPrimitives();
+let savedMat = null;
+for (const p of allPrims) { const m = p.getMaterial(); if (m) { savedMat = m; break; } }
+
 // ---- replace the canonical mesh primitive (skeleton/IBM/clips untouched) ---
 const buf = root.listBuffers()[0];
 const prim = meshNode.getMesh().listPrimitives()[0];
@@ -196,6 +229,7 @@ prim.setAttribute('NORMAL',   doc.createAccessor().setType('VEC3').setArray(new 
 prim.setAttribute('JOINTS_0', doc.createAccessor().setType('VEC4').setArray(J).setBuffer(buf));
 prim.setAttribute('WEIGHTS_0',doc.createAccessor().setType('VEC4').setArray(W).setBuffer(buf));
 prim.setIndices(doc.createAccessor().setType('SCALAR').setArray(new Uint32Array(IDX)).setBuffer(buf));
+if (savedMat) prim.setMaterial(savedMat);
 for (const p2 of meshNode.getMesh().listPrimitives()) if (p2 !== prim) p2.dispose();
 
 await io.write(outPath, doc);
