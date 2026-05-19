@@ -63,7 +63,11 @@ function rotMagFromOutputs(arr) {
   if (n < 2) return 0;
   const f0 = [arr[0], arr[1], arr[2], arr[3]];
   function ang(q) {
-    const wx = -f0[0]*q[0] - f0[1]*q[1] - f0[2]*q[2] + f0[3]*q[3];
+    // inv(f0) * q .w = dot(f0, q): inverse flips the sign of xyz, the
+    // qmul then flips it back, leaving the straight dot product. The
+    // earlier minus signs were wrong and inflated every w-dominant
+    // bone's rotMag to a spurious 180deg.
+    const wx = f0[0]*q[0] + f0[1]*q[1] + f0[2]*q[2] + f0[3]*q[3];
     const aw = Math.min(1, Math.abs(wx));
     return 2 * Math.acos(aw);
   }
