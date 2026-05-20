@@ -31,6 +31,18 @@ for (const n of root.listNodes()) if (n.getMesh() && n.getSkin()) { meshNode = n
 const skin = meshNode.getSkin();
 const sJoints = skin.listJoints();
 
+// Per-bone region classification. If RIG_PROFILE env var points at a JSON
+// emitted by Claude per character, use it directly (replaces the regex
+// heuristics below for any rig whose bone names do not match the canonical
+// biped convention). Falls back to the regex tables when no profile is set.
+const PROFILE_PATH = process.env.RIG_PROFILE;
+let profile = null;
+if (PROFILE_PATH) {
+  const { readFileSync } = await import('node:fs');
+  profile = JSON.parse(readFileSync(PROFILE_PATH, 'utf8'));
+  console.log(`[anat] using rig profile: ${PROFILE_PATH}`);
+}
+
 // classify bones into three anatomical regions:
 //   upper = arms (shoulder/upperarm/forearm/hand/fingers) + neck + head
 //   lower = legs (thigh/shin/foot/toe)
@@ -65,7 +77,32 @@ const wrongForMid = sJoints.map((j, i) => !TORSO_RE.test(j.getName()));
 const torsoIdx = []; sJoints.forEach((j, i) => { if (TORSO_RE.test(j.getName())) torsoIdx.push(i); });
 const armIdx = []; sJoints.forEach((j, i) => { if (isArm[i] && !isSpine[i]) armIdx.push(i); });
 const legIdx = []; sJoints.forEach((j, i) => { if (isLeg[i]) legIdx.push(i); });
-console.log(`[anat] arm bones=${armIdx.length}, leg bones=${legIdx.length}, torso bones=${torsoIdx.length}, wrongForLower=${wrongForLower.filter(x=>x).length}, wrongForMid=${wrongForMid.filter(x=>x).length}`);
+
+// If a profile JSON was supplied, override the regex-derived flags with the
+// per-bone allowed-band data. Each bone has an `allowed` array of band names
+// it may weight; verts in a band whose bone's `allowed` does NOT include
+// that band are flagged wrong-for-this-band and redirected. The redirect
+// pool for a band is the union of bone-indices whose `allowed` includes it.
+if (profile) {
+  const lowerPool = []; const midPool = []; const upperPool = [];
+  for (let i = 0; i < sJoints.length; i++) {
+    const nm = sJoints[i].getName();
+    const entry = profile.bones[nm];
+    const allowed = entry && entry.allowed ? entry.allowed : [];
+    wrongForLower[i] = !allowed.includes('lower');
+    wrongForMid[i]   = !allowed.includes('mid');
+    wrongForUpper[i] = !allowed.includes('upper');
+    if (allowed.includes('lower')) lowerPool.push(i);
+    if (allowed.includes('mid'))   midPool.push(i);
+    if (allowed.includes('upper')) upperPool.push(i);
+  }
+  // Replace the regex-derived redirect pools.
+  legIdx.length = 0;   for (const i of lowerPool) legIdx.push(i);
+  torsoIdx.length = 0; for (const i of midPool) torsoIdx.push(i);
+  armIdx.length = 0;   for (const i of upperPool) armIdx.push(i);
+}
+
+console.log(`[anat] arm bones=${armIdx.length}, leg bones=${legIdx.length}, torso bones=${torsoIdx.length}, wrongForLower=${wrongForLower.filter(x=>x).length}, wrongForMid=${wrongForMid.filter(x=>x).length}, wrongForUpper=${wrongForUpper.filter(x=>x).length}`);
 
 // joint world positions via parent-chain TRS accumulation
 const allNodes = root.listNodes();
