@@ -31,14 +31,41 @@ for (const n of root.listNodes()) if (n.getMesh() && n.getSkin()) { meshNode = n
 const skin = meshNode.getSkin();
 const sJoints = skin.listJoints();
 
-// classify bones
-const ARM_RE = /^(l_|r_)?(shoulder|upperarm|forearm|hand|thumb|index|middle|ring|pinky|finger)|finger_/i;
+// classify bones into three anatomical regions:
+//   upper = arms (shoulder/upperarm/forearm/hand/fingers) + neck + head
+//   lower = legs (thigh/shin/foot/toe)
+//   mid   = hips + spine_01..03 (allowed on lower-body verts because hips
+//           connect leg geometry, allowed on upper-body verts because spine
+//           connects arm/head geometry)
+// Lower-body verts forbid upper bones; upper-body verts forbid lower bones.
+// The mid region (hips + spine) is allowed on both ends - matching dwarves'
+// clean baseline which uses hips for lower body and spine for upper body.
+const ARM_RE = /^(l_|r_)?(shoulder|upperarm|forearm|hand|thumb|index|middle|ring|pinky|finger)|finger_|neck|^head/i;
 const LEG_RE = /^(l_|r_)?(thigh|shin|calf|knee|ankle|foot|toe|_leg)/i;
+const SPINE_RE = /^spine|^head|neck/i;
 const isArm = sJoints.map(j => ARM_RE.test(j.getName()));
 const isLeg = sJoints.map(j => LEG_RE.test(j.getName()));
-const armIdx = []; sJoints.forEach((j, i) => { if (isArm[i]) armIdx.push(i); });
+const isSpine = sJoints.map(j => SPINE_RE.test(j.getName()));
+// "wrong for lower body" = anything that isn't a leg bone or the hips bone.
+// Matches dwarves' clean lower-body distribution (r_shin/r_toe/hips/l_shin/
+// l_thigh) which has no spine weight on lower-body verts. spine_01 at 0.177
+// on humans (dwarves: 0.001) is the next-biggest bleed after the r_forearm
+// fix.
+const HIPS_RE = /^(hips|pelvis)$/i;
+const wrongForLower = sJoints.map((j, i) => !(isLeg[i] || HIPS_RE.test(j.getName())));
+// "wrong for upper body" = leg bones
+const wrongForUpper = isLeg.slice();
+// "wrong for mid body" (waist/torso/cape band) = leg bones + arm bones.
+// Mid-body verts should only be on torso/spine/hips. Dwarves' clean mid
+// band: hips 0.301, hands 0.28 combined, spine 0.119, only ~8% on shin.
+// Humans mid band: r_shin 0.205, spine 0.221, r_forearm 0.246 -> leg+arm
+// bleed of ~50% pulls the torso around during locomotion.
+const TORSO_RE = /^(hips|pelvis)$|^spine|neck|^head/i;
+const wrongForMid = sJoints.map((j, i) => !TORSO_RE.test(j.getName()));
+const torsoIdx = []; sJoints.forEach((j, i) => { if (TORSO_RE.test(j.getName())) torsoIdx.push(i); });
+const armIdx = []; sJoints.forEach((j, i) => { if (isArm[i] && !isSpine[i]) armIdx.push(i); });
 const legIdx = []; sJoints.forEach((j, i) => { if (isLeg[i]) legIdx.push(i); });
-console.log(`[anat] arm bones=${armIdx.length}, leg bones=${legIdx.length}`);
+console.log(`[anat] arm bones=${armIdx.length}, leg bones=${legIdx.length}, torso bones=${torsoIdx.length}, wrongForLower=${wrongForLower.filter(x=>x).length}, wrongForMid=${wrongForMid.filter(x=>x).length}`);
 
 // joint world positions via parent-chain TRS accumulation
 const allNodes = root.listNodes();
@@ -79,21 +106,21 @@ for (const prim of meshNode.getMesh().listPrimitives()) {
     const yFrac = (POS[v*3+1] - minY) / spanY;
     const lowerBody = yFrac < BLOW;
     const upperBody = yFrac > BHIGH;
-    if (!lowerBody && !upperBody) continue;
+    const midBody = !lowerBody && !upperBody;
     const vx = POS[v*3], vy = POS[v*3+1], vz = POS[v*3+2];
     const bin = new Map();
     let needRedirect = false;
     for (let k = 0; k < 4; k++) {
       const w = W[v*4+k]; if (w <= 0) continue;
       const ji = J[v*4+k];
-      const wrong = (lowerBody && isArm[ji]) || (upperBody && isLeg[ji]);
+      const wrong = (lowerBody && wrongForLower[ji]) || (upperBody && wrongForUpper[ji]) || (midBody && wrongForMid[ji]);
       if (wrong) {
         // distribute redirect across the K nearest correct-category bones via
         // 1/d^2 softmax — single-bone dump (previous version) made r_shin a
         // dominant outlier on humans and produced unbalanced motion (dwarves
         // shows a balanced 5-bone spread on the lower body which animates
         // cleanly).
-        const pool = lowerBody ? legIdx : armIdx;
+        const pool = lowerBody ? legIdx : (upperBody ? armIdx : torsoIdx);
         const ranked = pool.map(cj => {
           const dx = vx-jPos[cj][0], dy = vy-jPos[cj][1], dz = vz-jPos[cj][2];
           return [cj, dx*dx + dy*dy + dz*dz];
