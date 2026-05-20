@@ -132,6 +132,66 @@ for (let v = 0; v < nv; v++) {
   }
 }
 
+// Skirt rigid-pin post-step. Even with RigNet's anatomically-correct body
+// weights, a one-piece welded skirt/cape whose verts are physically near the
+// thighs gets multi-bone influence including leg bones — and adjacent skirt
+// verts whose dominant bone differs tear the hem at peak motion (visible in
+// run f12 / walk f24 inspections). Identify TRUE skirt verts by geometry,
+// not by current weight: vertices in the bottom Y-band whose Euclidean
+// distance to the nearest leg bone is well beyond the tight-leg-skin radius
+// (geometric drape signature). Override those to RIGID hips (single bone,
+// weight 1) so the skirt swings as a coherent panel with the pelvis instead
+// of being torn by leg rotation. Bare-leg verts (close to a leg bone axis)
+// keep their RigNet weights and animate normally underneath.
+const SKIRT_RIGID = process.env.SKIRT_RIGID === '0' ? 0 : 1;
+if (SKIRT_RIGID) {
+  let hipsBi = -1;
+  for (let bi = 0; bi < cJoints.length; bi++) if (/^(hips|pelvis)$/i.test(cJoints[bi].getName())) { hipsBi = bi; break; }
+  const legBi = [];
+  for (let bi = 0; bi < cJoints.length; bi++) if (/thigh|shin|calf|knee|ankle|foot|toe|_leg/i.test(cJoints[bi].getName())) legBi.push(bi);
+  if (hipsBi >= 0 && legBi.length > 0) {
+    let minY = Infinity, maxY = -Infinity;
+    for (let v = 0; v < nv; v++) { const y = POS[v*3+1]; if (y < minY) minY = y; if (y > maxY) maxY = y; }
+    const spanY = (maxY - minY) > 1e-9 ? (maxY - minY) : 1;
+    function segDist(vx, vy, vz, ax, ay, az, bx, by, bz) {
+      const dx=bx-ax, dy=by-ay, dz=bz-az; const L2=dx*dx+dy*dy+dz*dz;
+      const t = L2 > 1e-12 ? Math.max(0, Math.min(1, ((vx-ax)*dx+(vy-ay)*dy+(vz-az)*dz)/L2)) : 0;
+      const px=ax+t*dx, py=ay+t*dy, pz=az+t*dz;
+      return Math.hypot(vx-px, vy-py, vz-pz);
+    }
+    // canonical leg-bone segments (parent->child) from cPos + node parent chain.
+    // Approximate as point distance to the JOINT position (close enough for thresholding).
+    const dLeg = new Float32Array(nv).fill(-1);
+    const band = [];
+    for (let v = 0; v < nv; v++) {
+      if ((POS[v*3+1] - minY) / spanY >= 0.55) continue;
+      const vx = POS[v*3], vy = POS[v*3+1], vz = POS[v*3+2];
+      let d = Infinity;
+      for (const bi of legBi) {
+        const lp = cPos[bi];
+        const dd = Math.hypot(vx-lp[0], vy-lp[1], vz-lp[2]);
+        if (dd < d) d = dd;
+      }
+      dLeg[v] = d; band.push(d);
+    }
+    let pinned = 0;
+    if (band.length > 0) {
+      band.sort((a,b) => a-b);
+      const legR = band[Math.floor(band.length * 0.30)];
+      const skirtThresh = legR * 2.2;
+      for (let v = 0; v < nv; v++) {
+        if (dLeg[v] < 0 || dLeg[v] <= skirtThresh) continue;
+        J[v*4]   = hipsBi; W[v*4]   = 1;
+        J[v*4+1] = 0;      W[v*4+1] = 0;
+        J[v*4+2] = 0;      W[v*4+2] = 0;
+        J[v*4+3] = 0;      W[v*4+3] = 0;
+        pinned++;
+      }
+      console.log(`[syn] skirt rigid-pin: legR=${legR.toFixed(4)} thresh=${skirtThresh.toFixed(4)} -> ${pinned} verts -> '${cJoints[hipsBi].getName()}'`);
+    }
+  }
+}
+
 // Laplacian weight smoothing across the mesh edge graph. Each iteration
 // averages a vertex's weight vector with its mesh-graph neighbours, then
 // re-keeps top-4 and renormalises. Directly minimises edge-disagreement
