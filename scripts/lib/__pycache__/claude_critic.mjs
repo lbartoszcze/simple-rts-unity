@@ -1,18 +1,22 @@
-// Client of /api/animation-critic. Takes a clip name, picks N frames from
-// .work/credential-hook/cmp/<clip>/f*.png (the existing side-by-side
-// composites: LEFT half = reference, RIGHT half = production), crops each
-// into reference/production halves via ffmpeg, base64-encodes them, POSTs
-// to https://content.wisent.ai/api/animation-critic, prints the verdict.
+// Vision-capable client for /api/animation-critic. The model-router upstream
+// (Claude Code subscription) accepts text prompts only — but rev 00021 now
+// pre-approves WebFetch via --settings JSON, so the agent can pull HTTPS
+// URLs from its prompt and actually look at the bytes.
 //
-// Server-side route is the only path that reaches real Claude — the
-// router rejects direct external-shell calls with `all providers failed`
-// but serves real Claude from inside Wisent infra (verified via the
-// characters/generate call that returned a real LLM persona this session).
+// Pipeline:
+//   1. Pick N composite frames from .work/credential-hook/cmp/<clip>/
+//   2. Stack them into one tall PNG (1 frame per row, side-by-side
+//      reference|production already in the composite).
+//   3. Upload to gs://wisent-gcp-bucket/critic-frames/<ts>.png
+//   4. Generate a 10-minute signed URL.
+//   5. POST to /api/animation-critic mode=diagnostic, embedding the URL
+//      in the context field with a WebFetch instruction.
+//   6. Real Claude pulls the URL and describes actual pixel content.
 //
-// Usage:
-//   node claude_critic.mjs <clip> [framePicks=06,12,18,24] [endpoint]
-import { readFileSync, mkdirSync, existsSync } from 'node:fs';
+// Usage: node claude_critic.mjs <clip> [framePicks=06,12,18,24] [endpoint]
+
 import { execFileSync } from 'node:child_process';
+import { mkdirSync, existsSync, readFileSync, statSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -25,35 +29,58 @@ const picks = (picksArg ? picksArg.split(',') : ['06', '12', '18', '24']).map(p 
 const ENDPOINT = endpointArg || process.env.CRITIC_ENDPOINT || 'https://content.wisent.ai/api/animation-critic';
 const CRON_SECRET = process.env.CRON_SECRET || 'wisent-content-cron-secret-2024';
 const FF = '/opt/homebrew/bin/ffmpeg';
+const GSUTIL = '/opt/homebrew/bin/gsutil';
 const CMP_DIR = '.work/credential-hook/cmp/' + clip;
-const WORK = join(tmpdir(), 'critic_' + clip + '_' + Date.now());
+const TS = Date.now();
+const WORK = join(tmpdir(), 'critic_' + clip + '_' + TS);
 mkdirSync(WORK, { recursive: true });
 
-function cropAndEncode(srcPath, side) {
-  const outPath = join(WORK, side + '_' + srcPath.split('/').pop());
-  const filter = side === 'left' ? 'crop=iw/2:ih:0:0' : 'crop=iw/2:ih:iw/2:0';
-  execFileSync(FF, ['-y', '-loglevel', 'error', '-i', srcPath, '-vf', filter, outPath]);
-  return readFileSync(outPath).toString('base64');
-}
-
-const refFrames = [];
-const prodFrames = [];
+const framePaths = [];
 for (const p of picks) {
   const src = CMP_DIR + '/f' + p + '.png';
-  if (!existsSync(src)) {
-    console.error('missing frame: ' + src);
-    process.exit(2);
-  }
-  refFrames.push({ name: 'ref_f' + p + '.png', b64: cropAndEncode(src, 'left') });
-  prodFrames.push({ name: 'prod_f' + p + '.png', b64: cropAndEncode(src, 'right') });
+  if (!existsSync(src)) { console.error('missing frame: ' + src); process.exit(2); }
+  framePaths.push(src);
 }
-console.log('[critic] picked ' + picks.length + ' frames; cropped halves staged in ' + WORK);
+const stackInput = join(WORK, 'concat.txt');
+execFileSync('/bin/sh', ['-c', 'printf "%s\\n" ' + framePaths.map(p => "'" + p + "'").join(' ') + ' > ' + stackInput]);
+const stackedPath = join(WORK, 'stacked_' + clip + '.png');
+execFileSync(FF, ['-y', '-loglevel', 'error', ...framePaths.flatMap(p => ['-i', p]),
+  '-filter_complex', framePaths.map((_, i) => `[${i}:v]`).join('') + `vstack=inputs=${framePaths.length}`,
+  stackedPath]);
+const sz = statSync(stackedPath).size;
+console.log('[critic] stacked ' + framePaths.length + ' frames -> ' + stackedPath + ' (' + sz + ' bytes)');
+
+// Upload + v4-sign a 15-minute URL via the google-cloud-storage Python SDK.
+// gsutil signurl can't load pyopenssl on this machine (its bundled Python
+// ignores user-site packages); the small helper script uses pure Python 3.12
+// and the user's ADC end-to-end.
+const objPath = 'critic-frames/' + clip + '_' + TS + '.png';
+const SIGN = '/Users/lukaszbartoszcze/work/simple-rts-unity/scripts/lib/__pycache__/sign_gcs_url.py';
+const PY = '/Library/Frameworks/Python.framework/Versions/3.12/bin/python3.12';
+const signedUrl = execFileSync(PY, [SIGN, stackedPath, 'wisent-gcp-bucket', objPath, '900'], { encoding: 'utf8' }).trim();
+console.log('[critic] uploaded + signed (' + signedUrl.slice(0, 120) + '...)');
+
+const ctxText = [
+  'A side-by-side comparison grid has been uploaded for you to inspect.',
+  `Use the WebFetch tool to retrieve this URL and analyze the actual pixel content:`,
+  signedUrl,
+  ``,
+  `The grid is ${framePaths.length} frames stacked vertically (one per row).`,
+  `Within EACH row: LEFT half is the REFERENCE figure (low-poly humanoid, ground-truth animation).`,
+  `RIGHT half of each row is the PRODUCTION figure (armored knight on canonical biped, retargeted).`,
+  `Clip being inspected: ${clip}.`,
+  ``,
+  `After fetching the image, describe what the production figure looks like in each frame and identify any visible defects: tearing, shards, collapsed mesh, drag-along, skirt fan, leg/arm asymmetry. Compare to the reference. Then emit your JSON verdict.`,
+].join('\n');
 
 const body = {
   clip,
-  reference_frames: refFrames,
-  production_frames: prodFrames,
-  context: 'Production figure is an armored knight on a canonical biped skeleton. Reference is a low-poly humanoid.',
+  mode: 'diagnostic',
+  diagnostic: {
+    build_id: clip + ' composite via WebFetch URL @ ' + new Date().toISOString(),
+    notes: 'See context for the WebFetch URL. Inspect the image before producing the verdict.',
+  },
+  context: ctxText,
 };
 
 console.log('[critic] POST ' + ENDPOINT);
@@ -65,16 +92,8 @@ const res = await fetch(ENDPOINT, {
 const text = await res.text();
 console.log('HTTP ' + res.status);
 let parsed;
-try {
-  parsed = JSON.parse(text);
-} catch {
-  console.log(text.slice(0, 2000));
-  process.exit(3);
-}
-if (!res.ok) {
-  console.log(JSON.stringify(parsed, null, 2));
-  process.exit(4);
-}
+try { parsed = JSON.parse(text); } catch { console.log(text.slice(0, 2000)); process.exit(4); }
+if (!res.ok) { console.log(JSON.stringify(parsed, null, 2)); process.exit(5); }
 console.log('\n=== VERDICT ===');
 console.log('model:        ' + parsed.model);
 console.log('verdict:      ' + parsed.verdict);
@@ -83,3 +102,5 @@ console.log('defects:');
 for (const d of (parsed.defects || [])) console.log('  - ' + d);
 console.log('proposed_fix: ' + parsed.proposed_fix);
 if (parsed.usage) console.log('usage: ' + JSON.stringify(parsed.usage));
+console.log('\n=== RAW (first 2KB) ===');
+console.log((parsed.raw || '').slice(0, 2000));
