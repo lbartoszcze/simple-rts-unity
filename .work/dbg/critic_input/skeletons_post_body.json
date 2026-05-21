@@ -1,0 +1,91 @@
+{
+  "clip": "walk",
+  "mode": "diagnostic",
+  "diagnostic": {
+    "build_id": "skeletons_axe.glb after JSON-profile anat fix",
+    "weight_audit": {
+      "lower": {
+        "r_shin": 0.263,
+        "l_shin": 0.242,
+        "l_foot": 0.098,
+        "r_foot": 0.09,
+        "l_toe": 0.086,
+        "r_thigh": 0.074,
+        "r_toe": 0.072,
+        "hips": 0.044
+      },
+      "mid": {
+        "hips": 0.396,
+        "r_shoulder": 0.209,
+        "spine_01": 0.123,
+        "spine_03": 0.038,
+        "l_forearm": 0.037,
+        "r_upperarm": 0.037,
+        "r_thigh": 0.027,
+        "l_thigh": 0.026
+      },
+      "upper": {
+        "spine_03": 0.361,
+        "l_forearm": 0.142,
+        "neck": 0.082,
+        "l_upperarm": 0.075,
+        "l_shoulder": 0.066,
+        "r_forearm": 0.046,
+        "r_hand": 0.037,
+        "l_hand": 0.032
+      }
+    },
+    "baseline": {
+      "lower": {
+        "r_shin": 0.413,
+        "r_toe": 0.177,
+        "hips": 0.158,
+        "l_shin": 0.127,
+        "l_thigh": 0.092,
+        "r_thigh": 0.032,
+        "r_foot": 0.001,
+        "l_toe": 0
+      },
+      "mid": {
+        "hips": 0.425,
+        "spine_01": 0.184,
+        "spine_02": 0.079,
+        "r_shin": 0.074,
+        "l_forearm": 0.043,
+        "r_thigh": 0.039,
+        "l_thigh": 0.039,
+        "l_shin": 0.038
+      },
+      "upper": {
+        "r_forearm": 0.506,
+        "spine_03": 0.178,
+        "l_forearm": 0.132,
+        "r_upperarm": 0.045,
+        "head": 0.037,
+        "neck": 0.036,
+        "l_shoulder": 0.021,
+        "l_upperarm": 0.019
+      }
+    },
+    "bone_rotmag": {
+      "l_shin": 1.583,
+      "r_foot": 1.384,
+      "l_foot": 1.273,
+      "l_thigh": 1.243,
+      "r_shin": 1.057,
+      "r_shoulder": 0.956,
+      "l_shoulder": 0.945,
+      "l_forearm": 0.79,
+      "r_thigh": 0.698,
+      "r_forearm": 0.69,
+      "r_upperarm": 0.618,
+      "head": 0.573
+    },
+    "prior_fixes": [
+      "RigNet",
+      "tpose",
+      "retarget",
+      "JSON-profile anat fix"
+    ]
+  }
+}

@@ -1,0 +1,91 @@
+{
+  "clip": "walk",
+  "mode": "diagnostic",
+  "diagnostic": {
+    "build_id": "dwarves_axe.glb after JSON-profile anat fix",
+    "weight_audit": {
+      "lower": {
+        "r_shin": 0.413,
+        "r_toe": 0.177,
+        "hips": 0.158,
+        "l_shin": 0.127,
+        "l_thigh": 0.092,
+        "r_thigh": 0.032,
+        "r_foot": 0.001,
+        "l_toe": 0
+      },
+      "mid": {
+        "hips": 0.425,
+        "spine_01": 0.184,
+        "spine_02": 0.079,
+        "r_shin": 0.074,
+        "l_forearm": 0.043,
+        "r_thigh": 0.039,
+        "l_thigh": 0.039,
+        "l_shin": 0.038
+      },
+      "upper": {
+        "r_forearm": 0.506,
+        "spine_03": 0.178,
+        "l_forearm": 0.132,
+        "r_upperarm": 0.045,
+        "head": 0.037,
+        "neck": 0.036,
+        "l_shoulder": 0.021,
+        "l_upperarm": 0.019
+      }
+    },
+    "baseline": {
+      "lower": {
+        "r_shin": 0.413,
+        "r_toe": 0.177,
+        "hips": 0.158,
+        "l_shin": 0.127,
+        "l_thigh": 0.092,
+        "r_thigh": 0.032,
+        "r_foot": 0.001,
+        "l_toe": 0
+      },
+      "mid": {
+        "hips": 0.425,
+        "spine_01": 0.184,
+        "spine_02": 0.079,
+        "r_shin": 0.074,
+        "l_forearm": 0.043,
+        "r_thigh": 0.039,
+        "l_thigh": 0.039,
+        "l_shin": 0.038
+      },
+      "upper": {
+        "r_forearm": 0.506,
+        "spine_03": 0.178,
+        "l_forearm": 0.132,
+        "r_upperarm": 0.045,
+        "head": 0.037,
+        "neck": 0.036,
+        "l_shoulder": 0.021,
+        "l_upperarm": 0.019
+      }
+    },
+    "bone_rotmag": {
+      "l_shin": 1.583,
+      "l_thigh": 1.119,
+      "r_foot": 1.093,
+      "r_shin": 1.057,
+      "r_upperarm": 0.794,
+      "r_thigh": 0.693,
+      "l_foot": 0.584,
+      "head": 0.571,
+      "l_upperarm": 0.512,
+      "l_hand": 0.462,
+      "spine_03": 0.399,
+      "r_hand": 0.381
+    },
+    "prior_fixes": [
+      "RigNet",
+      "tpose",
+      "retarget",
+      "JSON-profile anat fix"
+    ]
+  }
+}

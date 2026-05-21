@@ -1,0 +1,91 @@
+{
+  "clip": "walk",
+  "mode": "diagnostic",
+  "diagnostic": {
+    "build_id": "elves_axe.glb after JSON-profile anat fix",
+    "weight_audit": {
+      "lower": {
+        "l_shin": 0.262,
+        "r_shin": 0.231,
+        "hips": 0.158,
+        "r_foot": 0.078,
+        "r_toe": 0.066,
+        "l_toe": 0.057,
+        "l_foot": 0.054,
+        "r_thigh": 0.048
+      },
+      "mid": {
+        "spine_01": 0.301,
+        "hips": 0.234,
+        "spine_02": 0.146,
+        "spine_03": 0.113,
+        "l_forearm": 0.053,
+        "r_forearm": 0.044,
+        "l_thigh": 0.04,
+        "r_thigh": 0.04
+      },
+      "upper": {
+        "spine_03": 0.43,
+        "neck": 0.102,
+        "l_shoulder": 0.1,
+        "l_upperarm": 0.094,
+        "l_forearm": 0.084,
+        "r_upperarm": 0.063,
+        "r_shoulder": 0.063,
+        "r_forearm": 0.062
+      }
+    },
+    "baseline": {
+      "lower": {
+        "r_shin": 0.413,
+        "r_toe": 0.177,
+        "hips": 0.158,
+        "l_shin": 0.127,
+        "l_thigh": 0.092,
+        "r_thigh": 0.032,
+        "r_foot": 0.001,
+        "l_toe": 0
+      },
+      "mid": {
+        "hips": 0.425,
+        "spine_01": 0.184,
+        "spine_02": 0.079,
+        "r_shin": 0.074,
+        "l_forearm": 0.043,
+        "r_thigh": 0.039,
+        "l_thigh": 0.039,
+        "l_shin": 0.038
+      },
+      "upper": {
+        "r_forearm": 0.506,
+        "spine_03": 0.178,
+        "l_forearm": 0.132,
+        "r_upperarm": 0.045,
+        "head": 0.037,
+        "neck": 0.036,
+        "l_shoulder": 0.021,
+        "l_upperarm": 0.019
+      }
+    },
+    "bone_rotmag": {
+      "l_shin": 1.583,
+      "r_foot": 1.215,
+      "l_thigh": 1.197,
+      "r_shin": 1.057,
+      "r_shoulder": 0.956,
+      "l_shoulder": 0.945,
+      "l_forearm": 0.79,
+      "r_thigh": 0.767,
+      "r_forearm": 0.69,
+      "l_foot": 0.668,
+      "r_hand": 0.618,
+      "head": 0.573
+    },
+    "prior_fixes": [
+      "RigNet",
+      "tpose",
+      "retarget",
+      "JSON-profile anat fix"
+    ]
+  }
+}
