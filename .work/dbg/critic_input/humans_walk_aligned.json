@@ -1,0 +1,85 @@
+{
+  "clip": "walk",
+  "mode": "diagnostic",
+  "diagnostic": {
+    "build_id": "humans_axe.glb after JSON-profile anat fix, BANDS ALIGNED 0.40/0.60",
+    "weight_audit": {
+      "lower": {
+        "r_shin": 0.385,
+        "l_shin": 0.245,
+        "hips": 0.193,
+        "l_thigh": 0.116,
+        "r_toe": 0.034,
+        "l_toe": 0.018,
+        "r_thigh": 0.007,
+        "r_foot": 0.002
+      },
+      "mid": {
+        "spine_01": 0.541,
+        "hips": 0.25,
+        "spine_02": 0.169,
+        "spine_03": 0.035,
+        "l_shoulder": 0.005,
+        "r_shoulder": 0
+      },
+      "upper": {
+        "r_forearm": 0.412,
+        "spine_03": 0.304,
+        "l_forearm": 0.181,
+        "l_shoulder": 0.088,
+        "r_upperarm": 0.006,
+        "r_shoulder": 0.005,
+        "neck": 0.003,
+        "r_hand": 0.001
+      }
+    },
+    "baseline": {
+      "lower": {
+        "r_shin": 0.363,
+        "hips": 0.207,
+        "r_toe": 0.128,
+        "l_shin": 0.127,
+        "l_thigh": 0.104,
+        "r_thigh": 0.062,
+        "r_foot": 0.008,
+        "l_foot": 0.001
+      },
+      "mid": {
+        "hips": 0.555,
+        "spine_01": 0.311,
+        "spine_02": 0.134,
+        "spine_03": 0
+      },
+      "upper": {
+        "r_forearm": 0.481,
+        "spine_03": 0.171,
+        "l_forearm": 0.162,
+        "r_upperarm": 0.041,
+        "head": 0.033,
+        "neck": 0.033,
+        "l_shoulder": 0.023,
+        "l_upperarm": 0.022
+      }
+    },
+    "bone_rotmag": {
+      "l_shin": 1.583,
+      "l_thigh": 1.119,
+      "r_foot": 1.093,
+      "r_shin": 1.057,
+      "r_upperarm": 0.794,
+      "r_thigh": 0.693,
+      "l_foot": 0.584,
+      "head": 0.571,
+      "l_upperarm": 0.512,
+      "l_hand": 0.462,
+      "spine_03": 0.399,
+      "r_hand": 0.381
+    },
+    "prior_fixes": [
+      "RigNet on humans",
+      "tpose_combined T-pose rebind",
+      "retarget #219979 clips frame-0 rebased",
+      "JSON-profile anat fix (humans_rig_profile.json: r_forearm allowed only in upper)"
+    ]
+  }
+}
