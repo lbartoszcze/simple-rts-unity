@@ -2,7 +2,7 @@ name: Deploy web build to GitHub Pages
 
 on:
   push:
-    branches: [main]
+    branches: [main, reference-unity-219979]
     paths:
       - 'web/**'
       - '.github/workflows/deploy.yml'
