@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Text2Game Animation Videos</title>
+<style>
+  html,body{margin:0;min-height:100%;background:#0f1118;color:#eef3ff;font-family:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+  header{padding:16px 20px;background:#171b25;border-bottom:1px solid #283142;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  h1{font-size:18px;margin:0;font-weight:700}.muted{font-size:12px;color:#9da9bc}.controls{display:flex;gap:8px;flex-wrap:wrap;padding:14px 20px;background:#121722;border-bottom:1px solid #252d3d}
+  button{background:#202838;color:#dfe8fa;border:1px solid #364154;border-radius:8px;padding:9px 14px;font-weight:650;cursor:pointer}button.on{background:#2a66ff;border-color:#2a66ff;color:white}
+  main{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:0}.stage{padding:18px}.side{padding:18px;border-left:1px solid #283142;background:#151a24;min-height:calc(100vh - 108px)}
+  video{display:block;width:100%;max-height:calc(100vh - 150px);background:#000;border:1px solid #283142;border-radius:10px}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:12px}
+  .thumb{background:#171d29;border:1px solid #2a3445;border-radius:8px;padding:8px;text-align:center;font-size:12px;color:#b9c5d8}.thumb.on{border-color:#2a66ff;color:#fff;background:#1e2b48}
+  code{font-size:12px;color:#a8c7ff;word-break:break-all}.metric{display:grid;grid-template-columns:1fr auto;gap:8px;padding:8px 0;border-bottom:1px solid #283142;font-size:13px}
+</style>
+</head>
+<body>
+<header><h1>Text2Game animation videos</h1><div class="muted">Actual generated race clips from <code>.work/credential-hook/videos</code></div></header>
+<div class="controls" id="races"></div>
+<div class="controls" id="clips"></div>
+<main>
+  <section class="stage">
+    <video id="video" controls autoplay loop muted playsinline></video>
+    <div class="grid" id="thumbs"></div>
+  </section>
+  <aside class="side">
+    <div class="metric"><span>Race</span><strong id="raceLabel"></strong></div>
+    <div class="metric"><span>Clip</span><strong id="clipLabel"></strong></div>
+    <div class="metric"><span>Source</span><strong>mp4</strong></div>
+    <p class="muted">These are the rendered animation artifacts from the earlier text2game pipeline, not the synthetic placeholder. Use the buttons to switch race and animation.</p>
+    <p class="muted">Current file:<br><code id="pathLabel"></code></p>
+  </aside>
+</main>
+<script>
+const RACES = ['humans','dwarves','elves','skeletons'];
+const CLIPS = ['idle','walk','run','attack'];
+let race = new URLSearchParams(location.search).get('race') || 'dwarves';
+let clip = new URLSearchParams(location.search).get('clip') || 'walk';
+if (!RACES.includes(race)) race = 'dwarves';
+if (!CLIPS.includes(clip)) clip = 'walk';
+const video = document.getElementById('video');
+const racesEl = document.getElementById('races');
+const clipsEl = document.getElementById('clips');
+const thumbsEl = document.getElementById('thumbs');
+const raceLabel = document.getElementById('raceLabel');
+const clipLabel = document.getElementById('clipLabel');
+const pathLabel = document.getElementById('pathLabel');
+const raceButtons = new Map();
+const clipButtons = new Map();
+function videoPath(r,c){ return `../../.work/credential-hook/videos/${r}_${c}.mp4`; }
+function sheetPath(r,c){ return `../../.work/credential-hook/sheets/${r}_${c}.png`; }
+function renderButtons(){
+  racesEl.innerHTML=''; clipsEl.innerHTML=''; thumbsEl.innerHTML='';
+  for (const r of RACES){ const b=document.createElement('button'); b.textContent=r; b.onclick=()=>{race=r; update();}; raceButtons.set(r,b); racesEl.appendChild(b); }
+  for (const c of CLIPS){ const b=document.createElement('button'); b.textContent=c; b.onclick=()=>{clip=c; update();}; clipButtons.set(c,b); clipsEl.appendChild(b); }
+  for (const c of CLIPS){ const d=document.createElement('div'); d.className='thumb'; d.textContent=c; d.onclick=()=>{clip=c; update();}; d.dataset.clip=c; thumbsEl.appendChild(d); }
+}
+function update(){
+  const src = videoPath(race, clip) + '?cb=' + Date.now();
+  video.src = src; video.load(); video.play().catch(()=>{});
+  for (const [r,b] of raceButtons) b.classList.toggle('on', r===race);
+  for (const [c,b] of clipButtons) b.classList.toggle('on', c===clip);
+  for (const d of thumbsEl.children) d.classList.toggle('on', d.dataset.clip===clip);
+  raceLabel.textContent = race; clipLabel.textContent = clip; pathLabel.textContent = videoPath(race, clip);
+  history.replaceState(null,'', `text2game-animation-videos.html?race=${race}&clip=${clip}`);
+  window.__TEXT2GAME_VIDEO_VIEWER_STATE = {race, clip, src: videoPath(race, clip)};
+}
+video.addEventListener('loadeddata', () => { window.__TEXT2GAME_VIDEO_VIEWER_READY = true; });
+video.addEventListener('canplay', () => { window.__TEXT2GAME_VIDEO_VIEWER_READY = true; });
+video.addEventListener('error', () => { window.__TEXT2GAME_VIDEO_VIEWER_ERROR = video.error?.message || 'video error'; });
+renderButtons(); update();
+</script>
+</body>
+</html>

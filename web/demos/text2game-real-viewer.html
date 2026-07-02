@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Text2Game Real Generated Models</title>
+<style>
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #10131a; color: #edf2ff; font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+  #wrap { display: grid; grid-template-columns: minmax(0, 1fr) 340px; height: 100%; }
+  #stage { position: relative; min-width: 0; }
+  canvas { display: block; width: 100%; height: 100%; }
+  aside { border-left: 1px solid #2b3342; background: #151a24; padding: 18px; overflow: auto; }
+  h1 { font-size: 18px; margin: 0 0 12px; }
+  .muted { color: #9ca8bb; font-size: 12px; line-height: 1.45; }
+  label { display: block; margin: 14px 0 6px; font-size: 12px; color: #aeb8ca; }
+  select, button, input[type="range"] { width: 100%; box-sizing: border-box; }
+  select, button { border: 1px solid #344154; border-radius: 8px; background: #202838; color: #edf2ff; padding: 9px 10px; }
+  button { cursor: pointer; font-weight: 650; }
+  button.primary { background: #2a66ff; border-color: #2a66ff; }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .metric { display: grid; grid-template-columns: 1fr auto; gap: 8px; padding: 8px 0; border-bottom: 1px solid #293141; font-size: 13px; }
+  code { color: #a8c7ff; font-size: 12px; word-break: break-all; }
+  #status { position: absolute; left: 16px; top: 16px; padding: 8px 10px; border-radius: 8px; background: rgba(0,0,0,0.55); color: #dbe7ff; font-size: 12px; }
+</style>
+<script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.js"}}</script>
+</head>
+<body>
+<div id="wrap">
+  <div id="stage"><div id="status">loading</div></div>
+  <aside>
+    <h1>Text2Game real generated models</h1>
+    <p class="muted">Loads the actual GLB assets from <code>web/art/models</code>. Drag to rotate. Scroll to zoom. Clip list is read from the loaded GLB, not hardcoded.</p>
+
+    <label for="race">Model</label>
+    <select id="race">
+      <option value="humans_reference">Humans reference</option>
+      <option value="dwarves_axe">Dwarves axe</option>
+      <option value="elves_axe">Elves axe</option>
+      <option value="skeletons_axe">Skeletons axe</option>
+    </select>
+
+    <label for="clip">Animation clip</label>
+    <select id="clip"></select>
+
+    <label for="time">Time <span id="timeLabel">0.00s</span></label>
+    <input id="time" type="range" min="0" max="1" value="0" step="0.001" />
+
+    <div class="row" style="margin:14px 0">
+      <button class="primary" id="play">Pause</button>
+      <button id="reset">Reset camera</button>
+    </div>
+
+    <div id="metrics"></div>
+    <p class="muted" style="margin-top:16px">Current asset:<br><code id="assetPath"></code></p>
+  </aside>
+</div>
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from 'https://unpkg.com/three@0.160.0/examples/jsm/loaders/GLTFLoader.js';
+import { OrbitControls } from 'https://unpkg.com/three@0.160.0/examples/jsm/controls/OrbitControls.js';
+
+const MODELS = {
+  humans_reference: '../art/models/humans_reference.glb',
+  dwarves_axe: '../art/models/dwarves_axe.glb',
+  elves_axe: '../art/models/elves_axe.glb',
+  skeletons_axe: '../art/models/skeletons_axe.glb',
+};
+
+const stage = document.getElementById('stage');
+const statusEl = document.getElementById('status');
+const raceEl = document.getElementById('race');
+const clipEl = document.getElementById('clip');
+const timeEl = document.getElementById('time');
+const timeLabel = document.getElementById('timeLabel');
+const playBtn = document.getElementById('play');
+const metricsEl = document.getElementById('metrics');
+const assetPathEl = document.getElementById('assetPath');
+
+const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+renderer.setPixelRatio(devicePixelRatio);
+stage.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x10131a);
+scene.add(new THREE.HemisphereLight(0xffffff, 0x242a35, 1.6));
+const sun = new THREE.DirectionalLight(0xffffff, 2.0);
+sun.position.set(4, 8, 5);
+scene.add(sun);
+const grid = new THREE.GridHelper(6, 12, 0x42506a, 0x263044);
+scene.add(grid);
+
+const camera = new THREE.PerspectiveCamera(35, 1, 0.01, 300);
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+
+let root = null;
+let mixer = null;
+let activeAction = null;
+let clips = [];
+let currentClip = null;
+let playing = true;
+let clock = new THREE.Clock();
+let skeletonHelpers = [];
+let modelStats = { meshes: 0, skinnedMeshes: 0, bones: 0, vertices: 0, animations: 0, duration: 0 };
+
+function resize() {
+  const w = Math.max(1, stage.clientWidth);
+  const h = Math.max(1, stage.clientHeight);
+  renderer.setSize(w, h, false);
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+}
+window.addEventListener('resize', resize);
+
+function disposeCurrent() {
+  if (!root) return;
+  for (const helper of skeletonHelpers) scene.remove(helper);
+  skeletonHelpers = [];
+  scene.remove(root);
+  root.traverse((obj) => {
+    if (obj.geometry) obj.geometry.dispose?.();
+    if (obj.material) {
+      const mats = Array.isArray(obj.material) ? obj.material : [obj.material];
+      for (const mat of mats) mat.dispose?.();
+    }
+  });
+  root = null;
+  mixer = null;
+  activeAction = null;
+  clips = [];
+}
+
+function frameObject(object) {
+  object.updateMatrixWorld(true);
+  const box = new THREE.Box3().setFromObject(object);
+  const size = new THREE.Vector3();
+  const center = new THREE.Vector3();
+  box.getSize(size);
+  box.getCenter(center);
+  const scale = 2.0 / Math.max(size.x, size.y, size.z, 0.001);
+  object.scale.multiplyScalar(scale);
+  object.updateMatrixWorld(true);
+  const box2 = new THREE.Box3().setFromObject(object);
+  box2.getCenter(center);
+  const minY = box2.min.y;
+  object.position.sub(center);
+  object.position.y -= minY - center.y;
+  camera.position.set(0, 1.05, 4.2);
+  controls.target.set(0, 0.95, 0);
+  controls.update();
+}
+
+function collectStats(object, animations) {
+  const bones = new Set();
+  const stats = { meshes: 0, skinnedMeshes: 0, bones: 0, vertices: 0, animations: animations.length, duration: 0 };
+  for (const clip of animations) stats.duration = Math.max(stats.duration, clip.duration || 0);
+  object.traverse((obj) => {
+    if (obj.isMesh || obj.isSkinnedMesh) {
+      stats.meshes += 1;
+      if (obj.isSkinnedMesh) stats.skinnedMeshes += 1;
+      const pos = obj.geometry?.attributes?.position;
+      if (pos) stats.vertices += pos.count;
+    }
+    if (obj.isBone) bones.add(obj);
+  });
+  stats.bones = bones.size;
+  return stats;
+}
+
+function updateMetrics() {
+  const clipDur = currentClip?.duration || 0;
+  metricsEl.innerHTML = `
+    <div class="metric"><span>Meshes</span><strong>${modelStats.meshes}</strong></div>
+    <div class="metric"><span>Skinned meshes</span><strong>${modelStats.skinnedMeshes}</strong></div>
+    <div class="metric"><span>Bones</span><strong>${modelStats.bones}</strong></div>
+    <div class="metric"><span>Vertices</span><strong>${modelStats.vertices.toLocaleString()}</strong></div>
+    <div class="metric"><span>Clips</span><strong>${modelStats.animations}</strong></div>
+    <div class="metric"><span>Current duration</span><strong>${clipDur.toFixed(2)}s</strong></div>`;
+}
+
+function setClip(name) {
+  if (!mixer || !clips.length) return;
+  const nextClip = clips.find((clip) => clip.name === name) || clips[0];
+  if (activeAction) activeAction.stop();
+  currentClip = nextClip;
+  activeAction = mixer.clipAction(nextClip);
+  activeAction.reset().play();
+  activeAction.paused = !playing;
+  timeEl.max = String(nextClip.duration || 1);
+  timeEl.value = '0';
+  timeLabel.textContent = '0.00s';
+  updateMetrics();
+}
+
+async function loadSelected() {
+  const key = raceEl.value;
+  const url = MODELS[key];
+  disposeCurrent();
+  statusEl.textContent = `loading ${key}`;
+  assetPathEl.textContent = url;
+  const gltf = await new GLTFLoader().loadAsync(url + '?cb=' + Date.now());
+  root = gltf.scene;
+  scene.add(root);
+  frameObject(root);
+  modelStats = collectStats(root, gltf.animations);
+  mixer = new THREE.AnimationMixer(root);
+  clips = gltf.animations.slice().sort((a, b) => a.name.localeCompare(b.name));
+  clipEl.innerHTML = '';
+  for (const clip of clips) {
+    const opt = document.createElement('option');
+    opt.value = clip.name;
+    opt.textContent = clip.name || '(unnamed)';
+    clipEl.appendChild(opt);
+  }
+  if (!clips.length) {
+    const opt = document.createElement('option');
+    opt.value = '';
+    opt.textContent = 'no animations in GLB';
+    clipEl.appendChild(opt);
+  } else {
+    const preferred = clips.find(c => /walk/i.test(c.name)) || clips[0];
+    clipEl.value = preferred.name;
+    setClip(preferred.name);
+  }
+  for (const child of root.children) {
+    child.traverse?.((node) => {
+      if (node.isSkinnedMesh && node.skeleton) {
+        const helper = new THREE.SkeletonHelper(node);
+        helper.material.depthTest = false;
+        helper.material.transparent = true;
+        helper.material.opacity = 0.65;
+        scene.add(helper);
+        skeletonHelpers.push(helper);
+      }
+    });
+  }
+  statusEl.textContent = `${key} loaded`;
+  window.__TEXT2GAME_VIEWER_READY = true;
+  window.__TEXT2GAME_VIEWER_STATE = { key, clips: clips.map(c => c.name), stats: modelStats };
+}
+
+raceEl.addEventListener('change', () => { window.__TEXT2GAME_VIEWER_READY = false; loadSelected().catch(err => { console.error(err); statusEl.textContent = 'load failed: ' + err.message; }); });
+clipEl.addEventListener('change', () => setClip(clipEl.value));
+playBtn.addEventListener('click', () => {
+  playing = !playing;
+  playBtn.textContent = playing ? 'Pause' : 'Play';
+  if (activeAction) activeAction.paused = !playing;
+});
+document.getElementById('reset').addEventListener('click', () => {
+  camera.position.set(0, 1.05, 4.2);
+  controls.target.set(0, 0.95, 0);
+  controls.update();
+});
+timeEl.addEventListener('input', () => {
+  if (!mixer || !currentClip) return;
+  playing = false;
+  playBtn.textContent = 'Play';
+  activeAction.paused = true;
+  const t = Number(timeEl.value);
+  mixer.setTime(t);
+  timeLabel.textContent = t.toFixed(2) + 's';
+});
+
+function animate() {
+  requestAnimationFrame(animate);
+  const dt = clock.getDelta();
+  if (mixer && playing) {
+    mixer.update(dt);
+    const t = activeAction ? activeAction.time : 0;
+    timeEl.value = String(t);
+    timeLabel.textContent = t.toFixed(2) + 's';
+  }
+  for (const helper of skeletonHelpers) helper.update();
+  controls.update();
+  renderer.render(scene, camera);
+}
+
+resize();
+loadSelected().catch(err => { console.error(err); statusEl.textContent = 'load failed: ' + err.message; });
+animate();
+</script>
+</body>
+</html>

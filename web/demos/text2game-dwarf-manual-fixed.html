@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Text2Game Manual Fixed Dwarf</title>
+<style>
+  html,body{margin:0;height:100%;overflow:hidden;background:#10131a;color:#edf2ff;font-family:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+  #wrap{display:grid;grid-template-columns:minmax(0,1fr) 340px;height:100%}#stage{position:relative}canvas{display:block;width:100%;height:100%}
+  aside{border-left:1px solid #2b3342;background:#151a24;padding:18px;overflow:auto}h1{font-size:18px;margin:0 0 12px}.muted{color:#9ca8bb;font-size:12px;line-height:1.45}
+  button,input{width:100%;box-sizing:border-box}button{border:1px solid #344154;border-radius:8px;background:#202838;color:#edf2ff;padding:9px 10px;cursor:pointer;font-weight:650}.primary{background:#2a66ff;border-color:#2a66ff}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:14px 0}.metric{display:grid;grid-template-columns:1fr auto;gap:8px;padding:8px 0;border-bottom:1px solid #283142;font-size:13px}
+  code{font-size:12px;color:#a8c7ff;word-break:break-all}#status{position:absolute;top:16px;left:16px;background:rgba(0,0,0,.58);border-radius:8px;padding:8px 10px;font-size:12px}
+</style>
+<script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.js"}}</script>
+</head>
+<body>
+<div id="wrap">
+  <div id="stage"><div id="status">loading dwarf frames</div></div>
+  <aside>
+    <h1>Manual fixed dwarf</h1>
+    <p class="muted">Actual <code>dwarf_remesh.obj</code> in a visual-safe non-deforming action preview: side step + bob + lunge + yaw. Limb skinning is intentionally disabled here because the previous limb pass looked bad and is not acceptable.</p>
+    <div class="row"><button class="primary" id="play">Pause</button><button id="reset">Reset camera</button></div>
+    <label class="muted">Frame <span id="frameLabel">0</span></label><input id="scrub" type="range" min="0" max="24" value="0" />
+    <div id="metrics"></div>
+    <p class="muted" style="margin-top:16px">Sources:<br><code>simple-rts-unity/.work/credential-hook/dwarf_remesh.obj</code><br><code>simple-rts-unity/.work/manual-dwarf-fix/landmarks.ai-manual.json</code><br><code>simple-rts-unity/.work/manual-dwarf-fix/frames-rigid-action/</code></p>
+  </aside>
+</div>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'https://unpkg.com/three@0.160.0/examples/jsm/controls/OrbitControls.js';
+const FRAME_COUNT=25;
+const FRAME_BASE='../../.work/manual-dwarf-fix/frames-rigid-action/frame_';
+const MANIFEST='../../.work/manual-dwarf-fix/frames-rigid-action/manifest.json';
+const RIG='../../.work/manual-dwarf-fix/rig.ai-manual.json';
+const stage=document.getElementById('stage'), statusEl=document.getElementById('status'), scrub=document.getElementById('scrub'), frameLabel=document.getElementById('frameLabel'), metricsEl=document.getElementById('metrics');
+const renderer=new THREE.WebGLRenderer({antialias:true}); renderer.setPixelRatio(devicePixelRatio); stage.appendChild(renderer.domElement);
+const scene=new THREE.Scene(); scene.background=new THREE.Color(0x10131a); scene.add(new THREE.HemisphereLight(0xffffff,0x252b35,1.6)); const sun=new THREE.DirectionalLight(0xffffff,2.0); sun.position.set(3,6,4); scene.add(sun); scene.add(new THREE.GridHelper(2.4,12,0x42506a,0x263044));
+const camera=new THREE.PerspectiveCamera(35,1,0.01,100); const controls=new OrbitControls(camera,renderer.domElement); controls.enableDamping=true;
+let frames=[], faces=[], metrics=[], bones=[], geometry, mesh, skeletonGroup=new THREE.Group(), frame=0, playing=true, last=performance.now(); scene.add(skeletonGroup);
+function resize(){const w=Math.max(1,stage.clientWidth),h=Math.max(1,stage.clientHeight);renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();} addEventListener('resize',resize);
+function parseObj(text){const vs=[],fs=[]; for(const line of text.split('\n')){const p=line.trim().split(/\s+/); if(p[0]==='v')vs.push([+p[1],+p[2],+p[3]]); else if(p[0]==='f')fs.push(p.slice(1).map(t=>parseInt(t,10)-1));} return {vs,fs};}
+async function loadFrame(i){const s=String(i).padStart(4,'0'); const txt=await fetch(`${FRAME_BASE}${s}.obj`).then(r=>{if(!r.ok)throw new Error(`${r.status} ${r.statusText}`); return r.text();}); return parseObj(txt);}
+function buildGeometry(){const verts=frames[0]; const pos=[]; const idx=[]; for(const f of faces){ if(f.length===3)idx.push(...f); else if(f.length===4)idx.push(f[0],f[1],f[2], f[0],f[2],f[3]); } for(const v of verts)pos.push(v[0],v[1],v[2]); geometry=new THREE.BufferGeometry(); geometry.setAttribute('position', new THREE.Float32BufferAttribute(pos,3)); geometry.setIndex(idx); geometry.computeVertexNormals(); mesh=new THREE.Mesh(geometry,new THREE.MeshStandardMaterial({color:0x8aa4c8,roughness:.82,metalness:.08,side:THREE.DoubleSide})); scene.add(mesh); frameMesh();}
+function frameMesh(){const box=new THREE.Box3().setFromObject(mesh); const size=new THREE.Vector3(), center=new THREE.Vector3(); box.getSize(size); box.getCenter(center); mesh.position.sub(center); mesh.position.y -= box.min.y-center.y; camera.position.set(0,0.62,2.2); controls.target.set(0,0.46,0); controls.update();}
+function updateGeometry(){const pos=geometry.attributes.position.array; const vs=frames[frame]; for(let i=0;i<vs.length;i++){pos[i*3]=vs[i][0];pos[i*3+1]=vs[i][1];pos[i*3+2]=vs[i][2];} geometry.attributes.position.needsUpdate=true; geometry.computeVertexNormals(); frameLabel.textContent=String(frame); scrub.value=String(frame); updateMetrics(); updateSkeleton();}
+function updateSkeleton(){skeletonGroup.clear(); const mat=new THREE.LineBasicMaterial({color:0xffd36a,transparent:true,opacity:.95}); for(const b of bones){const g=new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(...b.head),new THREE.Vector3(...b.tail)]); const line=new THREE.Line(g,mat); skeletonGroup.add(line);} skeletonGroup.position.copy(mesh.position);}
+function updateMetrics(){const m=metrics[frame]; metricsEl.innerHTML=`<div class="metric"><span>Verifier passed</span><strong>${window.__SUMMARY.passed}</strong></div><div class="metric"><span>Frame count</span><strong>${FRAME_COUNT}</strong></div><div class="metric"><span>Vertices</span><strong>${frames[0].length.toLocaleString()}</strong></div><div class="metric"><span>Faces</span><strong>${faces.length.toLocaleString()}</strong></div><div class="metric"><span>Current max edge stretch</span><strong>${m.max_edge_stretch.toFixed(4)}</strong></div><div class="metric"><span>Global max edge stretch</span><strong>${window.__SUMMARY.max_edge_stretch.toFixed(4)}</strong></div><div class="metric"><span>Tear frames</span><strong>${window.__SUMMARY.tear_edge_frames.length?window.__SUMMARY.tear_edge_frames.join(', '):'none'}</strong></div>`;}
+async function init(){const manifest=await fetch(MANIFEST).then(r=>r.json()); const rig=await fetch(RIG).then(r=>r.json()); metrics=manifest.metrics; bones=rig.rig.bones; window.__SUMMARY={passed:manifest.passed,max_edge_stretch:Math.max(...metrics.map(m=>m.max_edge_stretch)),tear_edge_frames:metrics.filter(m=>m.tear_edges.length).map(m=>m.frame)}; for(let i=0;i<FRAME_COUNT;i++){statusEl.textContent=`loading frame ${i+1}/${FRAME_COUNT}`; const parsed=await loadFrame(i); frames.push(parsed.vs); if(!faces.length)faces=parsed.fs;} buildGeometry(); updateGeometry(); statusEl.textContent='manual fixed dwarf loaded'; window.__DWARF_FIXED_READY=true;}
+function animate(now){requestAnimationFrame(animate); if(playing && now-last>1000/12){frame=(frame+1)%FRAME_COUNT; updateGeometry(); last=now;} controls.update(); renderer.render(scene,camera);} 
+document.getElementById('play').onclick=e=>{playing=!playing;e.target.textContent=playing?'Pause':'Play';}; document.getElementById('reset').onclick=()=>{camera.position.set(0,0.62,2.2);controls.target.set(0,0.46,0);controls.update();}; scrub.oninput=e=>{frame=+e.target.value;playing=false;document.getElementById('play').textContent='Play';updateGeometry();};
+resize(); init().catch(e=>{console.error(e);statusEl.textContent='load failed: '+e.message;}); animate(performance.now());
+</script>
+</body>
+</html>
