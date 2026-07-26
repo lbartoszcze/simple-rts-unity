@@ -29,7 +29,7 @@
   <div id="stage"><div id="status">loading</div></div>
   <aside>
     <h1>Text2Game real generated models</h1>
-    <p class="muted">Loads the actual GLB assets from <code>web/art/models</code>. Drag to rotate. Scroll to zoom. Clip list is read from the loaded GLB, not hardcoded.</p>
+    <p class="muted">Loads the actual GLB assets from <code>web/game_asset_creator/assets/models</code>. Drag to rotate. Scroll to zoom. Clip list is read from the loaded GLB, not hardcoded.</p>
 
     <label for="race">Model</label>
     <select id="race">
@@ -60,10 +60,10 @@ import { GLTFLoader } from 'https://unpkg.com/three@0.160.0/examples/jsm/loaders
 import { OrbitControls } from 'https://unpkg.com/three@0.160.0/examples/jsm/controls/OrbitControls.js';
 
 const MODELS = {
-  humans_reference: '../art/models/humans_reference.glb',
-  dwarves_axe: '../art/models/dwarves_axe.glb',
-  elves_axe: '../art/models/elves_axe.glb',
-  skeletons_axe: '../art/models/skeletons_axe.glb',
+  humans_reference: '../game_asset_creator/assets/models/humans_reference.glb',
+  dwarves_axe: '../game_asset_creator/assets/models/dwarves_axe.glb',
+  elves_axe: '../game_asset_creator/assets/models/elves_axe.glb',
+  skeletons_axe: '../game_asset_creator/assets/models/skeletons_axe.glb',
 };
 
 const stage = document.getElementById('stage');

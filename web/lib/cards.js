@@ -1,4 +1,4 @@
-import { cardArtSvg } from '../art/card-art.js';
+import { cardArtSvg } from '../game_asset_creator/src/card-art.js';
 import { registerVariants } from './modes/variants.js';
 
 export const RACES = {

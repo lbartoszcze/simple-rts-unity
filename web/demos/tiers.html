@@ -27,7 +27,7 @@
 </head>
 <body>
   <h1>🎬 Procedural fantasy characters — generated, not imported</h1>
-  <p class="sub">Every vertex of every model below is built at runtime in <code>web/art/anatomy.js</code> from THREE.js primitives (LatheGeometry, SphereGeometry, CylinderGeometry, etc.) at high segment counts. Polygon target: ~6,000 triangles per character, matching the reference Unity Low-Poly Axe Warrior. Live polygon counter on each cell.</p>
+  <p class="sub">Every vertex of every model below is built at runtime in <code>web/game_asset_creator/src/anatomy.js</code> from THREE.js primitives (LatheGeometry, SphereGeometry, CylinderGeometry, etc.) at high segment counts. Polygon target: ~6,000 triangles per character, matching the reference Unity Low-Poly Axe Warrior. Live polygon counter on each cell.</p>
   <div class="row" style="grid-template-columns: 1fr 1fr 1fr 1fr;">
     <div class="cell"><h2>HUMANS</h2><canvas data-proc="humans"></canvas><p class="poly-tag" data-poly="humans">…</p></div>
     <div class="cell"><h2>DWARVES</h2><canvas data-proc="dwarves"></canvas><p class="poly-tag" data-poly="dwarves">…</p></div>
@@ -36,7 +36,7 @@
   </div>
   <script type="module">
     import * as THREE from 'three';
-    import { sculptHumanoid } from '../art/sculpt.js';
+    import { sculptHumanoid } from '../game_asset_creator/src/sculpt.js';
 
     const RACE_PALETTE = {
       humans:    { skin: 0xe6c39a, armor: 0xc9a44a, helmet: 0xa6a6b0, pants: 0x4a3a2a, boot: 0x2a1f15, belt: 0x33231a, collar: 0xb8843e, gauntlet: 0x8a8a98 },
