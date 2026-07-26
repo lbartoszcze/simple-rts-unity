@@ -14,6 +14,22 @@ Camera: WASD or screen edge to pan, scroll to zoom. Source under [`web/`](web/),
 
 ---
 
+## Asset pipeline (`web/game_asset_creator/`)
+
+The runtime asset-creation pipeline (procedural characters, gear, card art)
+lives in [`web/game_asset_creator/`](web/game_asset_creator/) as a vendored
+copy of the standalone package
+**[lbartoszcze/game_asset_creator](https://github.com/lbartoszcze/game_asset_creator)**.
+The standalone repo is canonical — sync updates into the game with:
+
+```bash
+git subtree pull --prefix=web/game_asset_creator game-asset-creator main --squash
+```
+
+(and push game-side changes back with `git subtree push`).
+
+---
+
 ## Unity 2022 LTS version (under `Assets/`)
 
 The repo also ships the original Unity scaffold — drag-select units, right-click move, edge-pan / WASD camera, scroll zoom. An Editor bootstrap script sets the scene up on first open.
