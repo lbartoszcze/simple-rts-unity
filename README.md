@@ -1,9 +1,11 @@
 # Potyczka
 
+A 3D auto-battle roguelike in the visual style of Thronefall and *Diplomacy Is
+Not An Option* — pick a race, watch your army auto-fight a wave of another
+race, and draft one card per win between rounds. No install.
+
 ## ▶ Play in your browser
 **https://lbartoszcze.github.io/potyczka/**
-
-No install. A 3D auto-battle roguelike in the visual style of Thronefall and *Diplomacy Is Not An Option*:
 
 1. Pick your race — **Humans**, **Dwarves**, **Elves**, or **Skeletons**. Each has its own base stats and its own card pool.
 2. Watch your army auto-fight a wave of a different race.
