@@ -44,7 +44,7 @@ async function captureStrip(page, selector, frames, intervalMs, outDir, prefix) 
   await ctx.route('**/*', (r) => r.continue({ headers: { ...r.request().headers(), 'Cache-Control': 'no-cache' } }));
   const page = await ctx.newPage();
   page.on('pageerror', (err) => console.error('PAGE ERROR:', err.message));
-  await page.goto('https://lbartoszcze.github.io/simple-rts-unity/demos/tiers.html?cb=' + Date.now(), { waitUntil: 'networkidle' });
+  await page.goto('https://lbartoszcze.github.io/potyczka/demos/tiers.html?cb=' + Date.now(), { waitUntil: 'networkidle' });
   await page.waitForTimeout(8000);
   const out = '/tmp/_smoketest/anim-strips';
   fs.mkdirSync(out, { recursive: true });

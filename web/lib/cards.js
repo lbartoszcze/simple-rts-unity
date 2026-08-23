@@ -142,7 +142,8 @@ function _renderPicks() {
 }
 export function resetPicks() { _picks.length = 0; _renderPicks(); }
 
-const META_KEY = 'simple-rts-meta-v2';
+const META_KEY = 'potyczka-meta-v2';
+const LEGACY_META_KEY = 'simple-rts-meta-v2'; // saves from before the rename, migrated on load
 const RACE_COST = { humans: 0, dwarves: 8, elves: 18, skeletons: 32 };
 const TIER_LEVEL = { common: 1, combo: 3, rare: 6 };
 
@@ -151,7 +152,8 @@ export function xpForLevel(lv) { return Math.pow(Math.max(1, lv) - 1, 2) * 25; }
 
 export function loadMeta() {
   try {
-    const raw = localStorage.getItem(META_KEY);
+      let raw = localStorage.getItem(META_KEY);
+      if (!raw) raw = localStorage.getItem(LEGACY_META_KEY);
     if (raw) {
       const m = JSON.parse(raw);
       m.unlocked = m.unlocked || ['humans'];

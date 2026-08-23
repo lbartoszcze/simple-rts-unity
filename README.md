@@ -1,7 +1,7 @@
-# simple-rts-unity
+# Potyczka
 
 ## ▶ Play in your browser
-**https://lbartoszcze.github.io/simple-rts-unity/**
+**https://lbartoszcze.github.io/potyczka/**
 
 No install. A 3D auto-battle roguelike in the visual style of Thronefall and *Diplomacy Is Not An Option*:
 
@@ -24,7 +24,7 @@ The repo also ships the original Unity scaffold — drag-select units, right-cli
 2. Hub → **Installs → Install Editor → 2022.3 LTS** (any 2022.3.x release).
 3. Clone:
    ```bash
-   git clone https://github.com/lbartoszcze/simple-rts-unity.git
+   git clone https://github.com/lbartoszcze/potyczka.git
    ```
 4. Hub → **Add → Add project from disk** → pick the cloned folder.
 5. Wait for Unity to finish the first import. The bootstrap script (`Assets/Editor/SceneBootstrap.cs`) will:
